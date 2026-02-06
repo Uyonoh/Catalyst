@@ -1,33 +1,34 @@
 'use client'
 
+import React from 'react'
 import GlassPanel from './GlassPanel'
+import { usePrompt } from '../../context/PromptContext'
+import { useParsing } from '../../hooks/useParsing'
+import { EntityType } from '../../lib/parsing/types'
 
-const ENTITIES = [
-    { label: 'Subject: Cat', color: 'cyan' as const },
-    { label: 'Style: Cyberpunk', color: 'purple' as const },
-    { label: 'Env: Neon City', color: 'blue' as const },
-    { label: 'Time: Night', color: 'emerald' as const },
-]
-
-const getEntityStyles = (color: 'cyan' | 'purple' | 'blue' | 'emerald') => {
-    const styles = {
-        cyan: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300',
-        purple: 'bg-purple-500/10 border-purple-500/30 text-purple-300',
-        blue: 'bg-blue-500/10 border-blue-500/30 text-blue-300',
-        emerald: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300',
+const getEntityStyles = (type: EntityType) => {
+    const styles: Record<EntityType, string> = {
+        subject: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300',
+        style: 'bg-purple-500/10 border-purple-500/30 text-purple-300',
+        modifier: 'bg-blue-500/10 border-blue-500/30 text-blue-300',
+        atmosphere: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300',
+        lighting: 'bg-orange-500/10 border-orange-500/30 text-orange-300',
+        persona: 'bg-pink-500/10 border-pink-500/30 text-pink-300',
+        instruction: 'bg-slate-500/10 border-slate-500/30 text-slate-300',
     }
-    return styles[color]
+    return styles[type] || styles.subject
 }
 
 export default function LiveAnalysisPanel() {
+    const { input } = usePrompt()
+    const { result, isLoading, error } = useParsing(input)
+
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(JSON.stringify({
-            core_subject: "cat",
-            modifiers: ["cyberpunk", "neon"],
-            atmosphere: "raining",
-            lighting: "cinematic_night"
-        }, null, 2))
+        if (!result) return
+        navigator.clipboard.writeText(JSON.stringify(result, null, 2))
     }
+
+    const clarityPercent = result ? Math.round(result.intentClarity * 100) : 0
 
     return (
         <GlassPanel
@@ -46,10 +47,12 @@ export default function LiveAnalysisPanel() {
 
                 <div className="flex items-center gap-2 text-xs font-medium text-cyan-400 self-start sm:self-auto">
                     <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
+                        {isLoading ? (
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                        ) : null}
+                        <span className={`relative inline-flex rounded-full h-2 w-2 ${isLoading ? 'bg-cyan-500' : 'bg-slate-600'}`} />
                     </span>
-                    Real-time Parsing
+                    {isLoading ? 'Real-time Parsing...' : 'Waiting for Input'}
                 </div>
             </div>
 
@@ -57,12 +60,13 @@ export default function LiveAnalysisPanel() {
                 {/* Intent Clarity */}
                 <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                        <span className="text-slate-400">Intent Clarity</span>
-                        <span className="text-cyan-400 font-bold">85%</span>
+                        <span className="text-slate-400">Intent Clarity ({result?.intent || 'Unknown'})</span>
+                        <span className="text-cyan-400 font-bold">{clarityPercent}%</span>
                     </div>
                     <div className="w-full bg-slate-800 rounded-full h-1.5">
                         <div
-                            className="bg-gradient-to-r from-cyan-500 to-purple-500 h-1.5 rounded-full w-[85%] shadow-[0_0_10px_rgba(168,85,247,0.4)]"
+                            className="bg-gradient-to-r from-cyan-500 to-purple-500 h-1.5 rounded-full transition-all duration-500"
+                            style={{ width: `${clarityPercent}%` }}
                         />
                     </div>
                 </div>
@@ -72,15 +76,19 @@ export default function LiveAnalysisPanel() {
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                         Detected Entities
                     </span>
-                    <div className="flex flex-wrap gap-2">
-                        {ENTITIES.map((entity) => (
-                            <span
-                                key={entity.label}
-                                className={`px-3 py-1 rounded-full border text-xs font-medium ${getEntityStyles(entity.color)}`}
-                            >
-                                {entity.label}
-                            </span>
-                        ))}
+                    <div className="flex flex-wrap gap-2 min-h-[32px]">
+                        {result?.entities && result.entities.length > 0 ? (
+                            result.entities.map((entity, i) => (
+                                <span
+                                    key={i}
+                                    className={`px-3 py-1 rounded-full border text-xs font-medium transition-all animate-fadeIn ${getEntityStyles(entity.type)}`}
+                                >
+                                    {entity.label}
+                                </span>
+                            ))
+                        ) : (
+                            <span className="text-xs text-slate-600 italic">No entities detected yet</span>
+                        )}
                     </div>
                 </div>
 
@@ -93,24 +101,37 @@ export default function LiveAnalysisPanel() {
                         <span className="text-[10px] text-slate-600 font-mono hidden sm:inline">JSON_STRUCTURE</span>
                     </div>
 
-                    <div className="code-preview flex-1 rounded-lg p-4 overflow-hidden relative group">
-                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                                onClick={copyToClipboard}
-                                className="p-1 hover:bg-white/10 rounded text-slate-400 hover:text-white"
-                                aria-label="Copy code"
-                            >
-                                <span className="material-symbols-outlined text-[16px]">content_copy</span>
-                            </button>
-                        </div>
+                    <div className="code-preview flex-1 rounded-lg p-4 overflow-hidden relative group bg-black/20 border border-white/5">
+                        {result && (
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                    onClick={copyToClipboard}
+                                    className="p-1 hover:bg-white/10 rounded text-slate-400 hover:text-white"
+                                    aria-label="Copy code"
+                                >
+                                    <span className="material-symbols-outlined text-[16px]">content_copy</span>
+                                </button>
+                            </div>
+                        )}
 
                         <code className="text-sm font-mono leading-relaxed block text-slate-300 overflow-x-auto">
-                            <span className="text-purple-400">{'{'}</span><br />
-                            &nbsp;&nbsp;<span className="text-blue-400">"core_subject"</span>: <span className="text-emerald-300">"cat"</span>,<br />
-                            &nbsp;&nbsp;<span className="text-blue-400">"modifiers"</span>: [<span className="text-emerald-300">"cyberpunk"</span>, <span className="text-emerald-300">"neon"</span>],<br />
-                            &nbsp;&nbsp;<span className="text-blue-400">"atmosphere"</span>: <span className="text-emerald-300">"raining"</span>,<br />
-                            &nbsp;&nbsp;<span className="text-blue-400">"lighting"</span>: <span className="text-emerald-300">"cinematic_night"</span><br />
-                            <span className="text-purple-400">{'}'}</span>
+                            {result ? (
+                                <pre className="whitespace-pre-wrap">
+                                    <span className="text-purple-400">{'{'}</span><br />
+                                    &nbsp;&nbsp;<span className="text-blue-400">"intent"</span>: <span className="text-emerald-300">"{result.intent}"</span>,<br />
+                                    &nbsp;&nbsp;<span className="text-blue-400">"clarity"</span>: <span className="text-emerald-300">{result.intentClarity}</span>,<br />
+                                    &nbsp;&nbsp;<span className="text-blue-400">"entities"</span>: <span className="text-purple-400">[</span><br />
+                                    {result.entities.map((e, i) => (
+                                        <React.Fragment key={i}>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-400">{'{'}</span> <span className="text-blue-400">"type"</span>: <span className="text-emerald-300">"{e.type}"</span>, <span className="text-blue-400">"val"</span>: <span className="text-emerald-300">"{e.value}"</span> <span className="text-purple-400">{'}'}</span>{i < result.entities.length - 1 ? ',' : ''}<br />
+                                        </React.Fragment>
+                                    ))}
+                                    &nbsp;&nbsp;<span className="text-purple-400">]</span><br />
+                                    <span className="text-purple-400">{'}'}</span>
+                                </pre>
+                            ) : (
+                                <span className="text-slate-600 italic">Waiting for parsing results...</span>
+                            )}
                         </code>
                     </div>
                 </div>

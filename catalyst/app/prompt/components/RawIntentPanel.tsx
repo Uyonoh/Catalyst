@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import GlassPanel from './GlassPanel'
+import { usePrompt } from '../../context/PromptContext'
 
 const MODELS = [
     { id: 'midjourney', name: 'Midjourney v6', type: 'Img', icon: 'palette', color: 'cyan' },
@@ -13,8 +14,8 @@ const MODELS = [
 ]
 
 export default function RawIntentPanel() {
-    const [input, setInput] = useState('')
-    const [selectedModel, setSelectedModel] = useState(MODELS[0])
+    const { input, setInput, selectedModel: selectedModelId, setSelectedModel: setSelectedModelId } = usePrompt()
+    const selectedModel = MODELS.find(m => m.id === selectedModelId) || MODELS[0]
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -31,7 +32,7 @@ export default function RawIntentPanel() {
     }, [])
 
     const handleModelSelect = (model: typeof MODELS[0]) => {
-        setSelectedModel(model)
+        setSelectedModelId(model.id)
         setIsDropdownOpen(false)
         console.log(`Model selected: ${model.name}`)
     }
