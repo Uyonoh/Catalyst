@@ -30,7 +30,10 @@ export default function LiveAnalysisPanel() {
     }
 
     return (
-        <GlassPanel className="border border-cyan-500/20 shadow-[0_0_30px_rgba(6,182,212,0.05)] h-full">
+        <GlassPanel
+            gradientBorder
+            className="border border-cyan-500/20 shadow-[0_0_30px_rgba(6,182,212,0.05)] p-4 md:p-6 flex flex-col h-full"
+        >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div className="flex items-center gap-3">
                     <div className="bg-purple-500/20 p-2 rounded-lg text-purple-400">
