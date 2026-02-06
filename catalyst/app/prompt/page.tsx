@@ -14,13 +14,13 @@ export default function PromptPage() {
 
             <Navbar />
 
-            <main className="flex-1 relative z-10 w-full max-w-[1600px] mx-auto px-6 py-8 flex flex-col gap-8">
+            <main className="flex-1 relative z-10 w-full max-w-[1600px] mx-auto px-4 sm:px-6 py-6 md:py-8 flex flex-col gap-6 md:gap-8">
                 {/* Header */}
                 <div className="flex flex-col gap-2">
-                    <h1 className="text-4xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
                         Catalyst Workspace
                     </h1>
-                    <p className="text-slate-400 text-lg">
+                    <p className="text-slate-400 text-base md:text-lg">
                         Transform your raw ideas into optimized prompts with live analysis.
                     </p>
                 </div>

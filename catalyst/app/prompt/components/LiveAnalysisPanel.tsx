@@ -31,7 +31,7 @@ export default function LiveAnalysisPanel() {
 
     return (
         <GlassPanel className="border border-cyan-500/20 shadow-[0_0_30px_rgba(6,182,212,0.05)] h-full">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div className="flex items-center gap-3">
                     <div className="bg-purple-500/20 p-2 rounded-lg text-purple-400">
                         <span className="material-symbols-outlined">query_stats</span>
@@ -41,7 +41,7 @@ export default function LiveAnalysisPanel() {
                     </span>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs font-medium text-cyan-400">
+                <div className="flex items-center gap-2 text-xs font-medium text-cyan-400 self-start sm:self-auto">
                     <span className="relative flex h-2 w-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
@@ -87,7 +87,7 @@ export default function LiveAnalysisPanel() {
                         <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                             Syntax Preview
                         </span>
-                        <span className="text-[10px] text-slate-600 font-mono">JSON_STRUCTURE</span>
+                        <span className="text-[10px] text-slate-600 font-mono hidden sm:inline">JSON_STRUCTURE</span>
                     </div>
 
                     <div className="code-preview flex-1 rounded-lg p-4 overflow-hidden relative group">
@@ -101,7 +101,7 @@ export default function LiveAnalysisPanel() {
                             </button>
                         </div>
 
-                        <code className="text-sm font-mono leading-relaxed block text-slate-300">
+                        <code className="text-sm font-mono leading-relaxed block text-slate-300 overflow-x-auto">
                             <span className="text-purple-400">{'{'}</span><br />
                             &nbsp;&nbsp;<span className="text-blue-400">"core_subject"</span>: <span className="text-emerald-300">"cat"</span>,<br />
                             &nbsp;&nbsp;<span className="text-blue-400">"modifiers"</span>: [<span className="text-emerald-300">"cyberpunk"</span>, <span className="text-emerald-300">"neon"</span>],<br />

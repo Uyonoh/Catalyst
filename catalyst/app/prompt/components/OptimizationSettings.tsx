@@ -66,7 +66,7 @@ export default function OptimizationSettings() {
         if (type === 'progress') return '2d Left'
         if (value > 66) return 'High'
         if (value > 33) return 'Medium'
-        return 'Short'
+        return 'Low'
     }
 
     const getColorStyles = (color: string) => {

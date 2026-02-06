@@ -11,6 +11,47 @@
 
   --shadow-neon: 0 0 20px rgba(37, 140, 244, 0.3);
   --shadow-neon-strong: 0 0 30px rgba(6, 182, 212, 0.5);
+
+  /* Custom animations */
+  --animate-fadeIn: fadeIn 0.2s ease-out;
+  --animate-slideDown: slideDown 0.3s ease-out;
+  --animate-pulse-glow: pulseGlow 2s infinite;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.8);
+  }
 }
 
 .dark {
@@ -20,6 +61,13 @@
 /* Glass panel styles */
 .glass-panel {
   background: rgba(16, 25, 34, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-panel-dark {
+  background: rgba(16, 25, 34, 0.9);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -47,4 +95,19 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #3b4754;
+}
+
+/* Hide scrollbar for dropdown but allow scrolling */
+.dropdown-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(6, 182, 212, 0.5) transparent;
+}
+
+.dropdown-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.dropdown-scroll::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.5);
+  border-radius: 2px;
 }
