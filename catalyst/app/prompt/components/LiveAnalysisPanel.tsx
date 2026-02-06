@@ -3,11 +3,21 @@
 import GlassPanel from './GlassPanel'
 
 const ENTITIES = [
-    { label: 'Subject: Cat', color: 'cyan' },
-    { label: 'Style: Cyberpunk', color: 'purple' },
-    { label: 'Env: Neon City', color: 'blue' },
-    { label: 'Time: Night', color: 'emerald' },
+    { label: 'Subject: Cat', color: 'cyan' as const },
+    { label: 'Style: Cyberpunk', color: 'purple' as const },
+    { label: 'Env: Neon City', color: 'blue' as const },
+    { label: 'Time: Night', color: 'emerald' as const },
 ]
+
+const getEntityStyles = (color: 'cyan' | 'purple' | 'blue' | 'emerald') => {
+    const styles = {
+        cyan: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300',
+        purple: 'bg-purple-500/10 border-purple-500/30 text-purple-300',
+        blue: 'bg-blue-500/10 border-blue-500/30 text-blue-300',
+        emerald: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300',
+    }
+    return styles[color]
+}
 
 export default function LiveAnalysisPanel() {
     const copyToClipboard = () => {
@@ -63,7 +73,7 @@ export default function LiveAnalysisPanel() {
                         {ENTITIES.map((entity) => (
                             <span
                                 key={entity.label}
-                                className={`px-3 py-1 rounded-full bg-${entity.color}-500/10 border border-${entity.color}-500/30 text-${entity.color}-300 text-xs font-medium`}
+                                className={`px-3 py-1 rounded-full border text-xs font-medium ${getEntityStyles(entity.color)}`}
                             >
                                 {entity.label}
                             </span>

@@ -11,6 +11,7 @@ const SETTINGS = [
         icon: 'shutter_speed',
         color: 'purple',
         defaultValue: 75,
+        type: 'slider' as const,
     },
     {
         id: 'precision',
@@ -19,6 +20,7 @@ const SETTINGS = [
         icon: 'ads_click',
         color: 'cyan',
         defaultValue: 50,
+        type: 'slider' as const,
     },
     {
         id: 'length',
@@ -27,6 +29,16 @@ const SETTINGS = [
         icon: 'straighten',
         color: 'green',
         defaultValue: 25,
+        type: 'slider' as const,
+    },
+    {
+        id: 'token',
+        title: 'Token Usage',
+        description: '450 / 1000 credits.',
+        icon: 'bolt',
+        color: 'slate',
+        defaultValue: 45,
+        type: 'progress' as const,
     },
 ]
 
@@ -50,10 +62,41 @@ export default function OptimizationSettings() {
         setSettings(prev => ({ ...prev, [id]: value }))
     }
 
-    const getLevelLabel = (value: number) => {
+    const getLevelLabel = (value: number, type: string) => {
+        if (type === 'progress') return '2d Left'
         if (value > 66) return 'High'
         if (value > 33) return 'Medium'
         return 'Short'
+    }
+
+    const getColorStyles = (color: string) => {
+        const colorMap: Record<string, { bg: string; text: string; border: string; accent: string }> = {
+            purple: {
+                bg: 'bg-purple-500/20',
+                text: 'text-purple-300',
+                border: 'border-purple-500/30',
+                accent: 'accent-purple-500'
+            },
+            cyan: {
+                bg: 'bg-cyan-500/20',
+                text: 'text-cyan-300',
+                border: 'border-cyan-500/30',
+                accent: 'accent-cyan-500'
+            },
+            green: {
+                bg: 'bg-green-500/20',
+                text: 'text-green-300',
+                border: 'border-green-500/30',
+                accent: 'accent-green-500'
+            },
+            slate: {
+                bg: 'bg-slate-800',
+                text: 'text-slate-400',
+                border: 'border-slate-500/30',
+                accent: 'accent-slate-500'
+            }
+        }
+        return colorMap[color] || colorMap.slate
     }
 
     return (
@@ -71,35 +114,54 @@ export default function OptimizationSettings() {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {SETTINGS.map((setting) => (
-                    <GlassPanel
-                        key={setting.id}
-                        hoverable
-                        className="p-5 rounded-xl cursor-pointer group border border-white/5 hover:border-cyan-500/30"
-                    >
-                        <div className="flex justify-between items-start mb-3">
-                            <div className={`p-2 rounded-lg bg-[#1b2127] text-${setting.color}-400 group-hover:text-${setting.color}-300 transition-colors`}>
-                                <span className="material-symbols-outlined">{setting.icon}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {SETTINGS.map((setting) => {
+                    const colors = getColorStyles(setting.color)
+                    const levelLabel = getLevelLabel(settings[setting.id], setting.type)
+
+                    return (
+                        <GlassPanel
+                            key={setting.id}
+                            hoverable
+                            className="p-5 rounded-xl cursor-pointer group border border-white/5 hover:border-cyan-500/30"
+                        >
+                            <div className="flex justify-between items-start mb-3">
+                                <div
+                                    className={`p-2 rounded-lg bg-[#1b2127] ${setting.color === 'slate' ? 'text-slate-400 group-hover:text-white' : `text-${setting.color}-400 group-hover:text-${setting.color}-300`} transition-colors`}
+                                    style={setting.color === 'slate' ? {} : undefined}
+                                >
+                                    <span className="material-symbols-outlined">{setting.icon}</span>
+                                </div>
+                                <span
+                                    className={`text-xs font-bold ${colors.bg} ${colors.text} px-2 py-1 rounded`}
+                                >
+                                    {levelLabel}
+                                </span>
                             </div>
-                            <span className={`text-xs font-bold bg-${setting.color}-500/20 text-${setting.color}-300 px-2 py-1 rounded`}>
-                                {getLevelLabel(settings[setting.id])}
-                            </span>
-                        </div>
 
-                        <h3 className="text-white font-bold mb-1">{setting.title}</h3>
-                        <p className="text-slate-400 text-sm">{setting.description}</p>
+                            <h3 className="text-white font-bold mb-1">{setting.title}</h3>
+                            <p className="text-slate-400 text-sm">{setting.description}</p>
 
-                        <input
-                            type="range"
-                            min="0"
-                            max="100"
-                            value={settings[setting.id]}
-                            onChange={(e) => handleSliderChange(setting.id, parseInt(e.target.value))}
-                            className={`w-full mt-4 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-${setting.color}-500`}
-                        />
-                    </GlassPanel>
-                ))}
+                            {setting.type === 'slider' ? (
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    value={settings[setting.id]}
+                                    onChange={(e) => handleSliderChange(setting.id, parseInt(e.target.value))}
+                                    className={`w-full mt-4 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer ${colors.accent}`}
+                                />
+                            ) : (
+                                <div className="w-full bg-slate-800 rounded-full h-1 mt-6">
+                                    <div
+                                        className="bg-cyan-500 h-1 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                                        style={{ width: `${settings[setting.id]}%` }}
+                                    />
+                                </div>
+                            )}
+                        </GlassPanel>
+                    )
+                })}
             </div>
         </>
     )

@@ -2,9 +2,6 @@ import Navbar from './components/Navbar'
 import RawIntentPanel from './components/RawIntentPanel'
 import LiveAnalysisPanel from './components/LiveAnalysisPanel'
 import OptimizationSettings from './components/OptimizationSettings'
-import ModelTargets from './components/ModelTargets'
-import '../globals.css'
-
 
 export default function PromptPage() {
     return (
@@ -20,7 +17,7 @@ export default function PromptPage() {
             <main className="flex-1 relative z-10 w-full max-w-[1600px] mx-auto px-6 py-8 flex flex-col gap-8">
                 {/* Header */}
                 <div className="flex flex-col gap-2">
-                    <h1 className="text-4xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-linear-to-r from-white to-slate-400">
+                    <h1 className="text-4xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
                         Catalyst Workspace
                     </h1>
                     <p className="text-slate-400 text-lg">
@@ -34,13 +31,10 @@ export default function PromptPage() {
                     <LiveAnalysisPanel />
                 </div>
 
-                {/* Settings section */}
+                {/* Settings section - Now full width */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div className="lg:col-span-8 flex flex-col gap-4">
+                    <div className="lg:col-span-12 flex flex-col gap-4">
                         <OptimizationSettings />
-                    </div>
-                    <div className="lg:col-span-4 flex flex-col gap-4">
-                        <ModelTargets />
                     </div>
                 </div>
             </main>
