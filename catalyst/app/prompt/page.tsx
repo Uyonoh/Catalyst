@@ -1,4 +1,6 @@
 import Navbar from './components/Navbar'
+import Header from './components/Header'
+import Footer from './components/Footer'
 import RawIntentPanel from './components/RawIntentPanel'
 import LiveAnalysisPanel from './components/LiveAnalysisPanel'
 import OptimizationSettings from './components/OptimizationSettings'
@@ -13,35 +15,32 @@ export default function PromptPage() {
                 <div className="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[100px]" />
             </div>
 
-            <Navbar />
+            <div className="relative z-10 min-h-screen flex flex-col">
+                <Navbar />
 
-            <main className="flex-1 relative z-10 w-full max-w-[1600px] mx-auto px-4 sm:px-6 py-6 md:py-8 flex flex-col gap-6 md:gap-8">
-                {/* Header */}
-                <div className="flex flex-col gap-2">
-                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
-                        Catalyst Workspace
-                    </h1>
-                    <p className="text-slate-400 text-base md:text-lg">
-                        Transform your raw ideas into optimized prompts with live analysis.
-                    </p>
-                </div>
+                <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 py-6 md:py-8 flex flex-col gap-6 md:gap-8">
+                    <Header />
 
-                {/* Main workspace */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-[450px]">
-                    <RawIntentPanel />
-                    <LiveAnalysisPanel />
-                </div>
-
-                {/* Settings section - Now full width */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div className="lg:col-span-12 flex flex-col gap-4">
-                        <OptimizationSettings />
+                    {/* Main workspace */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-[450px]">
+                        <RawIntentPanel />
+                        <LiveAnalysisPanel />
                     </div>
-                </div>
-            </main>
+
+                    {/* Settings section - Now full width */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div className="lg:col-span-12 flex flex-col gap-4">
+                            <OptimizationSettings />
+                        </div>
+                    </div>
+                </main>
+
+                <Footer />
+            </div>
 
             {/* Bottom gradient line */}
-            <div className="fixed bottom-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-900/50 to-transparent" />
+            <div className="fixed bottom-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-900/50 to-transparent pointer-events-none" />
         </PromptProvider>
     )
 }
+
