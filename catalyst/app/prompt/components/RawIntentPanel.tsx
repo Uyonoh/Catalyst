@@ -5,12 +5,12 @@ import GlassPanel from './GlassPanel'
 import { usePrompt } from '../../context/PromptContext'
 
 const MODELS = [
-    { id: 'midjourney', name: 'Midjourney v6', type: 'Img', icon: 'palette', color: 'cyan' },
-    { id: 'claude', name: 'Claude 3 Opus', type: 'Txt', icon: 'auto_awesome', color: 'purple' },
-    { id: 'gpt', name: 'GPT-4 Turbo', type: 'Txt', icon: 'chat', color: 'green' },
-    { id: 'llama', name: 'Llama 3', type: 'Txt', icon: 'terminal', color: 'orange' },
-    { id: 'dalle', name: 'DALL-E 3', type: 'Img', icon: 'image', color: 'pink' },
-    { id: 'stablediffusion', name: 'Stable Diffusion', type: 'Img', icon: 'filter_frames', color: 'blue' },
+    { id: 'midjourney', name: 'Midjourney v6', brief: 'MJ', type: 'Img', icon: 'palette', color: 'cyan' },
+    { id: 'claude', name: 'Claude 3 Opus', brief: 'CLD', type: 'Txt', icon: 'auto_awesome', color: 'purple' },
+    { id: 'gpt', name: 'GPT-4 Turbo', brief: 'GPT', type: 'Txt', icon: 'chat', color: 'green' },
+    { id: 'llama', name: 'Llama 3', brief: 'LLM', type: 'Txt', icon: 'terminal', color: 'orange' },
+    { id: 'dalle', name: 'DALL-E 3', brief: 'DAL', type: 'Img', icon: 'image', color: 'pink' },
+    { id: 'stablediffusion', name: 'Stable Diffusion', brief: 'SD', type: 'Img', icon: 'filter_frames', color: 'blue' },
 ]
 
 export default function RawIntentPanel() {
@@ -61,7 +61,7 @@ export default function RawIntentPanel() {
                             <div className="bg-cyan-500/20 p-1.5 md:p-2 rounded-lg text-cyan-400">
                                 <span className="material-symbols-outlined text-lg md:text-xl">edit_note</span>
                             </div>
-                            <span className="text-xs md:text-sm font-bold text-slate-200 uppercase tracking-wider">
+                            <span className="text-xs hidden sm:block md:text-sm font-bold text-slate-200 uppercase tracking-wider">
                                 Raw Intent
                             </span>
                             {/* Mobile Analysis Indicator */}
@@ -114,11 +114,7 @@ export default function RawIntentPanel() {
                                         {selectedModel.icon}
                                     </span>
                                     <span className="text-[10px] font-semibold">
-                                        {selectedModel.id === 'midjourney' ? 'MJ' :
-                                            selectedModel.id === 'claude' ? 'CLD' :
-                                                selectedModel.id === 'gpt' ? 'GPT' :
-                                                    selectedModel.id === 'llama' ? 'LLM' :
-                                                        selectedModel.id === 'dalle' ? 'DAL' : 'SD'}
+                                        {selectedModel.brief}
                                     </span>
                                 </button>
                             </div>
