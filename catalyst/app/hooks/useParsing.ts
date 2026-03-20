@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { OptimizedPrompt } from '../lib/engine/types';
 
-export function useParsing(text: string, debounceMs: number = 500) {
+export function useParsing(text: string, selectedModel: string, debounceMs: number = 500) {
     const [result, setResult] = useState<OptimizedPrompt | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const analyzePrompt = useCallback(async (currentText: string) => {
+    const analyzePrompt = useCallback(async (currentText: string, currentModel: string) => {
         if (!currentText.trim()) {
             setResult(null);
             return;
@@ -19,7 +19,7 @@ export function useParsing(text: string, debounceMs: number = 500) {
             const response = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: currentText }),
+                body: JSON.stringify({ text: currentText, model: currentModel }),
             });
 
             if (!response.ok) throw new Error('Failed to analyze prompt');
@@ -35,11 +35,11 @@ export function useParsing(text: string, debounceMs: number = 500) {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            analyzePrompt(text);
+            analyzePrompt(text, selectedModel);
         }, debounceMs);
 
         return () => clearTimeout(timer);
-    }, [text, debounceMs, analyzePrompt]);
+    }, [text, selectedModel, debounceMs, analyzePrompt]);
 
     return { result, isLoading, error };
 }

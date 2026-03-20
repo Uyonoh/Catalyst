@@ -17,8 +17,8 @@ const getMetadataStyles = (type: string) => {
 }
 
 export default function LiveAnalysisPanel() {
-    const { input } = usePrompt()
-    const { result, isLoading, error } = useParsing(input)
+    const { input, selectedModel } = usePrompt()
+    const { result, isLoading, error } = useParsing(input, selectedModel)
 
     const copyToClipboard = () => {
         if (!result) return
