@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ParsingResult } from '../lib/parsing/types';
+import { OptimizedPrompt } from '../lib/engine/types';
 
 export function useParsing(text: string, debounceMs: number = 500) {
-    const [result, setResult] = useState<ParsingResult | null>(null);
+    const [result, setResult] = useState<OptimizedPrompt | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -43,3 +43,4 @@ export function useParsing(text: string, debounceMs: number = 500) {
 
     return { result, isLoading, error };
 }
+

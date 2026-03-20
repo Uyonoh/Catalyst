@@ -1,0 +1,22 @@
+{
+  "test_cases": [
+    {
+      "input": "Look at this Python script and the attached screenshot. Why is the map not rendering the GeoJSON layer correctly?",
+      "expected_metadata": {
+        "detectedDomain": "TECHNICAL_GIS",
+        "primaryIntent": "DEBUG",
+        "assets_required": ["CODE", "IMAGE"],
+        "constraints": { "tone": "PROFESSIONAL", "outputFormat": "MARKDOWN" }
+      }
+    },
+    {
+      "input": "Generate a 5-second cinematic shot of a drone flying over a futuristic city at sunset. High contrast, neon lights.",
+      "expected_metadata": {
+        "detectedDomain": "CREATIVE_MOTION",
+        "primaryIntent": "COMPOSITION",
+        "targetModel": "VEO_VIDEO",
+        "constraints": { "tone": "CREATIVE" }
+      }
+    }
+  ]
+}
