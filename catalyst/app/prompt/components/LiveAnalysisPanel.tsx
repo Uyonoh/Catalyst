@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import GlassPanel from './GlassPanel'
 import { usePrompt } from '../../context/PromptContext'
 import { useParsing } from '../../hooks/useParsing'
@@ -19,6 +19,7 @@ const getMetadataStyles = (type: string) => {
 export default function LiveAnalysisPanel() {
     const { input, selectedModel } = usePrompt()
     const { result, isLoading, error } = useParsing(input, selectedModel)
+    const [showDetails, setShowDetails] = useState(false)
 
     const copyToClipboard = () => {
         if (!result) return
@@ -70,39 +71,54 @@ export default function LiveAnalysisPanel() {
                 </div>
             </div>
 
-            <div className="flex flex-col gap-6 flex-1">
-                {/* Confidence Score */}
-                <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                        <span className="text-slate-400">Confidence Score ({result?.metadata?.primaryIntent || 'Unknown'})</span>
-                        <span className="text-cyan-400 font-bold">{confidencePercent}%</span>
-                    </div>
-                    <div className="w-full bg-slate-800 rounded-full h-1.5">
-                        <div
-                            className="bg-gradient-to-r from-cyan-500 to-purple-500 h-1.5 rounded-full transition-all duration-500"
-                            style={{ width: `${confidencePercent}%` }}
-                        />
-                    </div>
-                </div>
-
-                {/* Detected Metadata */}
-                <div className="space-y-2">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                        Extracted Metadata
+            {/* Mobile Toggle Details */}
+            <div className="md:hidden flex justify-center mb-2">
+                <button 
+                    onClick={() => setShowDetails(!showDetails)}
+                    className="flex items-center gap-1 text-xs text-cyan-500 hover:text-cyan-400 transition-colors bg-cyan-500/10 px-3 py-1.5 rounded-full"
+                >
+                    <span>{showDetails ? 'Hide Engine Details' : 'Show Engine Details'}</span>
+                    <span className="material-symbols-outlined text-[16px]">
+                        {showDetails ? 'expand_less' : 'expand_more'}
                     </span>
-                    <div className="flex flex-wrap gap-2 min-h-[32px]">
-                        {entities.length > 0 ? (
-                            entities.map((entity, i) => (
-                                <span
-                                    key={i}
-                                    className={`px-3 py-1 rounded-full border text-xs font-medium transition-all animate-fadeIn ${getMetadataStyles(entity.type)}`}
-                                >
-                                    {entity.label}
-                                </span>
-                            ))
-                        ) : (
-                            <span className="text-xs text-slate-600 italic">No metadata detected yet</span>
-                        )}
+                </button>
+            </div>
+
+            <div className="flex flex-col gap-6 flex-1">
+                <div className={`flex-col gap-6 ${showDetails ? 'flex' : 'hidden md:flex'} animate-fadeIn`}>
+                    {/* Confidence Score */}
+                    <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                            <span className="text-slate-400">Confidence Score ({result?.metadata?.primaryIntent || 'Unknown'})</span>
+                            <span className="text-cyan-400 font-bold">{confidencePercent}%</span>
+                        </div>
+                        <div className="w-full bg-slate-800 rounded-full h-1.5">
+                            <div
+                                className="bg-gradient-to-r from-cyan-500 to-purple-500 h-1.5 rounded-full transition-all duration-500"
+                                style={{ width: `${confidencePercent}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Detected Metadata */}
+                    <div className="space-y-2">
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            Extracted Metadata
+                        </span>
+                        <div className="flex flex-wrap gap-2 min-h-[32px]">
+                            {entities.length > 0 ? (
+                                entities.map((entity, i) => (
+                                    <span
+                                        key={i}
+                                        className={`px-3 py-1 rounded-full border text-xs font-medium transition-all animate-fadeIn ${getMetadataStyles(entity.type)}`}
+                                    >
+                                        {entity.label}
+                                    </span>
+                                ))
+                            ) : (
+                                <span className="text-xs text-slate-600 italic">No metadata detected yet</span>
+                            )}
+                        </div>
                     </div>
                 </div>
 

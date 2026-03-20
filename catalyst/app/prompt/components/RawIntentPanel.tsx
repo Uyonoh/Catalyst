@@ -132,8 +132,8 @@ export default function RawIntentPanel() {
                                             ))}
                                         </div>
 
-                                        {/* Quick Stats Footer */}
-                                        <div className="mt-2 pt-2 border-t border-white/10">
+                                        {/* Quick Stats Footer - Desktop Only */}
+                                        <div className="hidden md:block mt-2 pt-2 border-t border-white/10">
                                             <div className="px-3 py-2 text-xs text-slate-400">
                                                 <div className="flex items-center justify-between mb-1">
                                                     <span className="flex items-center gap-1">
@@ -194,22 +194,10 @@ export default function RawIntentPanel() {
                         </button>
                     </div>
 
-                    {/* Mobile: Small additional actions */}
-                    <div className="flex gap-1 md:hidden">
-                        <button
-                            className="p-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-                            title="Settings"
-                            aria-label="Settings"
-                        >
-                            <span className="material-symbols-outlined text-[20px]">tune</span>
-                        </button>
-                        <button
-                            className="p-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-                            title="Help"
-                            aria-label="Help"
-                        >
-                            <span className="material-symbols-outlined text-[20px]">help</span>
-                        </button>
+                    {/* Mobile: Token Counter (Moved from dropdown for cleaner access) */}
+                    <div className="flex md:hidden items-center gap-2 pr-2 text-xs text-slate-400">
+                        <span className="material-symbols-outlined text-[14px] text-cyan-400">bolt</span>
+                        <span className="font-mono font-medium">450/1000</span>
                     </div>
                 </div>
 
