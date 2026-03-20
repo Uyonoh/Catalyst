@@ -34,6 +34,15 @@ export function useParsing(text: string, selectedModel: string, debounceMs: numb
     }, []);
 
     useEffect(() => {
+        if (!text.trim()) {
+            setResult(null);
+            setIsLoading(false);
+            return;
+        }
+
+        // Set loading immediately when the user starts typing/editing
+        setIsLoading(true);
+
         const timer = setTimeout(() => {
             analyzePrompt(text, selectedModel);
         }, debounceMs);

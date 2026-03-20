@@ -49,6 +49,7 @@ export default function OptimizationSettings() {
             return acc
         }, {} as Record<string, number>)
     )
+    const [showSettings, setShowSettings] = useState(false)
 
     const handleReset = () => {
         const defaultSettings = SETTINGS.reduce((acc, setting) => {
@@ -101,20 +102,36 @@ export default function OptimizationSettings() {
 
     return (
         <>
-            <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <span className="material-symbols-outlined text-cyan-400">tune</span>
-                    Optimization Settings
-                </h2>
-                <button
-                    onClick={handleReset}
-                    className="text-sm text-cyan-400 font-medium hover:text-cyan-300 transition-colors"
-                >
-                    Reset Defaults
-                </button>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                <div className="flex items-center justify-between w-full sm:w-auto">
+                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                        <span className="material-symbols-outlined text-cyan-400">tune</span>
+                        Optimization Settings
+                    </h2>
+                    
+                    {/* Mobile Toggle */}
+                    <button 
+                        onClick={() => setShowSettings(!showSettings)}
+                        className="sm:hidden flex items-center gap-1 text-xs text-cyan-400 bg-cyan-500/10 px-3 py-1.5 rounded-full"
+                    >
+                        <span>{showSettings ? 'Hide' : 'Show'}</span>
+                        <span className="material-symbols-outlined text-[16px]">
+                            {showSettings ? 'expand_less' : 'expand_more'}
+                        </span>
+                    </button>
+                </div>
+
+                <div className={`${showSettings ? 'flex' : 'hidden sm:flex'} items-center justify-between sm:justify-end gap-4`}>
+                    <button
+                        onClick={handleReset}
+                        className="text-sm text-cyan-400 font-medium hover:text-cyan-300 transition-colors"
+                    >
+                        Reset Defaults
+                    </button>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${showSettings ? 'grid' : 'hidden sm:grid'} animate-fadeIn`}>
                 {SETTINGS.map((setting) => {
                     const colors = getColorStyles(setting.color)
                     const levelLabel = getLevelLabel(settings[setting.id], setting.type)

@@ -131,9 +131,19 @@ export default function LiveAnalysisPanel() {
                         <span className="text-[10px] text-slate-600 font-mono hidden sm:inline">{result?.model || 'GENERATING'}</span>
                     </div>
 
-                    <div className="code-preview flex-1 rounded-lg p-4 overflow-hidden relative group bg-black/20 border border-white/5">
+                    <div className={`code-preview flex-1 rounded-lg p-4 overflow-hidden relative group bg-black/20 border transition-all duration-300 ${isLoading ? 'border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.2)]' : 'border-white/5'}`}>
+                        {/* Refreshing Overlay for Mobile */}
+                        {isLoading && (
+                            <div className="absolute inset-0 z-10 bg-[#101922]/40 backdrop-blur-[1px] flex items-center justify-center animate-fadeIn">
+                                <div className="flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-full border border-cyan-500/30 shadow-2xl">
+                                    <div className="w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+                                    <span className="text-xs font-bold text-cyan-400 uppercase tracking-tighter">Refreshing Engine</span>
+                                </div>
+                            </div>
+                        )}
+
                         {result && (
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                                 <button
                                     onClick={copyToClipboard}
                                     className="p-1 hover:bg-white/10 rounded text-slate-400 hover:text-white"
@@ -144,7 +154,7 @@ export default function LiveAnalysisPanel() {
                             </div>
                         )}
 
-                        <code className="text-sm font-mono leading-relaxed block text-slate-300 overflow-x-auto">
+                        <code className={`text-sm font-mono leading-relaxed block text-slate-300 overflow-x-auto transition-opacity duration-300 ${isLoading ? 'opacity-40' : 'opacity-100'}`}>
                             {result ? (
                                 <div className="space-y-4 max-h-[200px] md:max-h-[200px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700">
                                     {result.systemInstruction && (
