@@ -51,7 +51,7 @@ export default function RawIntentPanel() {
 
     return (
         <div className="relative group flex flex-col h-full">
-            <div className={`absolute -inset-0.5 bg-gradient-to-r ${isLoading ? 'from-cyan-400 via-purple-500 to-cyan-400 rounded-2xl blur-md opacity-70 animate-pulse' : 'from-cyan-500 to-primary rounded-2xl blur opacity-30 group-hover:opacity-60'} transition-all duration-500`} />
+            <div className={`absolute -inset-0.5 bg-gradient-to-r ${isLoading ? 'from-cyan-400 to-primary rounded-2xl blur-md opacity-75 animate-pulse' : 'from-cyan-500 to-primary rounded-2xl blur opacity-30 group-hover:opacity-60'} transition-all duration-500`} />
             <div className="relative flex flex-col glass-panel rounded-xl p-4 md:p-6 h-full">
                 {/* Header Section - Mobile Optimized */}
                 <div className="flex flex-col gap-3 mb-4">
