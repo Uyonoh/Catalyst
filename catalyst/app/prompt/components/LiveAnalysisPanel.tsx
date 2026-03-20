@@ -3,7 +3,6 @@
 import React, { useState } from 'react'
 import GlassPanel from './GlassPanel'
 import { usePrompt } from '../../context/PromptContext'
-import { useParsing } from '../../hooks/useParsing'
 
 const getMetadataStyles = (type: string) => {
     const styles: Record<string, string> = {
@@ -17,8 +16,7 @@ const getMetadataStyles = (type: string) => {
 }
 
 export default function LiveAnalysisPanel() {
-    const { input, selectedModel } = usePrompt()
-    const { result, isLoading, error } = useParsing(input, selectedModel)
+    const { input, selectedModel, result, isLoading, error } = usePrompt()
     const [showDetails, setShowDetails] = useState(false)
 
     const copyToClipboard = () => {

@@ -14,7 +14,7 @@ const MODELS = [
 ]
 
 export default function RawIntentPanel() {
-    const { input, setInput, selectedModel: selectedModelId, setSelectedModel: setSelectedModelId } = usePrompt()
+    const { input, setInput, selectedModel: selectedModelId, setSelectedModel: setSelectedModelId, isLoading, result } = usePrompt()
     const selectedModel = MODELS.find(m => m.id === selectedModelId) || MODELS[0]
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
@@ -51,7 +51,7 @@ export default function RawIntentPanel() {
 
     return (
         <div className="relative group flex flex-col h-full">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-primary rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500" />
+            <div className={`absolute -inset-0.5 bg-gradient-to-r ${isLoading ? 'from-cyan-400 via-purple-500 to-cyan-400 rounded-2xl blur-md opacity-70 animate-pulse' : 'from-cyan-500 to-primary rounded-2xl blur opacity-30 group-hover:opacity-60'} transition-all duration-500`} />
             <div className="relative flex flex-col glass-panel rounded-xl p-4 md:p-6 h-full">
                 {/* Header Section - Mobile Optimized */}
                 <div className="flex flex-col gap-3 mb-4">
@@ -64,6 +64,23 @@ export default function RawIntentPanel() {
                             <span className="text-xs md:text-sm font-bold text-slate-200 uppercase tracking-wider">
                                 Raw Intent
                             </span>
+                            {/* Mobile Analysis Indicator */}
+                            <div className="md:hidden flex items-center gap-1.5 ml-1 transition-opacity duration-300">
+                                {isLoading ? (
+                                    <>
+                                        <span className="relative flex h-2 w-2">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
+                                        </span>
+                                        <span className="text-[9px] uppercase text-cyan-400 font-bold tracking-widest animate-pulse">Analyzing</span>
+                                    </>
+                                ) : result ? (
+                                    <div className="flex items-center gap-1 bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
+                                        <span className="material-symbols-outlined text-[10px] text-emerald-400">bolt</span>
+                                        <span className="text-[8px] uppercase text-emerald-400 font-bold tracking-wider pt-[1px]">Ready</span>
+                                    </div>
+                                ) : null}
+                            </div>
                         </div>
                         {/* Desktop Model Selection */}
                         <div className="relative" ref={dropdownRef}>
