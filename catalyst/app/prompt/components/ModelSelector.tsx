@@ -7,7 +7,7 @@ export const MODELS = [
   {
     id: "midjourney",
     name: "Midjourney v6",
-    brief: "MJ",
+    brief: "MJ v6",
     type: "Img",
     icon: "palette",
     color: "cyan",
@@ -15,7 +15,7 @@ export const MODELS = [
   {
     id: "claude",
     name: "Claude 3 Opus",
-    brief: "CLD",
+    brief: "CLAUDE 3",
     type: "Txt",
     icon: "auto_awesome",
     color: "purple",
@@ -23,7 +23,7 @@ export const MODELS = [
   {
     id: "gpt",
     name: "GPT-4 Turbo",
-    brief: "GPT",
+    brief: "GPT-4T",
     type: "Txt",
     icon: "chat",
     color: "green",
@@ -31,7 +31,7 @@ export const MODELS = [
   {
     id: "llama",
     name: "Llama 3",
-    brief: "LLM",
+    brief: "LLAMA 3",
     type: "Txt",
     icon: "terminal",
     color: "orange",
@@ -39,7 +39,7 @@ export const MODELS = [
   {
     id: "dalle",
     name: "DALL-E 3",
-    brief: "DAL",
+    brief: "DALLE 3",
     type: "Img",
     icon: "image",
     color: "pink",
@@ -47,7 +47,7 @@ export const MODELS = [
   {
     id: "stablediffusion",
     name: "Stable Diffusion",
-    brief: "SD",
+    brief: "SDXL",
     type: "Img",
     icon: "filter_frames",
     color: "blue",
