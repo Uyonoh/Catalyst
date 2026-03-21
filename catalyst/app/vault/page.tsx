@@ -2,6 +2,7 @@ import Navbar from '../prompt/components/Navbar'
 import Footer from '../prompt/components/Footer'
 import VaultBackground from './components/VaultBackground'
 import VaultHero from './components/VaultHero'
+import VaultFeatured from './components/VaultFeatured'
 import VaultSearch from './components/VaultSearch'
 import VaultTags from './components/VaultTags'
 import VaultGrid from './components/VaultGrid'
@@ -92,6 +93,7 @@ export default function VaultPage() {
 
                 <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 py-8 flex flex-col">
                     <VaultHero />
+                    <VaultFeatured />
                     <VaultSearch />
                     <VaultTags />
                     <VaultGrid items={VAULT_ITEMS} />
