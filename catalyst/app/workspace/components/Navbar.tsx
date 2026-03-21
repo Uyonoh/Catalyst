@@ -10,7 +10,7 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 w-full border-b border-white/10 glass-panel-dark">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3">
           <div className="size-8 flex items-center justify-center text-cyan-400">
             <span className="material-symbols-outlined !text-[28px] sm:!text-[32px]">
               auto_awesome_mosaic
@@ -19,7 +19,7 @@ export default function Navbar() {
           <h2 className="text-white text-lg sm:text-xl font-black tracking-tight">
             Catalyst
           </h2>
-        </div>
+        </Link>
 
         {/* Mobile Menu Button */}
         <button
