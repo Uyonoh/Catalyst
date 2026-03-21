@@ -61,7 +61,7 @@ const Footer = () => {
                 <div className="mt-16 pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2">
                         <p className="text-slate-500 text-sm">
-                            © {currentYear} Catalyst Prompt Studio.
+                            © {currentYear} Catalyst Workspace Studio.
                         </p>
                         <span className="hidden sm:inline text-slate-700 font-bold">•</span>
                         <p className="text-slate-500 text-sm">Crafted for excellence.</p>

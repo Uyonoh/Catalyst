@@ -5,8 +5,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Catalyst Prompt Workspace',
-  description: 'Transform your raw ideas into optimized prompts with live analysis.',
+  title: 'Catalyst Workspace',
+  description: 'Transform your raw ideas into optimized workspaces with live analysis.',
 }
 
 export default function RootLayout({

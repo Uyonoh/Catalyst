@@ -4,11 +4,11 @@ import Footer from './components/Footer'
 import RawIntentPanel from './components/RawIntentPanel'
 import LiveAnalysisPanel from './components/LiveAnalysisPanel'
 import OptimizationSettings from './components/OptimizationSettings'
-import { PromptProvider } from '../context/PromptContext'
+import { WorkspaceProvider } from '../context/WorkspaceContext'
 
-export default function PromptPage() {
+export default function WorkspacePage() {
     return (
-        <PromptProvider>
+        <WorkspaceProvider>
             {/* Background gradient blurs */}
             <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
                 <div className="absolute top-[-20%] left-[20%] w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px]" />
@@ -40,7 +40,7 @@ export default function PromptPage() {
 
             {/* Bottom gradient line */}
             <div className="fixed bottom-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-900/50 to-transparent pointer-events-none" />
-        </PromptProvider>
+        </WorkspaceProvider>
     )
 }
 

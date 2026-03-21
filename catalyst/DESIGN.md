@@ -1,6 +1,6 @@
 # Catalyst Design System
 
-This document outlines the **Glass & Neon** aesthetic of the Catalyst Prompt Studio, defining the visual language, core components, and design tokens that drive our premium user experience.
+This document outlines the **Glass & Neon** aesthetic of the Catalyst Workspace Studio, defining the visual language, core components, and design tokens that drive our premium user experience.
 
 ## Aesthetic Philosophy: Glass & Neon
 

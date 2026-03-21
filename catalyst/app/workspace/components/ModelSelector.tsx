@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { usePrompt } from "../../context/PromptContext";
+import { useWorkspace } from "../../context/WorkspaceContext";
 
 export const MODELS = [
   {
@@ -73,7 +73,7 @@ export default function ModelSelector() {
   const {
     selectedModel: selectedModelId,
     setSelectedModel: setSelectedModelId,
-  } = usePrompt();
+  } = useWorkspace();
   const selectedModel =
     MODELS.find((m) => m.id === selectedModelId) || MODELS[0];
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useParsing } from '../hooks/useParsing';
 import { OptimizedPrompt } from '../lib/engine/types';
 
-interface PromptContextType {
+interface WorkspaceContextType {
     input: string;
     setInput: (text: string) => void;
     selectedModel: string;
@@ -14,24 +14,24 @@ interface PromptContextType {
     error: string | null;
 }
 
-const PromptContext = createContext<PromptContextType | undefined>(undefined);
+const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
-export function PromptProvider({ children }: { children: ReactNode }) {
+export function WorkspaceProvider({ children }: { children: ReactNode }) {
     const [input, setInput] = useState('');
     const [selectedModel, setSelectedModel] = useState('midjourney');
     const { result, isLoading, error } = useParsing(input, selectedModel);
 
     return (
-        <PromptContext.Provider value={{ input, setInput, selectedModel, setSelectedModel, result, isLoading, error }}>
+        <WorkspaceContext.Provider value={{ input, setInput, selectedModel, setSelectedModel, result, isLoading, error }}>
             {children}
-        </PromptContext.Provider>
+        </WorkspaceContext.Provider>
     );
 }
 
-export function usePrompt() {
-    const context = useContext(PromptContext);
+export function useWorkspace() {
+    const context = useContext(WorkspaceContext);
     if (context === undefined) {
-        throw new Error('usePrompt must be used within a PromptProvider');
+        throw new Error('useWorkspace must be used within a WorkspaceProvider');
     }
     return context;
 }

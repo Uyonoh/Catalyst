@@ -2,11 +2,11 @@
 
 import React from 'react'
 import GlassPanel from './GlassPanel'
-import { usePrompt } from '../../context/PromptContext'
+import { useWorkspace } from '../../context/WorkspaceContext'
 import ModelSelector, { MODELS } from './ModelSelector'
 
 export default function RawIntentPanel() {
-    const { input, setInput, selectedModel: selectedModelId, isLoading, result } = usePrompt()
+    const { input, setInput, selectedModel: selectedModelId, isLoading, result } = useWorkspace()
     const selectedModel = MODELS.find(m => m.id === selectedModelId) || MODELS[0]
 
     return (

@@ -1,5 +1,5 @@
-import Navbar from '../prompt/components/Navbar'
-import Footer from '../prompt/components/Footer'
+import Navbar from '../workspace/components/Navbar'
+import Footer from '../workspace/components/Footer'
 import VaultBackground from './components/VaultBackground'
 import VaultHero from './components/VaultHero'
 import VaultFeatured from './components/VaultFeatured'

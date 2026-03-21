@@ -1,5 +1,4 @@
-import React from 'react';
-import GlassPanel from '../../prompt/components/GlassPanel';
+import GlassPanel from '../../workspace/components/GlassPanel';
 
 export interface VaultItem {
   id: number;

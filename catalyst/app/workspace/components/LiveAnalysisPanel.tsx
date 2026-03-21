@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import GlassPanel from './GlassPanel'
-import { usePrompt } from '../../context/PromptContext'
+import { useWorkspace } from '../../context/WorkspaceContext'
 
 const getMetadataStyles = (type: string) => {
     const styles: Record<string, string> = {
@@ -16,7 +16,7 @@ const getMetadataStyles = (type: string) => {
 }
 
 export default function LiveAnalysisPanel() {
-    const { input, selectedModel, result, isLoading, error } = usePrompt()
+    const { input, selectedModel, result, isLoading, error } = useWorkspace()
     const [showDetails, setShowDetails] = useState(false)
 
     const copyToClipboard = () => {

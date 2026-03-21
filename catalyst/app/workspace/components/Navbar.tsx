@@ -37,13 +37,13 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-8">
           <div className="flex items-center gap-1">
             <Link
-              href="#"
+              href="/vault"
               className="px-4 py-2 text-sm font-medium text-white hover:text-cyan-300 transition-colors rounded-lg hover:bg-white/5"
             >
               Vault
             </Link>
             <Link
-              href="#"
+              href="/workspace"
               className="px-4 py-2 text-sm font-medium text-white hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5"
             >
               Workspace
@@ -92,14 +92,14 @@ export default function Navbar() {
           <div className="absolute top-16 left-0 right-0 glass-panel-dark border-t border-white/10 md:hidden animate-fadeIn">
             <div className="px-6 py-4 space-y-3">
               <Link
-                href="#"
+                href="/vault"
                 className="block px-4 py-3 text-sm font-medium text-white hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Vault
               </Link>
               <Link
-                href="#"
+                href="/workspace"
                 className="block px-4 py-3 text-sm font-medium text-white hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
