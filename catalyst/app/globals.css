@@ -16,6 +16,7 @@
   --animate-fadeIn: fadeIn 0.2s ease-out;
   --animate-slideDown: slideDown 0.3s ease-out;
   --animate-pulse-glow: pulseGlow 2s infinite;
+  --animate-slideCollapse: slideCollapse 0.3s ease-in-out;
 }
 
 @keyframes fadeIn {
@@ -52,6 +53,33 @@
   50% {
     box-shadow: 0 0 20px rgba(6, 182, 212, 0.8);
   }
+}
+
+@keyframes slideCollapse {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Smooth panel collapse/expand */
+.panel-body {
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease,
+              padding 0.3s ease;
+  max-height: 2000px;
+  opacity: 1;
+}
+
+.panel-body--collapsed {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .dark {

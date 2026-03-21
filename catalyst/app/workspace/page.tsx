@@ -31,7 +31,7 @@ export default function WorkspacePage() {
           </section>
 
           {/* Main workspace */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-[450px]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             <RawIntentPanel />
             <LiveAnalysisPanel />
           </div>
