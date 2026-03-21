@@ -1,4 +1,4 @@
-import GlassPanel from '../../workspace/components/GlassPanel';
+import GlassPanel from "../GlassPanel";
 
 export interface VaultItem {
   id: number;
@@ -37,11 +37,18 @@ export default function VaultCard({ item }: VaultCardProps) {
             <h3 className="text-white font-bold leading-tight group-hover:text-cyan-400 transition-colors">
               {item.title}
             </h3>
-            <p className="text-slate-500 text-xs mt-0.5">Updated {item.updated}</p>
+            <p className="text-slate-500 text-xs mt-0.5">
+              Updated {item.updated}
+            </p>
           </div>
         </div>
-        <button className="text-slate-500 hover:text-cyan-400 transition-colors" aria-label="More options">
-          <span className="material-symbols-outlined text-[20px]">more_vert</span>
+        <button
+          className="text-slate-500 hover:text-cyan-400 transition-colors"
+          aria-label="More options"
+        >
+          <span className="material-symbols-outlined text-[20px]">
+            more_vert
+          </span>
         </button>
       </div>
       <div className="h-[1px] w-full bg-white/5" />
@@ -62,7 +69,9 @@ export default function VaultCard({ item }: VaultCardProps) {
             className="p-1.5 hover:bg-white/10 rounded-md text-slate-400 hover:text-cyan-400 transition-colors"
             title="Copy"
           >
-            <span className="material-symbols-outlined text-[18px]">content_copy</span>
+            <span className="material-symbols-outlined text-[18px]">
+              content_copy
+            </span>
           </button>
           <button
             className="p-1.5 hover:bg-white/10 rounded-md text-slate-400 hover:text-cyan-400 transition-colors"

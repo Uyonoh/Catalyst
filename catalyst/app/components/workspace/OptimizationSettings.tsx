@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import GlassPanel from "./GlassPanel";
+import GlassPanel from "../GlassPanel";
 
 const SETTINGS = [
   {

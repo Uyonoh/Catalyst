@@ -1,5 +1,5 @@
-import Navbar from "./workspace/components/Navbar";
-import Footer from "./workspace/components/Footer";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
 import HeroSection from "./components/home/HeroSection";
 import QuickAccessModels from "./components/home/QuickAccessModels";
 import StatsOverview from "./components/home/StatsOverview";
@@ -8,7 +8,7 @@ import RecentPrompts from "./components/home/RecentPrompts";
 export default function Home() {
   return (
     <>
-      <Navbar />
+      <Header />
 
       {/* Background Ambient Glows */}
       <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[#258cf4]/10 blur-[120px] pointer-events-none z-0"></div>

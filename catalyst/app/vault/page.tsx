@@ -1,12 +1,12 @@
-import Navbar from "../workspace/components/Navbar";
-import Footer from "../workspace/components/Footer";
-import VaultBackground from "./components/VaultBackground";
-import VaultHero from "./components/VaultHero";
-import VaultFeatured from "./components/VaultFeatured";
-import VaultSearch from "./components/VaultSearch";
-import VaultTags from "./components/VaultTags";
-import VaultGrid from "./components/VaultGrid";
-import { VaultItem } from "./components/VaultCard";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import VaultBackground from "../components/vault/VaultBackground";
+import VaultHero from "../components/vault/VaultHero";
+import VaultFeatured from "../components/vault/VaultFeatured";
+import VaultSearch from "../components/vault/VaultSearch";
+import VaultTags from "../components/vault/VaultTags";
+import VaultGrid from "../components/vault/VaultGrid";
+import { VaultItem } from "../components/vault/VaultCard";
 
 const VAULT_ITEMS: VaultItem[] = [
   {
@@ -95,7 +95,7 @@ export default function VaultPage() {
       <VaultBackground />
 
       <div className="relative z-10 min-h-screen flex flex-col">
-        <Navbar />
+        <Header />
 
         <main className="flex-1 w-full max-w-[1200px] mx-auto pt-16 pb-12 px-4 md:px-8 relative z-10">
           <VaultHero />

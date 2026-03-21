@@ -3,11 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 
-export default function Navbar() {
+export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-white/10 glass-panel-dark">
+    <header className="sticky top-0 z-50 w-full border-b border-white/10 glass-panel-dark">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
@@ -34,7 +34,7 @@ export default function Navbar() {
         </button>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-8">
           <div className="flex items-center gap-1">
             <Link
               href="/vault"
@@ -85,11 +85,11 @@ export default function Navbar() {
               }}
             />
           </div>
-        </div>
+        </nav>
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="absolute top-16 left-0 right-0 glass-panel-dark border-t border-white/10 md:hidden animate-fadeIn">
+          <nav className="absolute top-16 left-0 right-0 glass-panel-dark border-t border-white/10 md:hidden animate-fadeIn">
             <div className="px-6 py-4 space-y-3">
               <Link
                 href="/vault"
@@ -139,9 +139,9 @@ export default function Navbar() {
                 />
               </div>
             </div>
-          </div>
+          </nav>
         )}
       </div>
-    </nav>
+    </header>
   );
 }

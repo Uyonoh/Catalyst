@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import GlassPanel from "./GlassPanel";
+import GlassPanel from "../GlassPanel";
 import { useWorkspace } from "../../context/WorkspaceContext";
 import ModelSelector, { MODELS } from "./ModelSelector";
 
