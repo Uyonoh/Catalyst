@@ -34,7 +34,7 @@ export class CompilerService {
    * CLAUDE ADAPTER: Focuses on XML tagging and "Prefilled" context.
    */
   private compileForClaude(meta: DeconstructedPrompt): { formattedPrompt: string, systemInstruction: string } {
-    const system = `You are an expert ${meta.detectedDomain.replace('_', ' ')}. Your task is ${meta.primaryIntent}. 
+    const system = `You are an expert in ${meta.detectedDomain.replace('_', ' ')}. Your task is ${meta.primaryIntent}. 
     Respond in a ${meta.constraints.tone} tone and output as ${meta.constraints.outputFormat}.`;
 
     const prompt = `

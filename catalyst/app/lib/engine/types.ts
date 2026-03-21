@@ -29,6 +29,7 @@ export enum Domain {
   CREATIVE_COPY = "CREATIVE_COPY",
   CREATIVE_VISUAL = "CREATIVE_VISUAL",
   BUSINESS_STRATEGY = "BUSINESS_STRATEGY",
+  GENERAL = "GENERAL",
 }
 
 export enum Intent {
@@ -50,6 +51,7 @@ export enum Intent {
   SUMMARIZE = "SUMMARIZE",
   EXPAND = "EXPAND",
   BRAINSTORM = "BRAINSTORM",
+  GENERAL_TASK = "GENERAL_TASK",
 }
 
 export interface Asset {
@@ -66,6 +68,7 @@ export interface PromptConstraints {
   outputFormat: "MARKDOWN" | "JSON" | "CSV" | "YAML" | "PLAIN_TEXT";
   maxTokens?: number;
   temperature?: number; // 0.0 to 1.0
+  negativeConstraints?: string[]; // e.g. ["no code", "no intro"]
 }
 
 /**
@@ -81,6 +84,8 @@ export interface DeconstructedPrompt {
   assets: Asset[];
   constraints: PromptConstraints;
   variables: Record<string, string>; // Extracted placeholders like {{api_key}}
+  persona?: string; // e.g. "Senior React Developer"
+  style?: string; // e.g. "Step-by-step", "Chain of thought"
 }
 
 /**

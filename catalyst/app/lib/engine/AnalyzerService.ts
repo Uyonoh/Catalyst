@@ -2,89 +2,102 @@ import {
   DeconstructedPrompt, Domain, Intent, 
   InputModality, Asset, PromptConstraints 
 } from './types';
+import { DomainClassifier } from './detectors/DomainDetector';
+import { IntentClassifier } from './detectors/IntentDetector';
+import { BaseConstraintExtractor } from './detectors/ConstraintDetector';
+import { ScenarioDetector } from './detectors/ScenarioDetector';
 
 export class AnalyzerService {
-  // Weighted maps for Domain detection
-  private readonly domainKeywords: Record<Domain, string[]> = {
-    [Domain.TECHNICAL_GIS]: ["geojson", "shapefile", "coordinate", "spatial", "map", "arcgis", "qgis", "layer", "centroid"],
-    [Domain.TECHNICAL_BACKEND]: ["api", "database", "endpoint", "sql", "postgres", "fastapi", "django", "middleware", "async"],
-    [Domain.TECHNICAL_FRONTEND]: ["react", "tailwind", "css", "component", "nextjs", "hydration", "dom", "flexbox"],
-    [Domain.TECHNICAL_DEVOPS]: ["docker", "kubernetes", "ci/cd", "pipeline", "aws", "terraform", "ingress"],
-    [Domain.CREATIVE_MOTION]: ["frame", "fps", "cinematic", "drone", "lighting", "shutter", "bokeh", "tracking"],
-    [Domain.CREATIVE_COPY]: ["headline", "blog", "persuasive", "hook", "narrative", "tone of voice"],
-    [Domain.CREATIVE_VISUAL]: ["contrast", "palette", "composition", "resolution", "aspect ratio", "noise"],
-    [Domain.BUSINESS_STRATEGY]: ["roi", "kpi", "roadmap", "stakeholder", "compliance", "market fit"],
-  };
+  private domainClassifier = new DomainClassifier();
+  private intentClassifier = new IntentClassifier();
+  private constraintExtractor = new BaseConstraintExtractor();
+  private scenarioDetector = new ScenarioDetector();
 
-  // Weighted maps for Intent detection
-  private readonly intentKeywords: Record<Intent, string[]> = {
-    [Intent.DEBUG]: ["error", "fix", "broken", "why", "bug", "crash", "issue", "fails"],
-    [Intent.REFACTOR]: ["optimize", "clean", "shorter", "improve", "faster", "readable"],
-    [Intent.SPATIAL_ANALYSIS]: ["intersect", "within", "distance", "buffer", "heatmap"],
-    [Intent.STORYBOARD]: ["scene", "shot", "sequence", "visualize", "panel"],
-    [Intent.BRAINSTORM]: ["ideas", "suggest", "list", "options", "give me 10"],
-    [Intent.SUMMARIZE]: ["tldr", "shorten", "gist", "key points", "brief"],
-    [Intent.ARCHITECT]: ["architecture", "design", "system", "structure", "blueprint"],
-    [Intent.DOCUMENT]: ["document", "documentation", "specs", "requirements", "specs"],
-    [Intent.COLOR_GRADE]: ["color", "grade", "color grading", "color correction", "color grading"],
-    [Intent.COMPOSITION]: ["composition", "composition", "composition", "composition", "composition"],
-    [Intent.SCRIPTWRITING]: ["script", "scriptwriting", "scriptwriting", "scriptwriting", "scriptwriting"],
-    [Intent.STYLE_TRANSFER]: ["style", "style transfer", "style transfer", "style transfer", "style transfer"],
-    [Intent.EXPAND]: ["expand"],
+  // Multipliers for "high-intent" verbs
+  private readonly boosters: Record<string, number> = {
+    "write": 1.2,
+    "create": 1.2,
+    "generate": 1.2,
+    "build": 1.3,
+    "analyze": 1.4,
+    "fix": 1.5,
+    "optimize": 1.4,
   };
 
   public analyze(input: string, assets: Asset[] = []): DeconstructedPrompt {
     const lowerInput = input.toLowerCase();
     
-    const domain = this.detectCategory<Domain>(lowerInput, this.domainKeywords, Domain.CREATIVE_MOTION);
-    const primaryIntent = this.detectCategory<Intent>(lowerInput, this.intentKeywords, Intent.STORYBOARD);
-    const constraints = this.extractConstraints(lowerInput);
+    // 1. Detect Domain with Boosters
+    let domainResults = this.domainClassifier.detect(lowerInput);
+    domainResults = this.applyBoosters(lowerInput, domainResults);
+    const domain = domainResults.length > 0 ? domainResults[0].value : Domain.GENERAL;
+    
+    // 2. Detect Intents with Boosters
+    let intentResults = this.intentClassifier.detect(lowerInput);
+    intentResults = this.applyBoosters(lowerInput, intentResults);
+    const primaryIntent = intentResults.length > 0 ? intentResults[0].value : Intent.GENERAL_TASK;
+    const secondaryIntents = intentResults.length > 1 ? [intentResults[1].value] : [];
+
+    // 3. Extract Constraints & Scenarios
+    const baseConstraints: PromptConstraints = {
+      tone: "PROFESSIONAL",
+      outputFormat: "PLAIN_TEXT",
+    };
+    const constraints = {
+      ...baseConstraints,
+      ...this.constraintExtractor.extract(lowerInput, baseConstraints)
+    };
+
+    const scenario = this.scenarioDetector.detect(lowerInput);
+
+    // 4. Calculate Confidence Score (Refined for Phase 2)
+    const confidenceScore = this.calculateConfidence(domainResults, intentResults);
 
     return {
       originalInput: input,
       detectedDomain: domain,
       primaryIntent: primaryIntent,
-      secondaryIntents: [], // Logic can be expanded to find top 2
-      confidenceScore: 0.85, // Placeholder for actual scoring logic
+      secondaryIntents: secondaryIntents,
+      confidenceScore: confidenceScore,
       assets: assets,
       constraints: constraints,
       variables: this.extractVariables(input),
+      persona: scenario.persona,
+      style: scenario.style,
     };
   }
 
-  private detectCategory<T>(input: string, keywordMap: Record<any, string[]>, fallback: T): T {
-    let bestMatch: T = fallback;
-    let highestScore = 0;
-
-    for (const [category, keywords] of Object.entries(keywordMap)) {
-      const score = keywords.reduce((acc, kw) => acc + (input.includes(kw) ? 1 : 0), 0);
-      if (score > highestScore) {
-        highestScore = score;
-        bestMatch = category as unknown as T;
+  private applyBoosters<T>(input: string, results: { value: T, score: number }[]): { value: T, score: number }[] {
+    return results.map(res => {
+      let multiplier = 1.0;
+      for (const [word, boost] of Object.entries(this.boosters)) {
+        if (input.includes(word)) multiplier = Math.max(multiplier, boost);
       }
-    }
-    return bestMatch;
+      return { ...res, score: res.score * multiplier };
+    }).sort((a, b) => b.score - a.score);
   }
 
-  private extractConstraints(input: string): PromptConstraints {
-    const constraints: PromptConstraints = {
-      tone: "PROFESSIONAL",
-      outputFormat: "MARKDOWN",
-    };
+  private calculateConfidence(domainResults: any[], intentResults: any[]): number {
+    const dScore = domainResults[0]?.score || 0;
+    const iScore = intentResults[0]?.score || 0;
 
-    // Simple Regex for Format
-    if (/json/i.test(input)) constraints.outputFormat = "JSON";
-    if (/table|csv/i.test(input)) constraints.outputFormat = "CSV";
+    // Penalty for "Conflicts" (if the top 2 matches are too close, confidence drops)
+    let conflictPenalty = 1.0;
+    if (domainResults.length > 1) {
+      const gap = domainResults[0].score - domainResults[1].score;
+      if (gap < 2) conflictPenalty -= 0.1;
+    }
+    if (intentResults.length > 1) {
+      const gap = intentResults[0].score - intentResults[1].score;
+      if (gap < 2) conflictPenalty -= 0.1;
+    }
 
-    // Simple Regex for Tone
-    if (/explain like i'm 5|eli5/i.test(input)) constraints.tone = "ELI5";
-    if (/funny|creative|witty/i.test(input)) constraints.tone = "CREATIVE";
-    if (/brief|short|concise/i.test(input)) constraints.tone = "CONCISE";
-
-    return constraints;
+    const baseConfidence = Math.min(0.98, (dScore + iScore) / 10);
+    return Math.max(0.3, baseConfidence * conflictPenalty);
   }
 
   private extractVariables(input: string): Record<string, string> {
+
     const variables: Record<string, string> = {};
     const matches = input.matchAll(/{{(.*?)}}/g);
     for (const match of matches) {

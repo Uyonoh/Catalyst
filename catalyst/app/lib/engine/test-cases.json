@@ -17,6 +17,75 @@
         "targetModel": "VEO_VIDEO",
         "constraints": { "tone": "CREATIVE" }
       }
+    },
+    {
+      "input": "Act as a Senior Backend Architect. Give me a step-by-step plan to migrate this SQL database to Postgres.",
+      "expected_metadata": {
+        "detectedDomain": "TECHNICAL_BACKEND",
+        "primaryIntent": "ARCHITECT",
+        "persona": "Senior Backend Architect",
+        "style": "Step-by-step"
+      }
+    },
+    {
+      "input": "Act as a professional copywriter. Write a persuasive product description for a new eco-friendly water bottle. Keep it catchy and concise.",
+      "expected_metadata": {
+        "detectedDomain": "CREATIVE_COPY",
+        "primaryIntent": "BRAINSTORM",
+        "persona": "professional copywriter",
+        "style": "Briefing"
+      }
+    },
+    {
+      "input": "I need to edit this photo to have a Cyberpunk aesthetic. Add neon lights, high contrast, and a gritty texture.",
+      "expected_metadata": {
+        "detectedDomain": "CREATIVE_VISUAL",
+        "primaryIntent": "STYLE_TRANSFER"
+      }
+    },
+    {
+      "input": "Build a responsive landing page using Next.js and Tailwind CSS. The design should be minimalist and use glassmorphism effects.",
+      "expected_metadata": {
+        "detectedDomain": "TECHNICAL_FRONTEND",
+        "primaryIntent": "ARCHITECT"
+      }
+    },
+    {
+      "input": "Design a complete brand identity for a new AI startup. Include color palette, typography, and logo concepts.",
+      "expected_metadata": {
+        "detectedDomain": "CREATIVE_VISUAL",
+        "primaryIntent": "BRAINSTORM"
+      }
+    },
+    {
+      "input": "You are a Lead Software Engineer. Reason through the best way to implement a real-time notification system using WebSockets and Redis.",
+      "expected_metadata": {
+        "detectedDomain": "TECHNICAL_BACKEND",
+        "primaryIntent": "ARCHITECT",
+        "persona": "Lead Software Engineer",
+        "style": "Chain-of-thought"
+      }
+    },
+    {
+      "input": "Fix it.",
+      "expected_metadata": {
+        "detectedDomain": "GENERAL",
+        "primaryIntent": "DEBUG"
+      }
+    },
+    {
+      "input": "Make it more cinematic.",
+      "expected_metadata": {
+        "detectedDomain": "CREATIVE_MOTION",
+        "primaryIntent": "COMPOSITION"
+      }
+    },
+    {
+      "input": "Write a blog.",
+      "expected_metadata": {
+        "detectedDomain": "CREATIVE_COPY",
+        "primaryIntent": "BRAINSTORM"
+      }
     }
   ]
 }
