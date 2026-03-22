@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 // Initialize Gemini API
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 const SYSTEM_PROMPT = `You are an expert prompt engineer. 
 Your task is to take a "Raw Intent" from a user and transform it into a highly effective, structured, and refined prompt.
 
@@ -40,9 +38,11 @@ export async function POST(req: NextRequest) {
 
     const prompt = `${SYSTEM_PROMPT}\n\nRaw Intent: "${text}"\nRefined Prompt:`;
     
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const refinedText = response.text();
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+    const refinedText = response.text || "";
 
     return NextResponse.json({ refinedPrompt: refinedText.trim() });
   } catch (error: any) {
