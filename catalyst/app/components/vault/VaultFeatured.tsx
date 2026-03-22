@@ -1,12 +1,13 @@
-import React from 'react';
+import React from "react";
 
 export default function VaultFeatured() {
-  const featuredImage = "https://lh3.googleusercontent.com/aida-public/AB6AXuBAVsfsI1WFmkCuQZOSxSw5Rf07bYqbx7lHekw-arWybjAOc2nfPKoim5JXEy5Cp6X3m7dfQCerp9fGDnchx9hx7xh8-B6DMs-kCXIv1xJ0IB9xqmeOSnvW5-AcmNKZsirPCZFbNHQfSDnaUVuRzQXNMlaASTMkxcq0PH3VCOgs6WiQrPO6-mZN37WiZLGW5ZAUB2CcEJhJIsBjp63CaY5LZFonFhD_Qz3bB9aLbXzgK4Njr95gJcsqFGogBn7Rf0W1X9ZSuC3CCBc";
+  const featuredImage =
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBAVsfsI1WFmkCuQZOSxSw5Rf07bYqbx7lHekw-arWybjAOc2nfPKoim5JXEy5Cp6X3m7dfQCerp9fGDnchx9hx7xh8-B6DMs-kCXIv1xJ0IB9xqmeOSnvW5-AcmNKZsirPCZFbNHQfSDnaUVuRzQXNMlaASTMkxcq0PH3VCOgs6WiQrPO6-mZN37WiZLGW5ZAUB2CcEJhJIsBjp63CaY5LZFonFhD_Qz3bB9aLbXzgK4Njr95gJcsqFGogBn7Rf0W1X9ZSuC3CCBc";
 
   return (
     <div className="relative w-full rounded-2xl overflow-hidden group min-h-[320px] md:h-[280px] shadow-2xl border border-white/10 mb-10">
-      <div 
-        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
+      <div
+        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
         style={{ backgroundImage: `url("${featuredImage}")` }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-[#101922] via-[#101922]/60 to-transparent" />
@@ -25,11 +26,12 @@ export default function VaultFeatured() {
               Complex Data Analysis & Visualization Assistant
             </h3>
             <p className="text-white/80 text-sm md:text-base line-clamp-2 md:line-clamp-1">
-              A multi-step prompt designed to ingest CSV data and output Python matplotlib code.
+              A multi-step prompt designed to ingest CSV data and output Python
+              matplotlib code.
             </p>
           </div>
           <button className="glass-panel hover:bg-primary hover:border-primary text-white h-10 md:h-12 px-5 md:px-6 rounded-lg font-bold flex items-center justify-center gap-2 transition-all duration-300 shrink-0 w-full md:w-auto text-sm md:text-base hover:scale-[1.02] active:scale-[0.98] group/btn shadow-lg hover:shadow-primary/20">
-            Open Prompt 
+            Open Prompt
             <span className="material-symbols-outlined text-sm md:text-base transition-transform duration-300 group-hover/btn:translate-x-1">
               arrow_forward
             </span>

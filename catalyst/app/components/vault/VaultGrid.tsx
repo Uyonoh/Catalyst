@@ -1,5 +1,5 @@
-import React from 'react';
-import VaultCard, { VaultItem } from './VaultCard';
+import React from "react";
+import VaultCard, { VaultItem } from "./VaultCard";
 
 interface VaultGridProps {
   items: VaultItem[];

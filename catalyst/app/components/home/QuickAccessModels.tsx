@@ -35,15 +35,16 @@ const MODELS = [
 
 export default function QuickAccessModels() {
   return (
-    <div className="glass-panel rounded-2xl p-6 mb-12 animate-slideDown" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
+    <div
+      className="glass-panel rounded-2xl p-6 mb-12 animate-slideDown"
+      style={{ animationDelay: "0.1s", animationFillMode: "both" }}
+    >
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-white font-semibold text-lg flex items-center gap-2">
           <span className="material-symbols-outlined text-cyan-400">bolt</span>
           Quick Access Models
         </h3>
-        <a
-          className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
-        >
+        <a className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer">
           Manage Models
         </a>
       </div>
@@ -56,7 +57,9 @@ export default function QuickAccessModels() {
             <div
               className={`size-8 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform ${model.colorClass}`}
             >
-              <span className="material-symbols-outlined text-[18px]">{model.icon}</span>
+              <span className="material-symbols-outlined text-[18px]">
+                {model.icon}
+              </span>
             </div>
             <div className="flex flex-col">
               <span className="text-white text-sm font-bold">{model.name}</span>

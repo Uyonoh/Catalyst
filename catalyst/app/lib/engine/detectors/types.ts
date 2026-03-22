@@ -1,4 +1,4 @@
-import { Domain, Intent, PromptConstraints } from '../types';
+import { Domain, Intent, PromptConstraints } from "../types";
 
 export interface WeightedPattern {
   /**
@@ -38,5 +38,8 @@ export type IntentDetector = Detector<Intent>;
  * Specifically for Tone & Formatting extraction
  */
 export interface ConstraintExtractor {
-  extract(input: string, current: PromptConstraints): Partial<PromptConstraints>;
+  extract(
+    input: string,
+    current: PromptConstraints,
+  ): Partial<PromptConstraints>;
 }

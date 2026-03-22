@@ -1,11 +1,15 @@
-import { 
-  DeconstructedPrompt, Domain, Intent, 
-  InputModality, Asset, PromptConstraints 
-} from './types';
-import { DomainClassifier } from './detectors/DomainDetector';
-import { IntentClassifier } from './detectors/IntentDetector';
-import { BaseConstraintExtractor } from './detectors/ConstraintDetector';
-import { ScenarioDetector } from './detectors/ScenarioDetector';
+import {
+  DeconstructedPrompt,
+  Domain,
+  Intent,
+  InputModality,
+  Asset,
+  PromptConstraints,
+} from "./types";
+import { DomainClassifier } from "./detectors/DomainDetector";
+import { IntentClassifier } from "./detectors/IntentDetector";
+import { BaseConstraintExtractor } from "./detectors/ConstraintDetector";
+import { ScenarioDetector } from "./detectors/ScenarioDetector";
 
 export class AnalyzerService {
   private domainClassifier = new DomainClassifier();
@@ -15,28 +19,31 @@ export class AnalyzerService {
 
   // Multipliers for "high-intent" verbs
   private readonly boosters: Record<string, number> = {
-    "write": 1.2,
-    "create": 1.2,
-    "generate": 1.2,
-    "build": 1.3,
-    "analyze": 1.4,
-    "fix": 1.5,
-    "optimize": 1.4,
+    write: 1.2,
+    create: 1.2,
+    generate: 1.2,
+    build: 1.3,
+    analyze: 1.4,
+    fix: 1.5,
+    optimize: 1.4,
   };
 
   public analyze(input: string, assets: Asset[] = []): DeconstructedPrompt {
     const lowerInput = input.toLowerCase();
-    
+
     // 1. Detect Domain with Boosters
     let domainResults = this.domainClassifier.detect(lowerInput);
     domainResults = this.applyBoosters(lowerInput, domainResults);
-    const domain = domainResults.length > 0 ? domainResults[0].value : Domain.GENERAL;
-    
+    const domain =
+      domainResults.length > 0 ? domainResults[0].value : Domain.GENERAL;
+
     // 2. Detect Intents with Boosters
     let intentResults = this.intentClassifier.detect(lowerInput);
     intentResults = this.applyBoosters(lowerInput, intentResults);
-    const primaryIntent = intentResults.length > 0 ? intentResults[0].value : Intent.GENERAL_TASK;
-    const secondaryIntents = intentResults.length > 1 ? [intentResults[1].value] : [];
+    const primaryIntent =
+      intentResults.length > 0 ? intentResults[0].value : Intent.GENERAL_TASK;
+    const secondaryIntents =
+      intentResults.length > 1 ? [intentResults[1].value] : [];
 
     // 3. Extract Constraints & Scenarios
     const baseConstraints: PromptConstraints = {
@@ -45,13 +52,16 @@ export class AnalyzerService {
     };
     const constraints = {
       ...baseConstraints,
-      ...this.constraintExtractor.extract(lowerInput, baseConstraints)
+      ...this.constraintExtractor.extract(lowerInput, baseConstraints),
     };
 
     const scenario = this.scenarioDetector.detect(lowerInput);
 
     // 4. Calculate Confidence Score (Refined for Phase 2)
-    const confidenceScore = this.calculateConfidence(domainResults, intentResults);
+    const confidenceScore = this.calculateConfidence(
+      domainResults,
+      intentResults,
+    );
 
     return {
       originalInput: input,
@@ -67,17 +77,25 @@ export class AnalyzerService {
     };
   }
 
-  private applyBoosters<T>(input: string, results: { value: T, score: number }[]): { value: T, score: number }[] {
-    return results.map(res => {
-      let multiplier = 1.0;
-      for (const [word, boost] of Object.entries(this.boosters)) {
-        if (input.includes(word)) multiplier = Math.max(multiplier, boost);
-      }
-      return { ...res, score: res.score * multiplier };
-    }).sort((a, b) => b.score - a.score);
+  private applyBoosters<T>(
+    input: string,
+    results: { value: T; score: number }[],
+  ): { value: T; score: number }[] {
+    return results
+      .map((res) => {
+        let multiplier = 1.0;
+        for (const [word, boost] of Object.entries(this.boosters)) {
+          if (input.includes(word)) multiplier = Math.max(multiplier, boost);
+        }
+        return { ...res, score: res.score * multiplier };
+      })
+      .sort((a, b) => b.score - a.score);
   }
 
-  private calculateConfidence(domainResults: any[], intentResults: any[]): number {
+  private calculateConfidence(
+    domainResults: any[],
+    intentResults: any[],
+  ): number {
     const dScore = domainResults[0]?.score || 0;
     const iScore = intentResults[0]?.score || 0;
 
@@ -97,7 +115,6 @@ export class AnalyzerService {
   }
 
   private extractVariables(input: string): Record<string, string> {
-
     const variables: Record<string, string> = {};
     const matches = input.matchAll(/{{(.*?)}}/g);
     for (const match of matches) {

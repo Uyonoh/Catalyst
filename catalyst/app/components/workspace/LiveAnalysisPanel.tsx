@@ -83,8 +83,8 @@ export default function LiveAnalysisPanel() {
               {isLoading
                 ? "Real-time Parsing..."
                 : result
-                ? "Analysis Complete"
-                : "Waiting for Input"}
+                  ? "Analysis Complete"
+                  : "Waiting for Input"}
             </span>
           </div>
 
@@ -92,7 +92,9 @@ export default function LiveAnalysisPanel() {
           <button
             id="live-analysis-toggle"
             onClick={() => setIsCollapsed((prev) => !prev)}
-            aria-label={isCollapsed ? "Expand analysis panel" : "Collapse analysis panel"}
+            aria-label={
+              isCollapsed ? "Expand analysis panel" : "Collapse analysis panel"
+            }
             aria-expanded={!isCollapsed}
             className={`
               flex items-center justify-center
@@ -108,7 +110,9 @@ export default function LiveAnalysisPanel() {
           >
             <span
               className="material-symbols-outlined text-[18px] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
-              style={{ transform: isCollapsed ? "rotate(180deg)" : "rotate(0deg)" }}
+              style={{
+                transform: isCollapsed ? "rotate(180deg)" : "rotate(0deg)",
+              }}
             >
               expand_less
             </span>
@@ -256,8 +260,8 @@ export default function LiveAnalysisPanel() {
           {isLoading
             ? "Engine is analysing…"
             : result
-            ? `${confidencePercent}% confidence · ${entities.length} signal${entities.length !== 1 ? "s" : ""} detected`
-            : "No analysis yet — start typing in the workspace."}
+              ? `${confidencePercent}% confidence · ${entities.length} signal${entities.length !== 1 ? "s" : ""} detected`
+              : "No analysis yet — start typing in the workspace."}
         </p>
       </div>
     </GlassPanel>

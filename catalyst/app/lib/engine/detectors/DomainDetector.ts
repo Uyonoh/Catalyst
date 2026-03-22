@@ -1,8 +1,8 @@
-import { Domain } from '../types';
-import { DomainDetector, DetectionResult, WeightedPattern } from './types';
+import { Domain } from "../types";
+import { DomainDetector, DetectionResult, WeightedPattern } from "./types";
 
 export class DomainClassifier implements DomainDetector {
-  public name = 'weighted-domain-detector';
+  public name = "weighted-domain-detector";
 
   private readonly patterns: Record<Domain, WeightedPattern[]> = {
     [Domain.TECHNICAL_GIS]: [
@@ -14,7 +14,7 @@ export class DomainClassifier implements DomainDetector {
       { regex: /\barcgis\b/i, weight: 2 },
       { regex: /\bqgis\b/i, weight: 2 },
       { regex: /\blayer\b/i, weight: 1 },
-      { regex: /\bcentroid\b/i, weight: 2 }
+      { regex: /\bcentroid\b/i, weight: 2 },
     ],
     [Domain.TECHNICAL_BACKEND]: [
       { regex: /\bapi\b/i, weight: 1 },
@@ -28,7 +28,7 @@ export class DomainClassifier implements DomainDetector {
       { regex: /\basync\b/i, weight: 1 },
       { regex: /\bredis\b/i, weight: 3 },
       { regex: /\bwebsockets\b/i, weight: 3 },
-      { regex: /\bnode\b/i, weight: 2 }
+      { regex: /\bnode\b/i, weight: 2 },
     ],
     [Domain.TECHNICAL_FRONTEND]: [
       { regex: /\breact\b/i, weight: 2 },
@@ -38,7 +38,7 @@ export class DomainClassifier implements DomainDetector {
       { regex: /\bnextjs\b/i, weight: 3 },
       { regex: /\bhydration\b/i, weight: 2 },
       { regex: /\bdom\b/i, weight: 1 },
-      { regex: /\bflexbox\b/i, weight: 2 }
+      { regex: /\bflexbox\b/i, weight: 2 },
     ],
     [Domain.TECHNICAL_DEVOPS]: [
       { regex: /\bdocker\b/i, weight: 3 },
@@ -47,7 +47,7 @@ export class DomainClassifier implements DomainDetector {
       { regex: /\bpipeline\b/i, weight: 1 },
       { regex: /\baws\b/i, weight: 2 },
       { regex: /\bterraform\b/i, weight: 3 },
-      { regex: /\bingress\b/i, weight: 2 }
+      { regex: /\bingress\b/i, weight: 2 },
     ],
     [Domain.CREATIVE_MOTION]: [
       { regex: /\bframe\b/i, weight: 1 },
@@ -57,7 +57,7 @@ export class DomainClassifier implements DomainDetector {
       { regex: /\blighting\b/i, weight: 1 },
       { regex: /\bshutter\b/i, weight: 1 },
       { regex: /\bbokeh\b/i, weight: 2 },
-      { regex: /\btracking\b/i, weight: 1 }
+      { regex: /\btracking\b/i, weight: 1 },
     ],
     [Domain.CREATIVE_COPY]: [
       { regex: /\bheadline\b/i, weight: 2 },
@@ -65,7 +65,7 @@ export class DomainClassifier implements DomainDetector {
       { regex: /\bpersuasive\b/i, weight: 2 },
       { regex: /\bhook\b/i, weight: 2 },
       { regex: /\bnarrative\b/i, weight: 1 },
-      { regex: /\btone of voice\b/i, weight: 3 }
+      { regex: /\btone of voice\b/i, weight: 3 },
     ],
     [Domain.CREATIVE_VISUAL]: [
       { regex: /\bcontrast\b/i, weight: 1 },
@@ -73,7 +73,7 @@ export class DomainClassifier implements DomainDetector {
       { regex: /\bcomposition\b/i, weight: 1 },
       { regex: /\bresolution\b/i, weight: 1 },
       { regex: /\baspect ratio\b/i, weight: 2 },
-      { regex: /\bnoise\b/i, weight: 1 }
+      { regex: /\bnoise\b/i, weight: 1 },
     ],
     [Domain.BUSINESS_STRATEGY]: [
       { regex: /\broi\b/i, weight: 3 },
@@ -81,7 +81,7 @@ export class DomainClassifier implements DomainDetector {
       { regex: /\broadmap\b/i, weight: 2 },
       { regex: /\bstakeholder\b/i, weight: 2 },
       { regex: /\bcompliance\b/i, weight: 2 },
-      { regex: /\bmarket fit\b/i, weight: 3 }
+      { regex: /\bmarket fit\b/i, weight: 3 },
     ],
     [Domain.GENERAL]: [],
   };
@@ -100,7 +100,7 @@ export class DomainClassifier implements DomainDetector {
       if (score > 0) {
         results.push({
           value: domain as Domain,
-          score: score
+          score: score,
         });
       }
     }
@@ -108,4 +108,3 @@ export class DomainClassifier implements DomainDetector {
     return results.sort((a, b) => b.score - a.score);
   }
 }
-

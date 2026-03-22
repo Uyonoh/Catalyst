@@ -4,7 +4,8 @@ const PROMPTS = [
   {
     id: 1,
     title: "Code Refactor Agent",
-    description: "System prompt designed to analyze legacy Python codebases and suggest modular improvements using SOLID principles.",
+    description:
+      "System prompt designed to analyze legacy Python codebases and suggest modular improvements using SOLID principles.",
     tags: ["Python", "Engineering"],
     status: "Optimized",
     timeAgo: "2h ago",
@@ -15,7 +16,8 @@ const PROMPTS = [
   {
     id: 2,
     title: "SaaS Landing Copy",
-    description: "Generating high-conversion hero section copy for a fintech startup targeting Gen Z users.",
+    description:
+      "Generating high-conversion hero section copy for a fintech startup targeting Gen Z users.",
     tags: ["Marketing", "Copywriting"],
     status: "Draft",
     timeAgo: "5h ago",
@@ -26,7 +28,8 @@ const PROMPTS = [
   {
     id: 3,
     title: "Data Extraction JSON",
-    description: "Reliably extract specific entities from unstructured medical text into a strict JSON schema.",
+    description:
+      "Reliably extract specific entities from unstructured medical text into a strict JSON schema.",
     tags: ["Data", "JSON"],
     status: "Testing",
     timeAgo: "1d ago",
@@ -37,7 +40,8 @@ const PROMPTS = [
   {
     id: 4,
     title: "Legal Contract Summary",
-    description: "Summarizing NDA documents highlighting key risk clauses and indemnity terms.",
+    description:
+      "Summarizing NDA documents highlighting key risk clauses and indemnity terms.",
     tags: ["Legal"],
     status: "Optimized",
     timeAgo: "2d ago",
@@ -61,19 +65,28 @@ const MappedTextColors = {
 
 export default function RecentPrompts() {
   return (
-    <section className="animate-slideDown" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
+    <section
+      className="animate-slideDown"
+      style={{ animationDelay: "0.3s", animationFillMode: "both" }}
+    >
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-black text-white tracking-tight">
           Recent Prompts
         </h2>
         <div className="flex gap-2">
           <button className="size-8 flex items-center justify-center rounded-lg glass-panel hover:bg-white/10 text-white transition-colors cursor-pointer">
-            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+            <span
+              className="material-symbols-outlined"
+              style={{ fontSize: "20px" }}
+            >
               grid_view
             </span>
           </button>
           <button className="size-8 flex items-center justify-center rounded-lg bg-transparent hover:bg-white/5 text-slate-500 hover:text-white transition-colors cursor-pointer">
-            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+            <span
+              className="material-symbols-outlined"
+              style={{ fontSize: "20px" }}
+            >
               list
             </span>
           </button>
@@ -145,7 +158,9 @@ export default function RecentPrompts() {
         {/* Add New Placeholder */}
         <div className="border border-dashed border-white/10 rounded-2xl p-5 flex flex-col items-center justify-center hover:bg-white/5 transition-colors cursor-pointer min-h-[220px]">
           <div className="size-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
-            <span className="material-symbols-outlined text-slate-500">add</span>
+            <span className="material-symbols-outlined text-slate-500">
+              add
+            </span>
           </div>
           <span className="text-slate-500 text-sm font-medium">
             Create New Prompt
