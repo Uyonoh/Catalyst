@@ -82,6 +82,43 @@
   pointer-events: none;
 }
 
+/* Analysis panel visibility slot (page-level hide/show)
+   Mobile  (flex-col stack) → animate max-height so the slot collapses vertically
+   Desktop (flex-row)       → animate max-width  so the slot slides out horizontally
+---------------------------------------------------------------------- */
+.analysis-panel-slot {
+  overflow: hidden;
+  /* mobile default: height-based transition */
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity    0.35s ease;
+  max-height: 2000px;
+  opacity: 1;
+}
+
+.analysis-panel-slot--hidden {
+  /* mobile: collapse vertically */
+  max-height: 0;
+  opacity: 0;
+  /* pointer-events: none; */
+}
+
+/* ≥ lg breakpoint — panels are side-by-side, slide out horizontally */
+@media (min-width: 1024px) {
+  .analysis-panel-slot {
+    transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity   0.35s ease,
+                margin-left 0.4s ease;
+    max-width: 9999px;
+    max-height: none;   /* let flex-row control height */
+  }
+
+  .analysis-panel-slot--hidden {
+    max-width: 0;
+    max-height: none;   /* don't constrain height on desktop */
+    margin-left: 0 !important;
+  }
+}
+
 .dark {
   color-scheme: dark;
 }

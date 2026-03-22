@@ -40,13 +40,13 @@ export default function Header() {
               href="/vault"
               className="px-4 py-2 text-sm font-medium text-white hover:text-cyan-300 transition-colors rounded-lg hover:bg-white/5"
             >
-              Vault
+              Prompt Library
             </Link>
             <Link
               href="/workspace"
               className="px-4 py-2 text-sm font-medium text-white hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5"
             >
-              Workspace
+              Generate Prompts
             </Link>
             <Link
               href="#"

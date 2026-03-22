@@ -5,12 +5,12 @@ import { useWorkspace } from "../../context/WorkspaceContext";
 
 export const MODELS = [
   {
-    id: "midjourney",
-    name: "Midjourney v6",
-    brief: "MJ v6",
-    type: "Img",
-    icon: "palette",
-    color: "cyan",
+    id: "gpt",
+    name: "GPT-4 Turbo",
+    brief: "GPT-4T",
+    type: "Txt",
+    icon: "chat",
+    color: "green",
   },
   {
     id: "claude",
@@ -19,14 +19,6 @@ export const MODELS = [
     type: "Txt",
     icon: "auto_awesome",
     color: "purple",
-  },
-  {
-    id: "gpt",
-    name: "GPT-4 Turbo",
-    brief: "GPT-4T",
-    type: "Txt",
-    icon: "chat",
-    color: "green",
   },
   {
     id: "llama",
@@ -51,6 +43,14 @@ export const MODELS = [
     type: "Img",
     icon: "filter_frames",
     color: "blue",
+  },
+  {
+    id: "midjourney",
+    name: "Midjourney v6",
+    brief: "MJ v6",
+    type: "Img",
+    icon: "palette",
+    color: "cyan",
   },
 ];
 
