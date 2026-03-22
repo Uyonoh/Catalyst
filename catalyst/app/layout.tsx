@@ -5,9 +5,9 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Catalyst Workspace",
+  title: "Catalyst Studio | Professional Prompt Optimization",
   description:
-    "Transform your raw ideas into optimized workspaces with live analysis.",
+    "Transform your raw ideas into high-performance AI prompts with our Studio's live analysis and professional library.",
 };
 
 export default function RootLayout({

@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function VaultSearch() {
+export default function LibrarySearch() {
   return (
     <div className="flex flex-col md:flex-row gap-4 mb-8">
       {/* Search */}
@@ -11,10 +11,10 @@ export default function VaultSearch() {
           </span>
           <input
             className="w-full bg-transparent border-none text-white placeholder-slate-500 focus:ring-0 text-base focus:outline-none"
-            placeholder="Search prompts by keyword, model, or snippet..."
+            placeholder="Search your library for keywords, models, or tags..."
             type="text"
           />
-          <div className="hidden sm:flex text-xs text-slate-500 border border-white/10 rounded px-2 py-0.5">
+          <div className="hidden sm:flex text-xs text-slate-500 border border-white/10 rounded px-2 py-0.5 font-mono">
             ⌘K
           </div>
         </div>
@@ -27,8 +27,11 @@ export default function VaultSearch() {
           </span>
           <span className="text-sm font-medium">Filter</span>
         </button>
-        <button className="h-12 w-12 rounded-xl bg-gradient-to-r from-cyan-500 to-primary text-white flex items-center justify-center hover:opacity-90 transition-colors shadow-neon active:scale-95">
-          <span className="material-symbols-outlined">add</span>
+        <button 
+          className="h-12 w-12 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-lg hover:shadow-cyan-500/20 active:scale-95"
+          title="Create New Prompt"
+        >
+          <span className="material-symbols-outlined font-bold">add</span>
         </button>
       </div>
     </div>

@@ -1,14 +1,14 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import VaultBackground from "../components/vault/VaultBackground";
-import VaultHero from "../components/vault/VaultHero";
-import VaultFeatured from "../components/vault/VaultFeatured";
-import VaultSearch from "../components/vault/VaultSearch";
-import VaultTags from "../components/vault/VaultTags";
-import VaultGrid from "../components/vault/VaultGrid";
-import { VaultItem } from "../components/vault/VaultCard";
+import LibraryBackground from "../components/library/LibraryBackground";
+import LibraryHero from "../components/library/LibraryHero";
+import LibraryFeatured from "../components/library/LibraryFeatured";
+import LibrarySearch from "../components/library/LibrarySearch";
+import LibraryTags from "../components/library/LibraryTags";
+import LibraryGrid from "../components/library/LibraryGrid";
+import { LibraryItem } from "../components/library/LibraryCard";
 
-const VAULT_ITEMS: VaultItem[] = [
+const LIBRARY_ITEMS: LibraryItem[] = [
   {
     id: 1,
     title: "SEO Blog Generator",
@@ -89,20 +89,20 @@ const VAULT_ITEMS: VaultItem[] = [
   },
 ];
 
-export default function VaultPage() {
+export default function LibraryPage() {
   return (
     <>
-      <VaultBackground />
+      <LibraryBackground />
 
       <div className="relative z-10 min-h-screen flex flex-col">
         <Header />
 
         <main className="flex-1 w-full max-w-[1200px] mx-auto pt-16 pb-12 px-4 md:px-8 relative z-10">
-          <VaultHero />
-          <VaultFeatured />
-          <VaultSearch />
-          <VaultTags />
-          <VaultGrid items={VAULT_ITEMS} />
+          <LibraryHero />
+          <LibraryFeatured />
+          <LibrarySearch />
+          <LibraryTags />
+          <LibraryGrid items={LIBRARY_ITEMS} />
         </main>
 
         <Footer />

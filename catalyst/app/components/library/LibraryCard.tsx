@@ -1,6 +1,6 @@
 import GlassPanel from "../GlassPanel";
 
-export interface VaultItem {
+export interface LibraryItem {
   id: number;
   title: string;
   updated: string;
@@ -13,11 +13,11 @@ export interface VaultItem {
   hasGradient: boolean;
 }
 
-interface VaultCardProps {
-  item: VaultItem;
+interface LibraryCardProps {
+  item: LibraryItem;
 }
 
-export default function VaultCard({ item }: VaultCardProps) {
+export default function LibraryCard({ item }: LibraryCardProps) {
   return (
     <GlassPanel
       hoverable
@@ -30,6 +30,7 @@ export default function VaultCard({ item }: VaultCardProps) {
         <div className="flex items-center gap-3">
           <div
             className={`size-10 rounded-lg bg-${item.iconColor}-500/10 flex items-center justify-center text-${item.iconColor}-400 border border-${item.iconColor}-500/20`}
+            // className={`size-10 rounded-lg flex items-center justify-center border border-white/10 bg-white/5 text-slate-300 group-hover:text-cyan-400 group-hover:border-cyan-500/30 transition-colors`}
           >
             <span className="material-symbols-outlined">{item.icon}</span>
           </div>
@@ -52,13 +53,14 @@ export default function VaultCard({ item }: VaultCardProps) {
         </button>
       </div>
       <div className="h-[1px] w-full bg-white/5" />
-      <p className="text-slate-300 text-sm leading-relaxed line-clamp-3 font-mono opacity-80 code-preview p-2 rounded border border-white/10">
+      <p className="text-slate-300 text-sm leading-relaxed line-clamp-3 font-mono opacity-80 code-preview p-2 rounded border border-white/10 bg-white/5">
         {item.snippet}
       </p>
       <div className="mt-auto pt-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span
             className={`px-2 py-1 rounded bg-${item.modelColor}-500/10 border border-${item.modelColor}-500/20 text-[10px] font-semibold text-${item.modelColor}-400 uppercase tracking-wide`}
+            // className={`px-2 py-1 rounded bg-white/5 border border-white/10 text-[10px] font-semibold text-slate-400 uppercase tracking-wide`}
           >
             {item.model}
           </span>

@@ -261,7 +261,7 @@ export default function LiveAnalysisPanel() {
             ? "Engine is analysing…"
             : result
               ? `${confidencePercent}% confidence · ${entities.length} signal${entities.length !== 1 ? "s" : ""} detected`
-              : "No analysis yet — start typing in the workspace."}
+              : "No analysis yet — start typing in the Studio."}
         </p>
       </div>
     </GlassPanel>

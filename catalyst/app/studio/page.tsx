@@ -3,12 +3,12 @@
 import { useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import RawIntentPanel from "../components/workspace/RawIntentPanel";
-import LiveAnalysisPanel from "../components/workspace/LiveAnalysisPanel";
-import OptimizationSettings from "../components/workspace/OptimizationSettings";
+import RawIntentPanel from "../components/studio/RawIntentPanel";
+import LiveAnalysisPanel from "../components/studio/LiveAnalysisPanel";
+import OptimizationSettings from "../components/studio/OptimizationSettings";
 import { WorkspaceProvider } from "../context/WorkspaceContext";
 
-export default function WorkspacePage() {
+export default function StudioPage() {
   const [showAnalysis, setShowAnalysis] = useState(false);
   // tracks if the panel is currently in the middle of a show/hide transition
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -36,7 +36,7 @@ export default function WorkspacePage() {
           <section className="flex items-start justify-between gap-4">
             <div className="flex flex-col gap-1">
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
-                Catalyst Workspace
+                Prompt Studio
               </h1>
               <p className="text-slate-400 text-base md:text-lg">
                 Transform your raw ideas into optimized prompts with live

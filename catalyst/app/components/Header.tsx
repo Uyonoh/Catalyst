@@ -37,26 +37,30 @@ export default function Header() {
         <nav className="hidden md:flex items-center gap-8">
           <div className="flex items-center gap-1">
             <Link
-              href="/vault"
+              href="/library"
               className="px-4 py-2 text-sm font-medium text-white hover:text-cyan-300 transition-colors rounded-lg hover:bg-white/5"
+              title="Browse your prompt library"
             >
-              Prompt Library
+              Library
             </Link>
             <Link
-              href="/workspace"
+              href="/studio"
               className="px-4 py-2 text-sm font-medium text-white hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5"
+              title="Design and test new prompts"
             >
-              Generate Prompts
+              Studio
             </Link>
             <Link
-              href="#"
+              href="/history"
               className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+              title="View your prompt history"
             >
               History
             </Link>
             <Link
-              href="#"
+              href="/settings"
               className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+              title="Manage your account and preferences"
             >
               Settings
             </Link>
@@ -92,30 +96,34 @@ export default function Header() {
           <nav className="absolute top-16 left-0 right-0 glass-panel-dark border-t border-white/10 md:hidden animate-fadeIn">
             <div className="px-6 py-4 space-y-3">
               <Link
-                href="/vault"
+                href="/library"
                 className="block px-4 py-3 text-sm font-medium text-white hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5"
                 onClick={() => setIsMobileMenuOpen(false)}
+                title="Browse your prompt library"
               >
-                Vault
+                Library
               </Link>
               <Link
-                href="/workspace"
+                href="/studio"
                 className="block px-4 py-3 text-sm font-medium text-white hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5"
                 onClick={() => setIsMobileMenuOpen(false)}
+                title="Design and test new prompts"
               >
-                Workspace
+                Studio
               </Link>
               <Link
-                href="#"
+                href="/history"
                 className="block px-4 py-3 text-sm font-medium text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
                 onClick={() => setIsMobileMenuOpen(false)}
+                title="View your prompt history"
               >
                 History
               </Link>
               <Link
-                href="#"
+                href="/settings"
                 className="block px-4 py-3 text-sm font-medium text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
                 onClick={() => setIsMobileMenuOpen(false)}
+                title="Manage your account and preferences"
               >
                 Settings
               </Link>

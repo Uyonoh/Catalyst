@@ -28,7 +28,7 @@ const Footer = () => {
             <p className="text-slate-400 text-sm md:text-[15px] leading-relaxed">
               Empowering creatives and professionals with precision prompt
               engineering. Optimize, analyze, and refine your AI interactions in
-              a premium workspace.
+              the Catalyst Studio.
             </p>
             <div className="flex items-center gap-4 mt-2">
               <SocialIcon icon="language" label="Website" />
@@ -40,10 +40,10 @@ const Footer = () => {
           {/* Links sections */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-10 md:gap-16 lg:gap-24 w-full lg:w-auto">
             <FooterGroup title="Product">
-              <FooterLink href="#">Workspace</FooterLink>
-              <FooterLink href="#">History</FooterLink>
-              <FooterLink href="#">Models</FooterLink>
-              <FooterLink href="#">Templates</FooterLink>
+              <FooterLink href="/studio">Studio</FooterLink>
+              <FooterLink href="/library">Library</FooterLink>
+              <FooterLink href="/history">History</FooterLink>
+              <FooterLink href="/settings">Settings</FooterLink>
             </FooterGroup>
 
             <FooterGroup title="Resources">
@@ -66,7 +66,7 @@ const Footer = () => {
         <div className="mt-16 pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
             <p className="text-slate-500 text-sm">
-              © {currentYear} Catalyst Workspace Studio.
+              © {currentYear} Catalyst Studio.
             </p>
             <span className="hidden sm:inline text-slate-700 font-bold">•</span>
             <p className="text-slate-500 text-sm">Crafted for excellence.</p>

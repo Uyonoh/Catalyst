@@ -1,4 +1,4 @@
-"use client";
+import Link from "next/link";
 
 export default function HeroSection() {
   return (
@@ -19,18 +19,20 @@ export default function HeroSection() {
           </p>
         </div>
         {/* CTA Button with Blue-to-Cyan Gradient */}
-        <button className="group relative flex items-center justify-center overflow-hidden rounded-xl h-12 px-8 bg-gradient-to-r from-[--color-primary] to-cyan-500 text-white shadow-[0_0_20px_rgba(37,140,244,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] transition-all duration-300 transform hover:-translate-y-0.5 active:scale-95">
-          <div
-            className="absolute -translate-x-2 inset-0 bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 origin-left"
-            style={{ width: "120%" }}
-          ></div>
-          <span className="material-symbols-outlined mr-2 z-10 text-[20px]">
-            add_circle
-          </span>
-          <span className="text-base font-bold tracking-wide z-10">
-            New Prompt
-          </span>
-        </button>
+        <Link href="/studio">
+          <button className="group relative flex items-center justify-center overflow-hidden rounded-xl h-12 px-8 bg-gradient-to-r from-[--color-primary] to-cyan-500 text-white shadow-[0_0_20px_rgba(37,140,244,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] transition-all duration-300 transform hover:-translate-y-0.5 active:scale-95">
+            <div
+              className="absolute -translate-x-2 inset-0 bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 origin-left"
+              style={{ width: "120%" }}
+            ></div>
+            <span className="material-symbols-outlined mr-2 z-10 text-[20px]">
+              add_circle
+            </span>
+            <span className="text-base font-bold tracking-wide z-10">
+              New Prompt
+            </span>
+          </button>
+        </Link>
       </div>
     </section>
   );
