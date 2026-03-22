@@ -12,6 +12,8 @@ export default function RawIntentPanel() {
     selectedModel: selectedModelId,
     isLoading,
     result,
+    isGenerating,
+    parseIntent,
   } = useWorkspace();
   const selectedModel =
     MODELS.find((m) => m.id === selectedModelId) || MODELS[0];
@@ -60,7 +62,20 @@ export default function RawIntentPanel() {
               </div>
             </div>
             {/* Desktop Model Selection */}
-            <ModelSelector />
+            <div className="flex items-center gap-3">
+              {isGenerating && (
+                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 animate-pulse">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                  </span>
+                  <span className="text-[10px] font-black uppercase text-cyan-400 tracking-widest">
+                    Generating Refinement
+                  </span>
+                </div>
+              )}
+              <ModelSelector />
+            </div>
           </div>
         </div>
 
@@ -116,21 +131,27 @@ export default function RawIntentPanel() {
 
         {/* Catalyze Button - Better mobile sizing */}
         <button
-          className={`relative overflow-hidden bg-gradient-to-r from-cyan-500 to-primary text-white font-bold py-3 px-6 rounded-lg shadow-neon hover:shadow-neon-strong transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 w-full sm:w-auto ${!input.trim() ? "opacity-70" : ""}`}
-          onClick={() =>
-            console.log("Catalyze clicked with:", {
-              input,
-              model: selectedModel,
-            })
-          }
-          disabled={!input.trim()}
+          className={`relative overflow-hidden bg-gradient-to-r from-cyan-500 to-primary text-white font-bold py-3.5 px-6 rounded-lg shadow-neon hover:shadow-neon-strong transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 w-full sm:w-auto ${(!input.trim() || isGenerating) ? "opacity-70 pointer-events-none" : ""}`}
+          onClick={() => parseIntent(input)}
+          disabled={!input.trim() || isGenerating}
           aria-label="Generate prompt"
         >
           <div
-            className={`absolute inset-0 bg-white/20 hover:bg-transparent transition-colors ${!input.trim() ? "opacity-50" : ""}`}
+            className={`absolute inset-0 bg-white/20 hover:bg-transparent transition-colors ${(!input.trim() || isGenerating) ? "opacity-50" : ""}`}
           />
-          <span className="material-symbols-outlined">auto_awesome</span>
-          <span>Catalyze</span>
+          {isGenerating ? (
+            <>
+              <span className="material-symbols-outlined animate-spin-slow">
+                progress_activity
+              </span>
+              <span>Generating...</span>
+            </>
+          ) : (
+            <>
+              <span className="material-symbols-outlined">auto_awesome</span>
+              <span>Generate Prompt</span>
+            </>
+          )}
         </button>
       </div>
     </div>

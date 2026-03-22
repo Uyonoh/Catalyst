@@ -12,6 +12,10 @@ interface WorkspaceContextType {
   result: OptimizedPrompt | null;
   isLoading: boolean;
   error: string | null;
+  // LLM Parsing state
+  parsedPrompt: string | null;
+  isGenerating: boolean;
+  parseIntent: (text: string) => Promise<void>;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(
@@ -22,6 +26,34 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState("gpt");
   const { result, isLoading, error } = useParsing(input, selectedModel);
+  
+  // LLM Parsing state
+  const [parsedPrompt, setParsedPrompt] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const parseIntent = async (text: string) => {
+    if (!text.trim()) return;
+    
+    setIsGenerating(true);
+    setParsedPrompt(null);
+    
+    try {
+      const response = await fetch("/api/parse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      
+      if (!response.ok) throw new Error("Failed to generate prompt");
+      
+      const data = await response.json();
+      setParsedPrompt(data.refinedPrompt);
+    } catch (err) {
+      console.error("Error parsing intent:", err);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <WorkspaceContext.Provider
@@ -33,6 +65,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         result,
         isLoading,
         error,
+        parsedPrompt,
+        isGenerating,
+        parseIntent,
       }}
     >
       {children}
