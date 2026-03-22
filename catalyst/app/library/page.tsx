@@ -7,89 +7,31 @@ import LibrarySearch from "../components/library/LibrarySearch";
 import LibraryTags from "../components/library/LibraryTags";
 import LibraryGrid from "../components/library/LibraryGrid";
 import { LibraryItem } from "../components/library/LibraryCard";
+import { supabase } from "../lib/supabase";
 
-const LIBRARY_ITEMS: LibraryItem[] = [
-  {
-    id: 1,
-    title: "SEO Blog Generator",
-    updated: "2h ago",
-    snippet:
-      'Act as an SEO expert. Write a 1500-word comprehensive guide on "Future of AI in Marketing". Include H2, H3 headers, meta description, and focus on keywords: [keywords_list]...',
-    model: "GPT-4 Turbo",
-    modelColor: "green",
-    tag: "#Marketing",
-    icon: "description",
-    iconColor: "cyan",
-    hasGradient: true,
-  },
-  {
-    id: 2,
-    title: "Python Debugger",
-    updated: "1d ago",
-    snippet:
-      "Analyze the following Python script for memory leaks and efficiency issues. Suggest optimizations using the latest libraries for data processing...",
-    model: "Claude 3 Opus",
-    modelColor: "purple",
-    tag: "#Coding",
-    icon: "terminal",
-    iconColor: "orange",
-    hasGradient: false,
-  },
-  {
-    id: 3,
-    title: "Email Polisher",
-    updated: "3d ago",
-    snippet:
-      "Rewrite this email to sound more professional but empathetic. The context is explaining a project delay to a client due to unforeseen technical debt...",
-    model: "Llama 3",
-    modelColor: "orange",
-    tag: "#Business",
-    icon: "mail",
-    iconColor: "blue",
-    hasGradient: false,
-  },
-  {
-    id: 4,
-    title: "Midjourney Sci-Fi",
-    updated: "1w ago",
-    snippet:
-      "/imagine prompt: A futuristic cyberpunk city street at night, neon rain, reflections on wet pavement, cinematic lighting, 8k resolution, highly detailed...",
-    model: "Midjourney v6",
-    modelColor: "cyan",
-    tag: "#Creative",
-    icon: "palette",
-    iconColor: "cyan",
-    hasGradient: true,
-  },
-  {
-    id: 5,
-    title: "SQL Join Builder",
-    updated: "1w ago",
-    snippet:
-      "Create a complex SQL query that joins 'Users', 'Orders', and 'Products' tables. Calculate LTV per user and filter for users who have purchased in the last 30 days...",
-    model: "GPT-4 Turbo",
-    modelColor: "green",
-    tag: "#Data",
-    icon: "database",
-    iconColor: "green",
-    hasGradient: false,
-  },
-  {
-    id: 6,
-    title: "React Hook Gen",
-    updated: "2w ago",
-    snippet:
-      "Create a custom React hook called useLocalStorage that handles setting, getting, and listening for changes in local storage keys with TypeScript support...",
-    model: "Claude 3 Opus",
-    modelColor: "purple",
-    tag: "#Dev",
-    icon: "code",
-    iconColor: "pink",
-    hasGradient: false,
-  },
-];
+async function getLibraryItems(): Promise<LibraryItem[]> {
+  const { data, error } = await supabase
+    .from("prompts_public")
+    .select(
+      "id, title, updated_at, snippet, target_model, model_color, tag, icon, icon_color, has_gradient",
+    )
+    .order("created_at", { ascending: true });
 
-export default function LibraryPage() {
+  if (error) {
+    console.warn("Failed to fetch library items:", error.message);
+    return [];
+  }
+
+  // Map database target_model to model field
+  return (data || []).map((item: any) => ({
+    ...item,
+    model: item.target_model,
+  })) as LibraryItem[];
+}
+
+export default async function LibraryPage() {
+  const items = await getLibraryItems();
+
   return (
     <>
       <LibraryBackground />
@@ -102,7 +44,7 @@ export default function LibraryPage() {
           <LibraryFeatured />
           <LibrarySearch />
           <LibraryTags />
-          <LibraryGrid items={LIBRARY_ITEMS} />
+          <LibraryGrid items={items} />
         </main>
 
         <Footer />

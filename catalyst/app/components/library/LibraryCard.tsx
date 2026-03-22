@@ -1,20 +1,34 @@
 import GlassPanel from "../GlassPanel";
 
 export interface LibraryItem {
-  id: number;
+  id: string;
   title: string;
-  updated: string;
+  updated_at: string;
   snippet: string;
   model: string;
-  modelColor: string;
+  model_color: string;
   tag: string;
   icon: string;
-  iconColor: string;
-  hasGradient: boolean;
+  icon_color: string;
+  has_gradient: boolean;
 }
 
 interface LibraryCardProps {
   item: LibraryItem;
+}
+
+function formatUpdated(isoString: string): string {
+  const now = Date.now();
+  const then = new Date(isoString).getTime();
+  const diffMs = now - then;
+  const minutes = Math.floor(diffMs / 60000);
+  const hours = Math.floor(diffMs / 3600000);
+  const days = Math.floor(diffMs / 86400000);
+  const weeks = Math.floor(days / 7);
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 7) return `${days}d ago`;
+  return `${weeks}w ago`;
 }
 
 export default function LibraryCard({ item }: LibraryCardProps) {
@@ -23,14 +37,13 @@ export default function LibraryCard({ item }: LibraryCardProps) {
       hoverable
       className="p-5 flex flex-col gap-4 group cursor-pointer relative overflow-hidden active:scale-[0.98] transition-all h-full"
     >
-      {item.hasGradient && (
+      {item.has_gradient && (
         <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-cyan-500/10 to-transparent rounded-bl-full -mr-4 -mt-4 transition-opacity opacity-50 group-hover:opacity-100" />
       )}
       <div className="flex justify-between items-start z-10">
         <div className="flex items-center gap-3">
           <div
-            className={`size-10 rounded-lg bg-${item.iconColor}-500/10 flex items-center justify-center text-${item.iconColor}-400 border border-${item.iconColor}-500/20`}
-            // className={`size-10 rounded-lg flex items-center justify-center border border-white/10 bg-white/5 text-slate-300 group-hover:text-cyan-400 group-hover:border-cyan-500/30 transition-colors`}
+            className={`size-10 rounded-lg bg-${item.icon_color}-500/10 flex items-center justify-center text-${item.icon_color}-400 border border-${item.icon_color}-500/20`}
           >
             <span className="material-symbols-outlined">{item.icon}</span>
           </div>
@@ -39,7 +52,7 @@ export default function LibraryCard({ item }: LibraryCardProps) {
               {item.title}
             </h3>
             <p className="text-slate-500 text-xs mt-0.5">
-              Updated {item.updated}
+              Updated {formatUpdated(item.updated_at)}
             </p>
           </div>
         </div>
@@ -59,8 +72,7 @@ export default function LibraryCard({ item }: LibraryCardProps) {
       <div className="mt-auto pt-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span
-            className={`px-2 py-1 rounded bg-${item.modelColor}-500/10 border border-${item.modelColor}-500/20 text-[10px] font-semibold text-${item.modelColor}-400 uppercase tracking-wide`}
-            // className={`px-2 py-1 rounded bg-white/5 border border-white/10 text-[10px] font-semibold text-slate-400 uppercase tracking-wide`}
+            className={`px-2 py-1 rounded bg-${item.model_color}-500/10 border border-${item.model_color}-500/20 text-[10px] font-semibold text-${item.model_color}-400 uppercase tracking-wide`}
           >
             {item.model}
           </span>
