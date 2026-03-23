@@ -78,7 +78,7 @@ export default function LibraryCard({ item }: LibraryCardProps) {
           </span>
           <span className="text-slate-500 text-xs font-medium">{item.tag}</span>
         </div>
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex gap-1 sm:opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             className="p-1.5 hover:bg-white/10 rounded-md text-slate-400 hover:text-cyan-400 transition-colors"
             title="Copy"
@@ -87,12 +87,13 @@ export default function LibraryCard({ item }: LibraryCardProps) {
               content_copy
             </span>
           </button>
-          <button
-            className="p-1.5 hover:bg-white/10 rounded-md text-slate-400 hover:text-cyan-400 transition-colors"
+          <a
+            href={`/studio/${item.id}`}
+            className="p-1.5 hover:bg-white/10 rounded-md text-slate-400 hover:text-cyan-400 transition-colors flex items-center justify-center"
             title="Edit"
           >
             <span className="material-symbols-outlined text-[18px]">edit</span>
-          </button>
+          </a>
         </div>
       </div>
     </GlassPanel>
