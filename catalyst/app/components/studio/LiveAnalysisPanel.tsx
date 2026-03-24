@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import GlassPanel from "../GlassPanel";
 import { useWorkspace } from "../../context/WorkspaceContext";
+import { Activity, ChevronUp, Copy } from "lucide-react";
 
 const getMetadataStyles = (type: string) => {
   const styles: Record<string, string> = {
@@ -59,7 +60,7 @@ export default function LiveAnalysisPanel() {
       <div className="flex items-center justify-between mb-0">
         <div className="flex items-center gap-3">
           <div className="bg-purple-500/20 p-2 rounded-lg text-purple-400">
-            <span className="material-symbols-outlined">query_stats</span>
+            <Activity className="size-5" />
           </div>
           <span className="text-sm font-bold text-slate-200 uppercase tracking-wider">
             Engine Analysis
@@ -108,14 +109,9 @@ export default function LiveAnalysisPanel() {
               }
             `}
           >
-            <span
-              className="material-symbols-outlined text-[18px] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
-              style={{
-                transform: isCollapsed ? "rotate(180deg)" : "rotate(0deg)",
-              }}
-            >
-              expand_less
-            </span>
+            <ChevronUp
+              className={`size-4.5 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? "rotate-180" : ""}`}
+            />
           </button>
         </div>
       </div>
@@ -204,9 +200,7 @@ export default function LiveAnalysisPanel() {
                     className="p-1 hover:bg-white/10 rounded text-slate-400 hover:text-white"
                     aria-label="Copy code"
                   >
-                    <span className="material-symbols-outlined text-[16px]">
-                      content_copy
-                    </span>
+                    <Copy className="size-4" />
                   </button>
                 </div>
               )}

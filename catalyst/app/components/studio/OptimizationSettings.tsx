@@ -2,6 +2,22 @@
 
 import { useState } from "react";
 import GlassPanel from "../GlassPanel";
+import { 
+  Aperture, 
+  Target, 
+  Ruler, 
+  Zap, 
+  SlidersHorizontal, 
+  ChevronUp, 
+  ChevronDown 
+} from "lucide-react";
+
+const ICON_MAP: Record<string, any> = {
+  shutter_speed: Aperture,
+  ads_click: Target,
+  straighten: Ruler,
+  bolt: Zap,
+};
 
 const SETTINGS = [
   {
@@ -114,9 +130,7 @@ export default function OptimizationSettings() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <div className="flex items-center justify-between w-full sm:w-auto">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span className="material-symbols-outlined text-cyan-400">
-              tune
-            </span>
+            <SlidersHorizontal className="size-6 text-cyan-400" />
             Optimization Settings
           </h2>
 
@@ -126,9 +140,11 @@ export default function OptimizationSettings() {
             className="sm:hidden flex items-center gap-1 text-xs text-cyan-400 bg-cyan-500/10 px-3 py-1.5 rounded-full"
           >
             <span>{showSettings ? "Hide" : "Show"}</span>
-            <span className="material-symbols-outlined text-[16px]">
-              {showSettings ? "expand_less" : "expand_more"}
-            </span>
+            {showSettings ? (
+              <ChevronUp className="size-4" />
+            ) : (
+              <ChevronDown className="size-4" />
+            )}
           </button>
         </div>
 
@@ -162,9 +178,10 @@ export default function OptimizationSettings() {
                   className={`p-2 rounded-lg bg-[#1b2127] ${setting.color === "slate" ? "text-slate-400 group-hover:text-white" : `text-${setting.color}-400 group-hover:text-${setting.color}-300`} transition-colors`}
                   style={setting.color === "slate" ? {} : undefined}
                 >
-                  <span className="material-symbols-outlined">
-                    {setting.icon}
-                  </span>
+                  {(() => {
+                    const Icon = ICON_MAP[setting.icon];
+                    return Icon ? <Icon className="size-6" /> : null;
+                  })()}
                 </div>
                 <span
                   className={`text-xs font-bold ${colors.bg} ${colors.text} px-2 py-1 rounded`}

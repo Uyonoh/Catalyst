@@ -8,6 +8,7 @@ import LiveAnalysisPanel from "../components/studio/LiveAnalysisPanel";
 import OptimizationSettings from "../components/studio/OptimizationSettings";
 import { WorkspaceProvider, useWorkspace } from "../context/WorkspaceContext";
 import PromptEditor from "../components/studio/PromptEditor";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function StudioPage() {
   const [showAnalysis, setShowAnalysis] = useState(false);
@@ -110,14 +111,11 @@ function StudioContent({
                   }
                 `}
               >
-                <span
-                  className="material-symbols-outlined text-[20px] transition-transform duration-300"
-                  style={{
-                    transform: showAnalysis ? "scale(1)" : "scale(0.9)",
-                  }}
-                >
-                  {showAnalysis ? "visibility" : "visibility_off"}
-                </span>
+                {showAnalysis ? (
+                  <Eye className="size-5 transition-transform duration-300" />
+                ) : (
+                  <EyeOff className="size-5 transition-transform duration-300 scale-90" />
+                )}
                 <span className="hidden sm:inline whitespace-nowrap">
                   {showAnalysis ? "Hide Analysis" : "Show Analysis"}
                 </span>

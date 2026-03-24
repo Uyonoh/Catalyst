@@ -1,5 +1,6 @@
 "use client";
 
+import { Bell, Menu, X, LayoutGrid } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -12,9 +13,7 @@ export default function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
           <div className="size-8 flex items-center justify-center text-cyan-400">
-            <span className="material-symbols-outlined !text-[28px] sm:!text-[32px]">
-              auto_awesome_mosaic
-            </span>
+            <LayoutGrid className="size-7 sm:size-8" />
           </div>
           <h2 className="text-white text-lg sm:text-xl font-black tracking-tight">
             Catalyst
@@ -28,9 +27,11 @@ export default function Header() {
           aria-label="Toggle menu"
           aria-expanded={isMobileMenuOpen}
         >
-          <span className="material-symbols-outlined">
-            {isMobileMenuOpen ? "close" : "menu"}
-          </span>
+          {isMobileMenuOpen ? (
+            <X className="size-5" />
+          ) : (
+            <Menu className="size-5" />
+          )}
         </button>
 
         {/* Desktop Navigation */}
@@ -72,12 +73,7 @@ export default function Header() {
               className="flex items-center justify-center size-9 rounded-full hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
               aria-label="Notifications"
             >
-              <span
-                className="material-symbols-outlined"
-                style={{ fontSize: "20px" }}
-              >
-                notifications
-              </span>
+              <Bell className="size-5" />
             </button>
 
             <div
@@ -132,9 +128,7 @@ export default function Header() {
                   className="flex items-center gap-2 px-4 py-2 text-sm text-slate-400 hover:text-white"
                   aria-label="Notifications"
                 >
-                  <span className="material-symbols-outlined text-[20px]">
-                    notifications
-                  </span>
+                  <Bell className="size-5" />
                   Notifications
                 </button>
                 <div

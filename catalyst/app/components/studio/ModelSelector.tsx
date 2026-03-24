@@ -2,6 +2,25 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useWorkspace } from "../../context/WorkspaceContext";
+import { 
+  MessageSquare, 
+  Sparkles, 
+  Terminal, 
+  Image as ImageIcon, 
+  Box, 
+  Palette, 
+  ChevronDown,
+  Zap
+} from "lucide-react";
+
+const ICON_MAP: Record<string, any> = {
+  chat: MessageSquare,
+  auto_awesome: Sparkles,
+  terminal: Terminal,
+  image: ImageIcon,
+  filter_frames: Box,
+  palette: Palette,
+};
 
 export const MODELS = [
   {
@@ -109,18 +128,14 @@ export default function ModelSelector() {
         aria-label="Select AI model"
         aria-expanded={isDropdownOpen}
       >
-        <span className="material-symbols-outlined text-[18px] md:text-[20px]">
-          {selectedModel.icon}
-        </span>
+        {(() => {
+          const Icon = ICON_MAP[selectedModel.icon];
+          return Icon ? <Icon className="size-4 md:size-5" /> : null;
+        })()}
         <span className="hidden sm:inline">{selectedModel.name}</span>
-        <span
-          className="material-symbols-outlined text-[18px] md:text-[20px] opacity-70 transition-transform duration-200"
-          style={{
-            transform: isDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
-          }}
-        >
-          expand_more
-        </span>
+        <ChevronDown 
+          className={`size-4 md:size-5 opacity-70 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
+        />
       </button>
 
       {/* Mobile Toggle Indicator */}
@@ -131,9 +146,10 @@ export default function ModelSelector() {
           className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#101922] border ${getModelColor(selectedModel.color).split(" shadow")[0]} text-xs font-bold transition-all active:scale-95`}
           aria-label="Change AI model"
         >
-          <span className="material-symbols-outlined text-[16px]">
-            {selectedModel.icon}
-          </span>
+          {(() => {
+            const Icon = ICON_MAP[selectedModel.icon];
+            return Icon ? <Icon className="size-4" /> : null;
+          })()}
           <span className="text-[10px] font-semibold">
             {selectedModel.brief}
           </span>
@@ -162,9 +178,10 @@ export default function ModelSelector() {
                       .replace(/shadow.*$/, "")
                       .trim()}`}
                   >
-                    <span className="material-symbols-outlined text-[20px]">
-                      {model.icon}
-                    </span>
+                    {(() => {
+                      const Icon = ICON_MAP[model.icon];
+                      return Icon ? <Icon className="size-5" /> : null;
+                    })()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-white text-sm md:text-base truncate">
@@ -189,9 +206,7 @@ export default function ModelSelector() {
               <div className="px-3 py-2 text-xs text-slate-400">
                 <div className="flex items-center justify-between mb-1">
                   <span className="flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">
-                      bolt
-                    </span>
+                    <Zap className="size-3.5 text-cyan-400" />
                     <span>Token Usage</span>
                   </span>
                   <span>450/1000</span>

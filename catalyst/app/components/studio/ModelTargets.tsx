@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import GlassPanel from "../GlassPanel";
+import { LayoutGrid, Zap } from "lucide-react";
 
 const MODELS = [
   { id: "midjourney", name: "Midjourney v6", type: "Img", checked: true },
@@ -17,9 +18,7 @@ export default function ModelTargets() {
     <>
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          <span className="material-symbols-outlined text-cyan-400">
-            view_module
-          </span>
+          <LayoutGrid className="size-6 text-cyan-400" />
           Model Targets
         </h2>
       </div>
@@ -55,9 +54,7 @@ export default function ModelTargets() {
         <div className="mt-auto pt-4 border-t border-white/10">
           <div className="bg-gradient-to-br from-[#1b2127] to-[#101922] p-3 rounded-lg border border-white/5">
             <div className="flex items-center gap-2 mb-2 text-slate-300 text-xs font-medium">
-              <span className="material-symbols-outlined text-[16px]">
-                bolt
-              </span>
+              <Zap className="size-4" />
               <span>Tokens Used</span>
             </div>
             <div className="w-full bg-slate-800 rounded-full h-1.5 mb-2">

@@ -4,6 +4,15 @@ import React from "react";
 import GlassPanel from "../GlassPanel";
 import { useWorkspace } from "../../context/WorkspaceContext";
 import ModelSelector, { MODELS } from "./ModelSelector";
+import { 
+  FilePenLine, 
+  Zap, 
+  ImagePlus, 
+  Mic, 
+  History, 
+  Loader2, 
+  Sparkles 
+} from "lucide-react";
 
 export default function RawIntentPanel() {
   const {
@@ -30,9 +39,7 @@ export default function RawIntentPanel() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 md:gap-3">
               <div className="bg-cyan-500/20 p-1.5 md:p-2 rounded-lg text-cyan-400">
-                <span className="material-symbols-outlined text-lg md:text-xl">
-                  edit_note
-                </span>
+                <FilePenLine className="size-5 md:size-6" />
               </div>
               <span className="text-xs hidden sm:block md:text-sm font-bold text-slate-200 uppercase tracking-wider">
                 Raw Intent
@@ -51,9 +58,7 @@ export default function RawIntentPanel() {
                   </>
                 ) : result ? (
                   <div className="flex items-center gap-1 bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
-                    <span className="material-symbols-outlined text-[10px] text-emerald-400">
-                      bolt
-                    </span>
+                    <Zap className="size-2.5 text-emerald-400" />
                     <span className="text-[8px] uppercase text-emerald-400 font-bold tracking-wider pt-[1px]">
                       Ready
                     </span>
@@ -96,35 +101,27 @@ export default function RawIntentPanel() {
               title="Upload Image"
               aria-label="Upload Image"
             >
-              <span className="material-symbols-outlined text-[24px] md:text-[20px]">
-                add_photo_alternate
-              </span>
+              <ImagePlus className="size-6 md:size-5" />
             </button>
             <button
               className="p-3 md:p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors flex items-center justify-center"
               title="Voice Input"
               aria-label="Voice Input"
             >
-              <span className="material-symbols-outlined text-[24px] md:text-[20px]">
-                mic
-              </span>
+              <Mic className="size-6 md:size-5" />
             </button>
             <button
               className="p-3 md:p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors flex items-center justify-center"
               title="Prompt History"
               aria-label="Prompt History"
             >
-              <span className="material-symbols-outlined text-[24px] md:text-[20px]">
-                history
-              </span>
+              <History className="size-6 md:size-5" />
             </button>
           </div>
 
           {/* Mobile: Token Counter (Moved from dropdown for cleaner access) */}
           <div className="flex md:hidden items-center gap-2 pr-2 text-xs text-slate-400">
-            <span className="material-symbols-outlined text-[14px] text-cyan-400">
-              bolt
-            </span>
+            <Zap className="size-3.5 text-cyan-400" />
             <span className="font-mono font-medium">450/1000</span>
           </div>
         </div>
@@ -141,14 +138,12 @@ export default function RawIntentPanel() {
           />
           {isGenerating ? (
             <>
-              <span className="material-symbols-outlined animate-spin-slow">
-                progress_activity
-              </span>
+              <Loader2 className="size-5 animate-spin" />
               <span>Generating...</span>
             </>
           ) : (
             <>
-              <span className="material-symbols-outlined">auto_awesome</span>
+              <Sparkles className="size-5" />
               <span>Generate Prompt</span>
             </>
           )}

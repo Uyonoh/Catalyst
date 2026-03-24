@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { Globe, Code, Twitter, LayoutGrid } from "lucide-react";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -17,9 +18,7 @@ const Footer = () => {
           <div className="flex flex-col gap-5 max-w-sm">
             <div className="flex items-center gap-3">
               <div className="size-8 flex items-center justify-center text-cyan-400">
-                <span className="material-symbols-outlined !text-[28px]">
-                  auto_awesome_mosaic
-                </span>
+                <LayoutGrid className="size-7" />
               </div>
               <h2 className="text-white text-xl font-black tracking-tight">
                 Catalyst
@@ -31,9 +30,9 @@ const Footer = () => {
               the Catalyst Studio.
             </p>
             <div className="flex items-center gap-4 mt-2">
-              <SocialIcon icon="language" label="Website" />
-              <SocialIcon icon="code" label="GitHub" />
-              <SocialIcon icon="share" label="Twitter" />
+              <SocialIcon icon={<Globe className="size-5" />} label="Website" />
+              <SocialIcon icon={<Code className="size-5" />} label="GitHub" />
+              <SocialIcon icon={<Twitter className="size-5" />} label="Twitter" />
             </div>
           </div>
 
@@ -124,14 +123,14 @@ const FooterLink = ({
   </li>
 );
 
-const SocialIcon = ({ icon, label }: { icon: string; label: string }) => (
+const SocialIcon = ({ icon, label }: { icon: React.ReactNode; label: string }) => (
   <button
     className="size-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-cyan-400 hover:bg-white/10 hover:border-cyan-400/30 transition-all duration-300 group"
     aria-label={label}
   >
-    <span className="material-symbols-outlined text-[20px] transition-transform group-hover:scale-110">
+    <div className="transition-transform group-hover:scale-110">
       {icon}
-    </span>
+    </div>
   </button>
 );
 
