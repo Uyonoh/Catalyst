@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useWorkspace } from "../../context/WorkspaceContext";
+import { Sparkles, X, Copy } from "lucide-react";
 
 interface ParsedIntentModalProps {
   isOpen: boolean;
@@ -51,9 +52,7 @@ export default function ParsedIntentModal({
         <div className="p-5 border-b border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-cyan-500/20 p-2 rounded-lg text-cyan-400">
-              <span className="material-symbols-outlined text-xl">
-                auto_awesome
-              </span>
+              <Sparkles className="size-5" />
             </div>
             <div>
               <h2 className="text-white font-bold tracking-tight">Refined Prompt</h2>
@@ -64,7 +63,7 @@ export default function ParsedIntentModal({
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors"
           >
-            <span className="material-symbols-outlined">close</span>
+            <X className="size-5" />
           </button>
         </div>
 
@@ -87,7 +86,7 @@ export default function ParsedIntentModal({
             onClick={handleCopy}
             className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-medium px-2 py-1"
           >
-            <span className="material-symbols-outlined text-lg">content_copy</span>
+            <Copy className="size-5" />
             Copy to Clipboard
           </button>
           

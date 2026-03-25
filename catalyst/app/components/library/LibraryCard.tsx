@@ -1,4 +1,28 @@
 import GlassPanel from "../GlassPanel";
+import { 
+  MoreVertical, 
+  Copy, 
+  Edit, 
+  Sparkles, 
+  MessageSquare, 
+  Image as ImageIcon, 
+  Terminal, 
+  Box, 
+  Palette,
+  FileText,
+  Code
+} from "lucide-react";
+
+const ICON_MAP: Record<string, any> = {
+  auto_awesome: Sparkles,
+  chat: MessageSquare,
+  image: ImageIcon,
+  terminal: Terminal,
+  filter_frames: Box,
+  palette: Palette,
+  article: FileText,
+  code: Code,
+};
 
 export interface LibraryItem {
   id: string;
@@ -45,7 +69,10 @@ export default function LibraryCard({ item }: LibraryCardProps) {
           <div
             className={`size-10 rounded-lg bg-${item.icon_color}-500/10 flex items-center justify-center text-${item.icon_color}-400 border border-${item.icon_color}-500/20`}
           >
-            <span className="material-symbols-outlined">{item.icon}</span>
+            {(() => {
+              const Icon = ICON_MAP[item.icon];
+              return Icon ? <Icon className="size-5" /> : <FileText className="size-5" />;
+            })()}
           </div>
           <div>
             <h3 className="text-white font-bold leading-tight group-hover:text-cyan-400 transition-colors">
@@ -60,9 +87,7 @@ export default function LibraryCard({ item }: LibraryCardProps) {
           className="text-slate-500 hover:text-cyan-400 transition-colors"
           aria-label="More options"
         >
-          <span className="material-symbols-outlined text-[20px]">
-            more_vert
-          </span>
+          <MoreVertical className="size-5" />
         </button>
       </div>
       <div className="h-[1px] w-full bg-white/5" />
@@ -83,16 +108,14 @@ export default function LibraryCard({ item }: LibraryCardProps) {
             className="p-1.5 hover:bg-white/10 rounded-md text-slate-400 hover:text-cyan-400 transition-colors"
             title="Copy"
           >
-            <span className="material-symbols-outlined text-[18px]">
-              content_copy
-            </span>
+            <Copy className="size-5" />
           </button>
           <a
             href={`/studio/${item.id}`}
             className="p-1.5 hover:bg-white/10 rounded-md text-slate-400 hover:text-cyan-400 transition-colors flex items-center justify-center"
             title="Edit"
           >
-            <span className="material-symbols-outlined text-[18px]">edit</span>
+            <Edit className="size-5" />
           </a>
         </div>
       </div>

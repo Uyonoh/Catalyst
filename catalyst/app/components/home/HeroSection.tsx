@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PlusCircle } from "lucide-react";
 
 export default function HeroSection() {
   return (
@@ -25,9 +26,7 @@ export default function HeroSection() {
               className="absolute -translate-x-2 inset-0 bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 origin-left"
               style={{ width: "120%" }}
             ></div>
-            <span className="material-symbols-outlined mr-2 z-10 text-[20px]">
-              add_circle
-            </span>
+            <PlusCircle className="size-5 mr-2 z-10" />
             <span className="text-base font-bold tracking-wide z-10">
               New Prompt
             </span>

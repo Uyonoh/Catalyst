@@ -2,6 +2,16 @@
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { Settings, Key, CreditCard, BarChart2, Lock, Bell } from "lucide-react";
+
+const ICON_MAP: Record<string, any> = {
+  settings: Settings,
+  key: Key,
+  payments: CreditCard,
+  insights: BarChart2,
+  lock: Lock,
+  notifications: Bell,
+};
 
 export default function SettingsPage() {
   return (
@@ -36,9 +46,10 @@ export default function SettingsPage() {
                 className="glass-panel p-8 rounded-3xl hover:border-cyan-500/30 transition-all cursor-pointer group hover:-translate-y-1"
               >
                 <div className="size-12 rounded-full bg-white/5 flex items-center justify-center mb-6 group-hover:bg-cyan-500/10 transition-colors">
-                  <span className="material-symbols-outlined text-2xl text-slate-500 group-hover:text-cyan-400">
-                    {item.icon}
-                  </span>
+                  {(() => {
+                    const Icon = ICON_MAP[item.icon];
+                    return Icon ? <Icon className="size-6 text-slate-500 group-hover:text-cyan-400" /> : null;
+                  })()}
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
                 <p className="text-slate-500 text-sm leading-relaxed">

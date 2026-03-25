@@ -1,4 +1,5 @@
 import React from "react";
+import { ArrowRight } from "lucide-react";
 
 export default function LibraryFeatured() {
   const featuredImage =
@@ -32,9 +33,7 @@ export default function LibraryFeatured() {
           </div>
           <button className="glass-panel border-white/10 hover:bg-cyan-500/20 hover:border-cyan-500/30 text-white h-10 md:h-12 px-5 md:px-6 rounded-lg font-bold flex items-center justify-center gap-2 transition-all duration-300 shrink-0 w-full md:w-auto text-sm md:text-base hover:scale-[1.02] active:scale-[0.98] group/btn shadow-lg">
             Open Prompt
-            <span className="material-symbols-outlined text-sm md:text-base transition-transform duration-300 group-hover/btn:translate-x-1">
-              arrow_forward
-            </span>
+            <ArrowRight className="size-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
           </button>
         </div>
       </div>

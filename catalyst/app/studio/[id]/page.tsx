@@ -7,6 +7,29 @@ import Footer from "../../components/Footer";
 import GlassPanel from "../../components/GlassPanel";
 import { MODELS } from "../../components/studio/ModelSelector";
 import { supabase } from "../../lib/supabase";
+import { 
+  ArrowLeft, 
+  Loader2, 
+  Sparkles, 
+  Copy, 
+  Save, 
+  Lock, 
+  Globe,
+  MessageSquare,
+  Terminal,
+  Image as ImageIcon,
+  Box,
+  Palette
+} from "lucide-react";
+
+const ICON_MAP: Record<string, any> = {
+  chat: MessageSquare,
+  auto_awesome: Sparkles,
+  terminal: Terminal,
+  image: ImageIcon,
+  filter_frames: Box,
+  palette: Palette,
+};
 export default function PromptViewEditPage() {
   const router = useRouter();
   const params = useParams();
@@ -93,15 +116,13 @@ export default function PromptViewEditPage() {
               onClick={() => router.back()}
               className="text-slate-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-xl border border-white/5 active:scale-95"
             >
-              <span className="material-symbols-outlined">arrow_back</span>
+              <ArrowLeft className="size-5" />
             </button>
             <div className="flex flex-col gap-1">
               <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight text-white flex items-center gap-3">
                 Prompt Editor
                 {isLoading && (
-                  <span className="material-symbols-outlined animate-spin-slow text-cyan-400 text-2xl">
-                    progress_activity
-                  </span>
+                  <Loader2 className="animate-spin text-cyan-400 size-6" />
                 )}
               </h1>
               <p className="text-slate-400 text-sm md:text-base">
@@ -119,9 +140,7 @@ export default function PromptViewEditPage() {
                 <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-4 mb-2">
                   <div className="flex items-center gap-3">
                     <div className="bg-cyan-500/20 p-2 rounded-xl text-cyan-400 border border-cyan-500/30">
-                      <span className="material-symbols-outlined text-xl">
-                        auto_awesome
-                      </span>
+                      <Sparkles className="size-5" />
                     </div>
                     <div>
                       <h2 className="text-white font-bold tracking-tight text-lg">
@@ -139,9 +158,7 @@ export default function PromptViewEditPage() {
                       className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-white/5 rounded-lg transition-all"
                       title="Copy to clipboard"
                     >
-                      <span className="material-symbols-outlined text-xl">
-                        content_copy
-                      </span>
+                      <Copy className="size-5" />
                     </button>
                   </div>
                 </div>
@@ -167,7 +184,7 @@ export default function PromptViewEditPage() {
                   onClick={handleApply}
                   className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-primary text-white font-bold text-sm shadow-neon hover:shadow-neon-strong transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2"
                 >
-                  <span className="material-symbols-outlined">save</span>
+                  <Save className="size-5" />
                   Save Prompt
                 </button>
               </div>
@@ -180,9 +197,7 @@ export default function PromptViewEditPage() {
                 <GlassPanel className="p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="bg-purple-500/20 p-1.5 rounded-lg text-purple-400">
-                      <span className="material-symbols-outlined text-lg">
-                        lock
-                      </span>
+                      <Lock className="size-5" />
                     </div>
                     <span className="text-sm font-bold text-white uppercase tracking-wide">
                       Raw Intent
@@ -211,9 +226,10 @@ export default function PromptViewEditPage() {
                       Target Engine
                     </span>
                     <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 border border-white/10 rounded-lg">
-                      <span className="material-symbols-outlined text-[14px] text-cyan-400">
-                        {selectedModel.icon}
-                      </span>
+                      {(() => {
+                        const Icon = ICON_MAP[selectedModel.icon];
+                        return Icon ? <Icon className="size-4 text-cyan-400" /> : null;
+                      })()}
                       <span className="text-xs text-white font-medium">
                         {selectedModel.name}
                       </span>
@@ -230,9 +246,7 @@ export default function PromptViewEditPage() {
                   <div className="flex justify-between items-center py-2">
                     <span className="text-slate-400 text-sm">Visibility</span>
                     <div className="flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[16px] text-slate-500">
-                        public
-                      </span>
+                      <Globe className="size-4 text-slate-500" />
                       <span className="text-xs text-slate-300 font-medium">
                         Private
                       </span>

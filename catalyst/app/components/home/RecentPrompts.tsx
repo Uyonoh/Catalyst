@@ -1,5 +1,24 @@
 "use client";
 
+import { 
+  LayoutGrid, 
+  List, 
+  MoreHorizontal, 
+  Bot, 
+  Brain, 
+  Cloud, 
+  Sparkles, 
+  ArrowRight, 
+  Plus 
+} from "lucide-react";
+
+const ICON_MAP: Record<string, any> = {
+  smart_toy: Bot,
+  psychology: Brain,
+  cloud: Cloud,
+  spark: Sparkles,
+};
+
 const PROMPTS = [
   {
     id: 1,
@@ -75,20 +94,10 @@ export default function RecentPrompts() {
         </h2>
         <div className="flex gap-2">
           <button className="size-8 flex items-center justify-center rounded-lg glass-panel hover:bg-white/10 text-white transition-colors cursor-pointer">
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: "20px" }}
-            >
-              grid_view
-            </span>
+            <LayoutGrid className="size-5" />
           </button>
           <button className="size-8 flex items-center justify-center rounded-lg bg-transparent hover:bg-white/5 text-slate-500 hover:text-white transition-colors cursor-pointer">
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: "20px" }}
-            >
-              list
-            </span>
+            <List className="size-5" />
           </button>
         </div>
       </div>
@@ -99,9 +108,7 @@ export default function RecentPrompts() {
             className="glass-panel rounded-2xl p-5 hover:border-cyan-500/30 transition-all duration-300 group hover:-translate-y-1 cursor-pointer relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-              <span className="material-symbols-outlined text-slate-400 hover:text-white">
-                more_horiz
-              </span>
+              <MoreHorizontal className="size-5 text-slate-400 hover:text-white" />
             </div>
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -134,22 +141,15 @@ export default function RecentPrompts() {
             </div>
             <div className="flex items-center justify-between pt-4 border-t border-white/5">
               <div className="flex items-center gap-2">
-                <span
-                  className="material-symbols-outlined text-slate-500"
-                  style={{ fontSize: "16px" }}
-                >
-                  {prompt.icon}
-                </span>
+                {(() => {
+                  const Icon = ICON_MAP[prompt.icon];
+                  return Icon ? <Icon className="size-4 text-slate-500" /> : null;
+                })()}
                 <span className="text-xs text-slate-400">{prompt.model}</span>
               </div>
-              <div className="flex items-center gap-1 text-[--color-primary] text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+              <div className="flex items-center gap-1 text-cyan-400 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
                 Open{" "}
-                <span
-                  className="material-symbols-outlined"
-                  style={{ fontSize: "14px" }}
-                >
-                  arrow_forward
-                </span>
+                <ArrowRight className="size-3.5" />
               </div>
             </div>
           </div>
@@ -158,9 +158,7 @@ export default function RecentPrompts() {
         {/* Add New Placeholder */}
         <div className="border border-dashed border-white/10 rounded-2xl p-5 flex flex-col items-center justify-center hover:bg-white/5 transition-colors cursor-pointer min-h-[220px]">
           <div className="size-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
-            <span className="material-symbols-outlined text-slate-500">
-              add
-            </span>
+            <Plus className="size-6 text-slate-500" />
           </div>
           <span className="text-slate-500 text-sm font-medium">
             Create New Prompt

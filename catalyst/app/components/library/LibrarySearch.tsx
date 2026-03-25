@@ -1,4 +1,5 @@
 import React from "react";
+import { Search, ListFilter, Plus } from "lucide-react";
 
 export default function LibrarySearch() {
   return (
@@ -6,9 +7,7 @@ export default function LibrarySearch() {
       {/* Search */}
       <div className="flex-1 group">
         <div className="flex w-full items-center rounded-xl h-12 glass-panel border border-white/10 overflow-hidden px-4 transition-all duration-300 focus-within:border-cyan-500/50 focus-within:shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-          <span className="material-symbols-outlined text-cyan-400 mr-3">
-            search
-          </span>
+          <Search className="size-5 text-cyan-400 mr-3" />
           <input
             className="w-full bg-transparent border-none text-white placeholder-slate-500 focus:ring-0 text-base focus:outline-none"
             placeholder="Search your library for keywords, models, or tags..."
@@ -22,16 +21,14 @@ export default function LibrarySearch() {
       {/* Sort/View Options */}
       <div className="flex gap-2 shrink-0">
         <button className="h-12 px-4 rounded-xl glass-panel text-white hover:bg-white/10 border border-white/10 flex items-center gap-2 transition-colors active:scale-95">
-          <span className="material-symbols-outlined text-[20px]">
-            filter_list
-          </span>
+          <ListFilter className="size-5" />
           <span className="text-sm font-medium">Filter</span>
         </button>
         <button 
           className="h-12 w-12 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-lg hover:shadow-cyan-500/20 active:scale-95"
           title="Create New Prompt"
         >
-          <span className="material-symbols-outlined font-bold">add</span>
+          <Plus className="size-6 font-bold" />
         </button>
       </div>
     </div>

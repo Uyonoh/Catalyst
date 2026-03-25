@@ -110,7 +110,7 @@ export default function LiveAnalysisPanel() {
             `}
           >
             <ChevronUp
-              className={`size-4.5 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? "rotate-180" : ""}`}
+              className={`size-5 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? "rotate-180" : ""}`}
             />
           </button>
         </div>

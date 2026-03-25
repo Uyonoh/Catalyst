@@ -2,6 +2,7 @@
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { History } from "lucide-react";
 
 export default function HistoryPage() {
   return (
@@ -24,7 +25,7 @@ export default function HistoryPage() {
           
           <div className="glass-panel p-12 rounded-3xl flex flex-col items-center justify-center text-center animate-slideUp">
             <div className="size-20 rounded-full bg-white/5 flex items-center justify-center mb-6">
-              <span className="material-symbols-outlined text-4xl text-slate-500">history</span>
+              <History className="size-10 text-slate-500" />
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">No history found</h2>
             <p className="text-slate-500 mb-8 max-w-sm">
