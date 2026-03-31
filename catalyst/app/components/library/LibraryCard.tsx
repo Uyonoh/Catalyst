@@ -1,16 +1,16 @@
 import GlassPanel from "../GlassPanel";
-import { 
-  MoreVertical, 
-  Copy, 
-  Edit, 
-  Sparkles, 
-  MessageSquare, 
-  Image as ImageIcon, 
-  Terminal, 
-  Box, 
+import {
+  MoreVertical,
+  Copy,
+  Edit,
+  Sparkles,
+  MessageSquare,
+  Image as ImageIcon,
+  Terminal,
+  Box,
   Palette,
   FileText,
-  Code
+  Code,
 } from "lucide-react";
 
 const ICON_MAP: Record<string, any> = {
@@ -41,7 +41,7 @@ interface LibraryCardProps {
   item: LibraryItem;
 }
 
-function formatUpdated(isoString: string): string {
+export function formatUpdated(isoString: string): string {
   const now = Date.now();
   const then = new Date(isoString).getTime();
   const diffMs = now - then;
@@ -71,7 +71,11 @@ export default function LibraryCard({ item }: LibraryCardProps) {
           >
             {(() => {
               const Icon = ICON_MAP[item.icon];
-              return Icon ? <Icon className="size-5" /> : <FileText className="size-5" />;
+              return Icon ? (
+                <Icon className="size-5" />
+              ) : (
+                <FileText className="size-5" />
+              );
             })()}
           </div>
           <div>
