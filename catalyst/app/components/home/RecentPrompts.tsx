@@ -1,6 +1,3 @@
-"use client";
-
-import { supabase } from "@/app/lib/supabase";
 import {
   LibraryItem,
   formatUpdated,
@@ -24,95 +21,11 @@ const ICON_MAP: Record<string, any> = {
   spark: Sparkles,
 };
 
-const PROMPTS = [
-  {
-    id: 1,
-    title: "Code Refactor Agent",
-    description:
-      "System prompt designed to analyze legacy Python codebases and suggest modular improvements using SOLID principles.",
-    tags: ["Python", "Engineering"],
-    status: "Optimized",
-    timeAgo: "2h ago",
-    model: "GPT-4 Turbo",
-    icon: "smart_toy",
-    color: "green",
-  },
-  {
-    id: 2,
-    title: "SaaS Landing Copy",
-    description:
-      "Generating high-conversion hero section copy for a fintech startup targeting Gen Z users.",
-    tags: ["Marketing", "Copywriting"],
-    status: "Draft",
-    timeAgo: "5h ago",
-    model: "Claude 3 Opus",
-    icon: "psychology",
-    color: "yellow",
-  },
-  {
-    id: 3,
-    title: "Data Extraction JSON",
-    description:
-      "Reliably extract specific entities from unstructured medical text into a strict JSON schema.",
-    tags: ["Data", "JSON"],
-    status: "Testing",
-    timeAgo: "1d ago",
-    model: "Mistral Large",
-    icon: "cloud",
-    color: "purple",
-  },
-  {
-    id: 4,
-    title: "Legal Contract Summary",
-    description:
-      "Summarizing NDA documents highlighting key risk clauses and indemnity terms.",
-    tags: ["Legal"],
-    status: "Optimized",
-    timeAgo: "2d ago",
-    model: "Gemini 1.5 Pro",
-    icon: "spark",
-    color: "green",
-  },
-];
-
-// Randomly get 2 tags for prompts
-function getRandomTags(): string[] {
-  const tags = [
-    "Python",
-    "Engineering",
-    "Marketing",
-    "Copywriting",
-    "Data",
-    "JSON",
-    "Legal",
-  ];
-  const shuffled = tags.sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, 2);
+interface RecentPromptsProps {
+  prompts: LibraryItem[];
 }
 
-async function getRecentPrompts(): Promise<LibraryItem[]> {
-  const { data, error } = await supabase
-    .from("prompts_public")
-    .select(
-      "id, title, updated_at, snippet, target_model, model_color, tag, icon, icon_color, has_gradient",
-    )
-    // .where("is_published", true)
-    // Limit to promps updated within a week
-    // .gte("updated_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
-    .order("updated_at", { ascending: false })
-    .limit(5);
-  if (error) {
-    console.warn("Failed to fetch library items:", error.message);
-    return [];
-  }
-
-  // Map database target_model to model field
-  return (data || []).map((item: any) => ({
-    ...item,
-    model: item.target_model,
-  })) as LibraryItem[];
-}
-
+// Fixed mapping for mockup consistency
 const MappedColors = {
   green: "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]",
   yellow: "bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]",
@@ -125,8 +38,7 @@ const MappedTextColors = {
   purple: "text-purple-400",
 };
 
-export default async function RecentPrompts() {
-  const PROMPTS = await getRecentPrompts();
+export default function RecentPrompts({ prompts }: RecentPromptsProps) {
   return (
     <section
       className="animate-slideDown"
@@ -146,7 +58,7 @@ export default async function RecentPrompts() {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {PROMPTS.map((prompt) => (
+        {prompts.map((prompt) => (
           <div
             key={prompt.id}
             className="glass-panel rounded-2xl p-5 hover:border-cyan-500/30 transition-all duration-300 group hover:-translate-y-1 cursor-pointer relative overflow-hidden"
@@ -157,15 +69,14 @@ export default async function RecentPrompts() {
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div
-                  className={`size-2 rounded-full ${MappedColors[prompt.icon_color as keyof typeof MappedColors]}`}
+                  className={`size-2 rounded-full ${MappedColors[prompt.icon_color as keyof typeof MappedColors] || MappedColors.green}`}
                 ></div>
                 <span
-                  className={`text-xs font-mono ${MappedTextColors[prompt.icon_color as keyof typeof MappedTextColors]}`}
+                  className={`text-xs font-mono ${MappedTextColors[prompt.icon_color as keyof typeof MappedTextColors] || MappedTextColors.green}`}
                 >
-                  {/* {prompt.status} */} Published
+                  {/* {prompt.status} */}Published
                 </span>
               </div>
-              {/* <span className="text-xs text-slate-500">{prompt.timeAgo}</span> */}
               <span className="text-xs text-slate-500">
                 {formatUpdated(prompt.updated_at)}
               </span>
@@ -174,18 +85,17 @@ export default async function RecentPrompts() {
               {prompt.title}
             </h3>
             <p className="text-slate-400 text-sm mb-4 line-clamp-2">
-              {/* {prompt.description} */}
               {prompt.snippet}
             </p>
             <div className="flex items-center gap-2 mb-4">
-              {getRandomTags().map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2 py-1 rounded bg-white/5 text-[10px] text-slate-300 border border-white/5"
-                >
-                  {tag}
+              {prompt.tag && (
+                <span className="px-2 py-1 rounded bg-white/5 text-[10px] text-slate-300 border border-white/5">
+                  {prompt.tag}
                 </span>
-              ))}
+              )}
+              <span className="px-2 py-1 rounded bg-white/5 text-[10px] text-slate-300 border border-white/5">
+                AI Generated
+              </span>
             </div>
             <div className="flex items-center justify-between pt-4 border-t border-white/5">
               <div className="flex items-center gap-2">
@@ -193,7 +103,9 @@ export default async function RecentPrompts() {
                   const Icon = ICON_MAP[prompt.icon];
                   return Icon ? (
                     <Icon className="size-4 text-slate-500" />
-                  ) : null;
+                  ) : (
+                    <Bot className="size-4 text-slate-500" />
+                  );
                 })()}
                 <span className="text-xs text-slate-400">{prompt.model}</span>
               </div>

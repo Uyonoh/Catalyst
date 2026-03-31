@@ -4,8 +4,11 @@ import HeroSection from "./components/home/HeroSection";
 import QuickAccessModels from "./components/home/QuickAccessModels";
 import StatsOverview from "./components/home/StatsOverview";
 import RecentPrompts from "./components/home/RecentPrompts";
+import { getRecentPrompts } from "./lib/prompts";
 
-export default function Home() {
+export default async function Home() {
+  const recentPrompts = await getRecentPrompts();
+
   return (
     <>
       <Header />
@@ -19,7 +22,7 @@ export default function Home() {
         <HeroSection />
         <QuickAccessModels />
         <StatsOverview />
-        <RecentPrompts />
+        <RecentPrompts prompts={recentPrompts} />
       </main>
       <Footer />
     </>
