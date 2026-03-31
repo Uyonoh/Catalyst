@@ -8,6 +8,7 @@ import {
   ArrowLeft, 
   Sparkles, 
   Copy, 
+  Check,
   Save, 
   Lock, 
   Globe,
@@ -50,10 +51,13 @@ export default function PromptEditorView({ id, initialData }: PromptEditorViewPr
   ) || MODELS[0];
   
   const [selectedModel, setSelectedModel] = useState(initialModel);
+  const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(editedText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy text: ", err);
     }
@@ -110,10 +114,14 @@ export default function PromptEditorView({ id, initialData }: PromptEditorViewPr
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCopy}
-                  className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-white/5 rounded-lg transition-all"
-                  title="Copy to clipboard"
+                  className={`p-2 rounded-lg transition-all ${copied ? "text-emerald-400" : "text-slate-400 hover:text-cyan-400 hover:bg-white/5"}`}
+                  title={copied ? "Copied!" : "Copy to clipboard"}
                 >
-                  <Copy className="size-5" />
+                  {copied ? (
+                    <Check className="size-5" />
+                  ) : (
+                    <Copy className="size-5" />
+                  )}
                 </button>
               </div>
             </div>

@@ -1,7 +1,11 @@
+"use client";
+
+import React, { useState } from "react";
 import GlassPanel from "../GlassPanel";
 import {
   MoreVertical,
   Copy,
+  Check,
   Edit,
   Sparkles,
   MessageSquare,
@@ -29,6 +33,7 @@ export interface LibraryItem {
   title: string;
   updated_at: string;
   snippet: string;
+  content: string;
   model: string;
   model_color: string;
   tag: string;
@@ -56,6 +61,20 @@ export function formatUpdated(isoString: string): string {
 }
 
 export default function LibraryCard({ item }: LibraryCardProps) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(item.content || item.snippet);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
+
   return (
     <GlassPanel
       hoverable
@@ -109,10 +128,15 @@ export default function LibraryCard({ item }: LibraryCardProps) {
         </div>
         <div className="flex gap-1 sm:opacity-0 group-hover:opacity-100 transition-opacity">
           <button
-            className="p-1.5 hover:bg-white/10 rounded-md text-slate-400 hover:text-cyan-400 transition-colors"
-            title="Copy"
+            onClick={handleCopy}
+            className={`p-1.5 hover:bg-white/10 rounded-md transition-colors ${copied ? "text-emerald-400" : "text-slate-400 hover:text-cyan-400"}`}
+            title={copied ? "Copied!" : "Copy Full Prompt"}
           >
-            <Copy className="size-5" />
+            {copied ? (
+              <Check className="size-5" />
+            ) : (
+              <Copy className="size-5" />
+            )}
           </button>
           <a
             href={`/studio/${item.id}`}

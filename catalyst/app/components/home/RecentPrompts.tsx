@@ -1,3 +1,7 @@
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
 import {
   LibraryItem,
   formatUpdated,
@@ -10,6 +14,8 @@ import {
   Brain,
   Cloud,
   Sparkles,
+  Copy,
+  Check,
   ArrowRight,
   Plus,
 } from "lucide-react";
@@ -39,6 +45,18 @@ const MappedTextColors = {
 };
 
 export default function RecentPrompts({ prompts }: RecentPromptsProps) {
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = async (id: string, text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
+
   return (
     <section
       className="animate-slideDown"
@@ -110,6 +128,20 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                 <span className="text-xs text-slate-400">{prompt.model}</span>
               </div>
               <div className="flex items-center gap-1 text-cyan-400 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleCopy(prompt.id, prompt.content || prompt.snippet);
+                  }}
+                  className={`p-1.5 hover:bg-white/10 rounded-md transition-colors ${copiedId === prompt.id ? "text-emerald-400" : "text-slate-400 hover:text-cyan-400"}`}
+                  title={copiedId === prompt.id ? "Copied!" : "Copy Full Prompt"}
+                >
+                  {copiedId === prompt.id ? (
+                    <Check className="size-5" />
+                  ) : (
+                    <Copy className="size-5" />
+                  )}
+                </button>
                 <a
                   href={`/studio/${prompt?.id}`}
                   className="p-1.5 hover:bg-white/10 rounded-md text-slate-400 hover:text-cyan-400 transition-colors flex items-center justify-center"
@@ -123,14 +155,17 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
         ))}
 
         {/* Add New Placeholder */}
-        <div className="border border-dashed border-white/10 rounded-2xl p-5 flex flex-col items-center justify-center hover:bg-white/5 transition-colors cursor-pointer min-h-[220px]">
+        <Link
+          href="/studio"
+          className="border border-dashed border-white/10 rounded-2xl p-5 flex flex-col items-center justify-center hover:bg-white/5 transition-colors cursor-pointer min-h-[220px]"
+        >
           <div className="size-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
             <Plus className="size-6 text-slate-500" />
           </div>
           <span className="text-slate-500 text-sm font-medium">
             Create New Prompt
           </span>
-        </div>
+        </Link>
       </div>
     </section>
   );

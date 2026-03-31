@@ -13,7 +13,7 @@ async function getLibraryItems(): Promise<LibraryItem[]> {
   const { data, error } = await supabase
     .from("prompts_public")
     .select(
-      "id, title, updated_at, snippet, target_model, model_color, tag, icon, icon_color, has_gradient",
+      "id, title, updated_at, snippet, content, target_model, model_color, tag, icon, icon_color, has_gradient",
     )
     .order("created_at", { ascending: true });
 
