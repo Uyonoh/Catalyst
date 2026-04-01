@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Settings, Key, CreditCard, BarChart2, Lock, Bell } from "lucide-react";
-import { cn } from "@/lib/utils"; // Not sure if cn exists, I'll use template literals if not
+// import { cn } from "@/lib/utils"; // Not sure if cn exists, I'll use template literals if not
 
 const NAV_ITEMS = [
   { title: "General", href: "/settings/general", icon: Settings },
@@ -33,9 +33,13 @@ export default function SettingsSidebarNav() {
                 : "text-slate-400 hover:text-white hover:bg-white/5 border border-transparent"
             }`}
           >
-            <Icon className={`size-5 transition-colors ${
-              isActive ? "text-cyan-400" : "text-slate-500 group-hover:text-slate-300"
-            }`} />
+            <Icon
+              className={`size-5 transition-colors ${
+                isActive
+                  ? "text-cyan-400"
+                  : "text-slate-500 group-hover:text-slate-300"
+              }`}
+            />
             <span className="font-medium">{item.title}</span>
           </Link>
         );
