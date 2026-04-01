@@ -2,24 +2,28 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useWorkspace } from "../../context/WorkspaceContext";
-import { 
-  MessageSquare, 
-  Sparkles, 
-  Terminal, 
-  Image as ImageIcon, 
-  Box, 
-  Palette, 
+import {
+  MessageSquare,
+  Sparkles,
+  Terminal,
+  Image as ImageIcon,
+  Box,
+  Palette,
   ChevronDown,
-  Zap
+  Zap,
+  FileText,
+  Code,
 } from "lucide-react";
 
-const ICON_MAP: Record<string, any> = {
+export const ICON_MAP: Record<string, any> = {
   chat: MessageSquare,
   auto_awesome: Sparkles,
   terminal: Terminal,
   image: ImageIcon,
   filter_frames: Box,
   palette: Palette,
+  article: FileText,
+  code: Code,
 };
 
 export const MODELS = [
@@ -133,7 +137,7 @@ export default function ModelSelector() {
           return Icon ? <Icon className="size-4 md:size-5" /> : null;
         })()}
         <span className="hidden sm:inline">{selectedModel.name}</span>
-        <ChevronDown 
+        <ChevronDown
           className={`size-4 md:size-5 opacity-70 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
         />
       </button>

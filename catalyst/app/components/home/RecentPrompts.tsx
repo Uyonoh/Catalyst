@@ -19,13 +19,7 @@ import {
   ArrowRight,
   Plus,
 } from "lucide-react";
-
-const ICON_MAP: Record<string, any> = {
-  smart_toy: Bot,
-  psychology: Brain,
-  cloud: Cloud,
-  spark: Sparkles,
-};
+import { ICON_MAP } from "@/app/components/studio/ModelSelector";
 
 interface RecentPromptsProps {
   prompts: LibraryItem[];
@@ -81,9 +75,6 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
             key={prompt.id}
             className="glass-panel rounded-2xl p-5 hover:border-cyan-500/30 transition-all duration-300 group hover:-translate-y-1 cursor-pointer relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-              <MoreHorizontal className="size-5 text-slate-400 hover:text-white" />
-            </div>
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div
@@ -134,7 +125,9 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                     handleCopy(prompt.id, prompt.content || prompt.snippet);
                   }}
                   className={`p-1.5 hover:bg-white/10 rounded-md transition-colors ${copiedId === prompt.id ? "text-emerald-400" : "text-slate-400 hover:text-cyan-400"}`}
-                  title={copiedId === prompt.id ? "Copied!" : "Copy Full Prompt"}
+                  title={
+                    copiedId === prompt.id ? "Copied!" : "Copy Full Prompt"
+                  }
                 >
                   {copiedId === prompt.id ? (
                     <Check className="size-5" />

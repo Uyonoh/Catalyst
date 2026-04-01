@@ -15,6 +15,7 @@ import {
   Palette,
   FileText,
   Code,
+  Star,
 } from "lucide-react";
 
 const ICON_MAP: Record<string, any> = {
@@ -106,11 +107,12 @@ export default function LibraryCard({ item }: LibraryCardProps) {
             </p>
           </div>
         </div>
+        {/* Add favourite button */}
         <button
           className="text-slate-500 hover:text-cyan-400 transition-colors"
-          aria-label="More options"
+          aria-label="Favourite"
         >
-          <MoreVertical className="size-5" />
+          <Star className="size-5" />
         </button>
       </div>
       <div className="h-[1px] w-full bg-white/5" />
