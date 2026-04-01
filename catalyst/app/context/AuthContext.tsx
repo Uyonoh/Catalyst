@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 import { User } from "@supabase/supabase-js";
 import { supabaseBrowser } from "../lib/supabase-browser";
 
@@ -26,48 +32,55 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    async function fetchProfile(userId: string) {
-      try {
-        const { data: profileData } = await supabaseBrowser
-          .from("profiles")
-          .select("*")
-          .eq("id", userId)
-          .single();
-        if (mounted) setProfile(profileData);
-      } catch (err) {
-        console.error("Error fetching profile", err);
-      }
+    // Fetch profile in the background — never blocks auth resolution.
+    // Uses a 5s timeout to guard against Supabase cold-start query hangs
+    // (the root cause of the infinite spinner: the DB query silently never
+    // resolves/rejects when called immediately after SIGNED_IN fires).
+    function fetchProfileBackground(userId: string) {
+      const timeout = new Promise<void>((_, reject) =>
+        setTimeout(() => reject(new Error("fetchProfile timeout")), 5000)
+      );
+      const query = supabaseBrowser
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single()
+        .then(({ data: profileData }) => {
+          if (mounted) setProfile(profileData);
+        });
+
+      Promise.race([query, timeout]).catch((err) => {
+        console.warn("fetchProfile failed or timed out:", err.message);
+      });
     }
 
-    // onAuthStateChange fires INITIAL_SESSION synchronously from local storage,
-    // making it the fast, reliable path to resolve isLoading. This avoids the
-    // infinite spinner caused by getUser() hanging on production cold starts
-    // (getUser() hits the Supabase network endpoint to validate the JWT,
-    // whereas the auth listener reads from local storage first).
     const { data: authListener } = supabaseBrowser.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (!mounted) return;
 
         if (event === "INITIAL_SESSION") {
           const currentUser = session?.user ?? null;
           setUser(currentUser);
-          if (currentUser) {
-            await fetchProfile(currentUser.id);
-          }
-          // Always resolve isLoading on INITIAL_SESSION — this is the guaranteed
-          // first event fired by Supabase, even before any network calls.
+          // Resolve loading immediately — don't wait on the DB query.
           if (mounted) setIsLoading(false);
+          // Fetch profile in background after loading resolves.
+          if (currentUser) fetchProfileBackground(currentUser.id);
+
         } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
           const currentUser = session?.user ?? null;
           setUser(currentUser);
-          if (currentUser) {
-            await fetchProfile(currentUser.id);
-          }
+          // Critical: resolve loading BEFORE fetching profile.
+          // Previously, awaiting fetchProfile here caused isLoading to
+          // stay true indefinitely when the DB query hung on cold starts.
+          if (mounted) setIsLoading(false);
+          if (currentUser) fetchProfileBackground(currentUser.id);
+
         } else if (event === "SIGNED_OUT") {
           setUser(null);
           setProfile(null);
+          if (mounted) setIsLoading(false);
         }
-      }
+      },
     );
 
     return () => {
@@ -101,4 +114,3 @@ export const useUser = () => {
   }
   return context;
 };
-
