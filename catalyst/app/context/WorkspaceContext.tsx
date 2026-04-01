@@ -1,8 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { useParsing } from "../hooks/useParsing";
 import { OptimizedPrompt } from "../lib/engine/types";
+import { useUser } from "./AuthContext";
 
 interface WorkspaceContextType {
   input: string;
@@ -16,6 +17,7 @@ interface WorkspaceContextType {
   parsedPrompt: string | null;
   isGenerating: boolean;
   parseIntent: (text: string) => Promise<void>;
+  preferences: any;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(
@@ -25,7 +27,15 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState("gpt");
-  const { result, isLoading, error } = useParsing(input, selectedModel);
+  
+  const { profile } = useUser();
+  const preferences = profile?.preferences || {};
+  
+  // Use preference for autoAnalyze or default to true
+  const autoAnalyze = preferences.autoAnalyze ?? true;
+  // If autoAnalyze is false, we might want to tell useParsing not to run automatically,
+  // but useParsing currently might not accept preferences. For now we pass input and selectedModel.
+  const { result, isLoading, error } = useParsing(autoAnalyze ? input : "", selectedModel);
   
   // LLM Parsing state
   const [parsedPrompt, setParsedPrompt] = useState<string | null>(null);
@@ -68,6 +78,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         parsedPrompt,
         isGenerating,
         parseIntent,
+        preferences,
       }}
     >
       {children}
