@@ -1,11 +1,21 @@
 "use client";
 
-import { Bell, Menu, X, LayoutGrid } from "lucide-react";
+import { Bell, Menu, X, LayoutGrid, LogOut, User as UserIcon } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
+import { useUser } from "../context/AuthContext";
+import { supabaseBrowser } from "../lib/supabase-browser";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, profile } = useUser();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await supabaseBrowser.auth.signOut();
+    router.push("/login");
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 glass-panel-dark">
@@ -69,21 +79,48 @@ export default function Header() {
 
           {/* User actions */}
           <div className="flex items-center gap-4 border-l border-white/10 pl-6">
-            <button
-              className="flex items-center justify-center size-9 rounded-full hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
-              aria-label="Notifications"
-            >
-              <Bell className="size-5" />
-            </button>
+            {user ? (
+              <>
+                <button
+                  className="flex items-center justify-center size-9 rounded-full hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+                  aria-label="Notifications"
+                >
+                  <Bell className="size-5" />
+                </button>
 
-            <div
-              className="bg-center bg-no-repeat bg-cover rounded-full size-9 ring-2 ring-white/10 cursor-pointer"
-              aria-label="User profile avatar showing a smiling person"
-              style={{
-                backgroundImage:
-                  'url("https://lh3.googleusercontent.com/aida-public/AB6AXuA3g60JcD1O-zBbO1tv5aAO4luRtDDqXP0KVD03-sHIPWu0es_7MBZLIiTZKwJMRbY7uKc3GL_Rd2PWM_HYCZ8fFWvsjw7PFuFOvC6RGggy3x_TJ3191rRUx-gb_lbOPfvDd743xt5quIRn1zo7w8ct1914-i-eKbccHntDKYAD3m0ANNYFp73PEPlReRAq7GujQWJkwkGCN_MSef3JLE6S8pYxDLpflaXDzN2qtnS0gQhbcI0QIwdozgQhXK8kpOHsIHuhIXWf4K4")',
-              }}
-            />
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/settings/general"
+                    className="flex items-center justify-center size-9 rounded-full border-2 border-white/10 overflow-hidden bg-slate-800 hover:border-cyan-500/50 transition-colors"
+                  >
+                    {profile?.avatar_url ? (
+                      <img
+                        src={profile.avatar_url}
+                        alt="User"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <UserIcon className="size-5 text-slate-400" />
+                    )}
+                  </Link>
+
+                  <button
+                    onClick={handleSignOut}
+                    className="p-2 text-slate-400 hover:text-red-400 transition-colors"
+                    title="Sign Out"
+                  >
+                    <LogOut className="size-5" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all"
+              >
+                Log In
+              </Link>
+            )}
           </div>
         </nav>
 
@@ -124,21 +161,48 @@ export default function Header() {
                 Settings
               </Link>
               <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-                <button
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-slate-400 hover:text-white"
-                  aria-label="Notifications"
-                >
-                  <Bell className="size-5" />
-                  Notifications
-                </button>
-                <div
-                  className="bg-center bg-no-repeat bg-cover rounded-full size-8 ring-2 ring-white/10 cursor-pointer"
-                  aria-label="User profile avatar"
-                  style={{
-                    backgroundImage:
-                      'url("https://lh3.googleusercontent.com/aida-public/AB6AXuA3g60JcD1O-zBbO1tv5aAO4luRtDDqXP0KVD03-sHIPWu0es_7MBZLIiTZKwJMRbY7uKc3GL_Rd2PWM_HYCZ8fFWvsjw7PFuFOvC6RGggy3x_TJ3191rRUx-gb_lbOPfvDd743xt5quIRn1zo7w8ct1914-i-eKbccHntDKYAD3m0ANNYFp73PEPlReRAq7GujQWJkwkGCN_MSef3JLE6S8pYxDLpflaXDzN2qtnS0gQhbcI0QIwdozgQhXK8kpOHsIHuhIXWf4K4")',
-                  }}
-                />
+                {user ? (
+                  <>
+                    <button
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-slate-400 hover:text-white"
+                      aria-label="Notifications"
+                    >
+                      <Bell className="size-5" />
+                      Notifications
+                    </button>
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href="/settings/general"
+                        className="size-8 rounded-full border-2 border-white/10 overflow-hidden bg-slate-800"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {profile?.avatar_url ? (
+                          <img
+                            src={profile.avatar_url}
+                            alt="User"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <UserIcon className="size-4 text-slate-400 m-auto mt-1" />
+                        )}
+                      </Link>
+                      <button
+                        onClick={handleSignOut}
+                        className="p-2 text-slate-400"
+                      >
+                        <LogOut className="size-5" />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="w-full bg-primary text-white text-center py-2 rounded-lg font-bold"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Log In
+                  </Link>
+                )}
               </div>
             </div>
           </nav>
@@ -147,3 +211,4 @@ export default function Header() {
     </header>
   );
 }
+

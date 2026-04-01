@@ -1,15 +1,35 @@
 import SettingsSectionHeader from "../../components/settings/SettingsSectionHeader";
+import NotificationSettingsForm from "../../components/settings/notifications/NotificationSettingsForm";
+import { createClient } from "../../lib/supabase-server";
+import { redirect } from "next/navigation";
 
-export default function NotificationsSettings() {
+export default async function NotificationsSettings() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("preferences")
+    .eq("id", user.id)
+    .single();
+
   return (
     <>
       <SettingsSectionHeader 
-        title="Notifications" 
-        description="Stay updated on batch prompt status and important Catalyst product alerts."
+        title="Notification Preferences" 
+        description="Stay updated on batch prompt status, security alerts, and important Catalyst product updates."
       />
-      <div className="flex flex-col gap-6 animate-fadeIn">
-        <p className="text-slate-400">Notification preferences coming in Chunk 8.</p>
+      
+      <div className="flex flex-col gap-10 animate-fadeIn">
+        <section>
+          <NotificationSettingsForm user={user} preferences={profile?.preferences || {}} />
+        </section>
       </div>
     </>
   );
 }
+
