@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, Key, CreditCard, BarChart2, Lock, Bell } from "lucide-react";
-// import { cn } from "@/lib/utils"; // Not sure if cn exists, I'll use template literals if not
+import { Settings, Key, CreditCard, BarChart2, Lock, Bell, LogOut } from "lucide-react";
+import { useUser } from "../../context/AuthContext";
 
 const NAV_ITEMS = [
   { title: "General", href: "/settings/general", icon: Settings },
@@ -16,6 +16,7 @@ const NAV_ITEMS = [
 
 export default function SettingsSidebarNav() {
   const pathname = usePathname();
+  const { signOut } = useUser();
 
   return (
     <nav className="flex flex-row lg:flex-col gap-1">
@@ -44,6 +45,16 @@ export default function SettingsSidebarNav() {
           </Link>
         );
       })}
+
+      <div className="hidden lg:block my-2 h-px bg-white/10 mx-4" />
+
+      <button
+        onClick={() => signOut()}
+        className="flex items-center gap-2 sm:gap-3 px-4 py-2.5 sm:py-3 rounded-xl transition-all text-red-500/70 hover:text-red-400 hover:bg-red-500/5 group whitespace-nowrap border border-transparent"
+      >
+        <LogOut className="size-4 sm:size-5 transition-colors text-red-500/50 group-hover:text-red-400" />
+        <span className="font-medium text-sm sm:text-base">Sign Out</span>
+      </button>
     </nav>
   );
 }

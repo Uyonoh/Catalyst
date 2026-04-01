@@ -9,11 +9,11 @@ import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, profile } = useUser();
+  const { user, profile, signOut } = useUser();
   const router = useRouter();
 
   const handleSignOut = async () => {
-    await supabaseBrowser.auth.signOut();
+    await signOut();
     router.push("/login");
   };
 

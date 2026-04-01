@@ -8,12 +8,14 @@ interface AuthContextType {
   user: User | null;
   profile: any | null; // Replace any with Profile type if available
   isLoading: boolean;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
   isLoading: true,
+  signOut: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -24,37 +26,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    async function getUser() {
+    async function fetchProfile(userId: string) {
       try {
-        const { data: { user } } = await supabaseBrowser.auth.getUser();
-        if (mounted) {
-          setUser(user);
-          if (user) {
-             const { data: profileData } = await supabaseBrowser.from('profiles').select('*').eq('id', user.id).single();
-             if (mounted) setProfile(profileData);
-          }
-        }
+        const { data: profileData } = await supabaseBrowser
+          .from("profiles")
+          .select("*")
+          .eq("id", userId)
+          .single();
+        if (mounted) setProfile(profileData);
       } catch (err) {
-        console.error("Error fetching user data", err);
-      } finally {
-        if (mounted) setIsLoading(false);
+        console.error("Error fetching profile", err);
       }
     }
 
-    getUser();
-
+    // onAuthStateChange fires INITIAL_SESSION synchronously from local storage,
+    // making it the fast, reliable path to resolve isLoading. This avoids the
+    // infinite spinner caused by getUser() hanging on production cold starts
+    // (getUser() hits the Supabase network endpoint to validate the JWT,
+    // whereas the auth listener reads from local storage first).
     const { data: authListener } = supabaseBrowser.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-           const currentUser = session?.user ?? null;
-           setUser(currentUser);
-           if (currentUser) {
-              const { data: profileData } = await supabaseBrowser.from('profiles').select('*').eq('id', currentUser.id).single();
-              setProfile(profileData);
-           }
+        if (!mounted) return;
+
+        if (event === "INITIAL_SESSION") {
+          const currentUser = session?.user ?? null;
+          setUser(currentUser);
+          if (currentUser) {
+            await fetchProfile(currentUser.id);
+          }
+          // Always resolve isLoading on INITIAL_SESSION — this is the guaranteed
+          // first event fired by Supabase, even before any network calls.
+          if (mounted) setIsLoading(false);
+        } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+          const currentUser = session?.user ?? null;
+          setUser(currentUser);
+          if (currentUser) {
+            await fetchProfile(currentUser.id);
+          }
         } else if (event === "SIGNED_OUT") {
-           setUser(null);
-           setProfile(null);
+          setUser(null);
+          setProfile(null);
         }
       }
     );
@@ -65,8 +76,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
+  const signOut = async () => {
+    try {
+      const { error } = await supabaseBrowser.auth.signOut();
+      if (error) throw error;
+      setUser(null);
+      setProfile(null);
+    } catch (err) {
+      console.error("Error signing out:", err);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, profile, isLoading }}>
+    <AuthContext.Provider value={{ user, profile, isLoading, signOut }}>
       {children}
     </AuthContext.Provider>
   );
@@ -79,3 +101,4 @@ export const useUser = () => {
   }
   return context;
 };
+
