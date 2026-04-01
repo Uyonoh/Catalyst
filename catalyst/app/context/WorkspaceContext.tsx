@@ -28,6 +28,16 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState("gpt");
   
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const guestInput = localStorage.getItem("catalyst_guest_input");
+      if (guestInput) {
+        setInput(guestInput);
+        localStorage.removeItem("catalyst_guest_input");
+      }
+    }
+  }, []);
+  
   const { profile } = useUser();
   const preferences = profile?.preferences || {};
   

@@ -1,18 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { supabaseBrowser } from "../lib/supabase-browser";
 import { LayoutGrid } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextParam = searchParams.get("next");
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +28,7 @@ export default function LoginPage() {
           password,
         });
         if (error) throw error;
-        router.push("/");
+        router.push(nextParam || "/");
         router.refresh();
       } else {
         const { error } = await supabaseBrowser.auth.signUp({
@@ -55,7 +57,7 @@ export default function LoginPage() {
       const { error } = await supabaseBrowser.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: `${window.location.origin}${nextParam ? decodeURIComponent(nextParam) : "/"}`,
         },
       });
       if (error) throw error;
@@ -167,5 +169,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex flex-col items-center justify-center p-4 text-slate-400">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -3,6 +3,8 @@
 import React from "react";
 import GlassPanel from "../GlassPanel";
 import { useWorkspace } from "../../context/WorkspaceContext";
+import { useUser } from "../../context/AuthContext";
+import { useRouter } from "next/navigation";
 import ModelSelector, { MODELS } from "./ModelSelector";
 import { 
   FilePenLine, 
@@ -24,6 +26,9 @@ export default function RawIntentPanel() {
     isGenerating,
     parseIntent,
   } = useWorkspace();
+  const { user } = useUser();
+  const router = useRouter();
+  
   const selectedModel =
     MODELS.find((m) => m.id === selectedModelId) || MODELS[0];
 
@@ -129,7 +134,16 @@ export default function RawIntentPanel() {
         {/* Catalyze Button - Better mobile sizing */}
         <button
           className={`relative overflow-hidden bg-gradient-to-r from-cyan-500 to-primary text-white font-bold py-3.5 px-6 rounded-lg shadow-neon hover:shadow-neon-strong transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 w-full sm:w-auto ${(!input.trim() || isGenerating) ? "opacity-70 pointer-events-none" : ""}`}
-          onClick={() => parseIntent(input)}
+          onClick={() => {
+            if (!user) {
+              if (typeof window !== "undefined") {
+                 localStorage.setItem("catalyst_guest_input", input);
+              }
+              router.push("/login?next=/studio");
+              return;
+            }
+            parseIntent(input);
+          }}
           disabled={!input.trim() || isGenerating}
           aria-label="Generate prompt"
         >

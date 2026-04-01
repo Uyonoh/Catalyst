@@ -35,13 +35,14 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const protectedPaths = ["/settings", "/studio", "/library", "/history"];
+  const protectedPaths = ["/settings", "/library", "/history"];
   const isProtectedPath = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );
 
   if (isProtectedPath && !user) {
     const url = request.nextUrl.clone();
+    url.searchParams.set("next", request.nextUrl.pathname);
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
