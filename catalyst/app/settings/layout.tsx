@@ -40,18 +40,18 @@ export default function SettingsLayout({
 
       <Header />
       
-      <main className="flex-1 w-full max-w-[1400px] mx-auto pt-24 pb-12 px-4 md:px-8 relative z-10">
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
+      <main className="flex-1 w-full max-w-[1400px] mx-auto pt-20 lg:pt-24 pb-12 px-4 md:px-8 relative z-10">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-start">
           {/* Sidebar Nav */}
           <aside className="w-full lg:w-64 shrink-0 lg:sticky lg:top-24">
             <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-1 px-4">
-                <h1 className="text-3xl font-black text-white tracking-tight">Settings</h1>
-                <p className="text-slate-500 text-sm">Manage your Catalyst account</p>
+              <div className="flex flex-col gap-1 px-4 lg:px-0">
+                <h1 className="text-2xl lg:text-3xl font-black text-white tracking-tight">Settings</h1>
+                <p className="text-slate-500 text-xs lg:text-sm">Manage your Catalyst account</p>
               </div>
               
               {/* Mobile horizontal scroll, Desktop vertical list */}
-              <div className="w-full overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
+              <div className="w-full overflow-x-auto pb-2 -mx-4 px-4 lg:mx-0 lg:px-0 scrollbar-hide">
                 <div className="min-w-max lg:min-w-0">
                   <SettingsSidebarNav />
                 </div>
@@ -61,7 +61,7 @@ export default function SettingsLayout({
 
           {/* Main Content Area */}
           <section className="flex-1 w-full min-w-0">
-            <div className="glass-panel p-6 md:p-10 rounded-3xl animate-fadeIn border-white/5">
+            <div className="glass-panel p-4 sm:p-6 md:p-10 rounded-2xl sm:rounded-3xl animate-fadeIn border-white/5">
               {children}
             </div>
           </section>

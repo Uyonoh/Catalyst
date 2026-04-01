@@ -41,7 +41,7 @@ export default function SubscriptionPanel({ plan, promptsCount, analysesCount }:
   return (
     <div className="flex flex-col gap-8 w-full max-w-3xl">
       {/* Current Plan Card */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/20 p-8 pt-10">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-black/20 p-5 sm:p-8 pt-8 sm:pt-10">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400" />
         
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">

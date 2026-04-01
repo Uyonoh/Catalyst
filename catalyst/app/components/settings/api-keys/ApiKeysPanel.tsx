@@ -85,8 +85,8 @@ export default function ApiKeysPanel() {
               <SettingsFormRow
                 label={provider.name}
                 description={
-                  <span>
-                    Get your key at <a href={provider.helpLink} target="_blank" className="text-cyan-500 hover:underline">{provider.helpLink.replace("https://", "")}</a>
+                  <span className="block truncate sm:whitespace-normal">
+                    Get your key at <a href={provider.helpLink} target="_blank" className="text-cyan-500 hover:underline break-all">{provider.helpLink.replace("https://", "")}</a>
                   </span>
                 }
               >

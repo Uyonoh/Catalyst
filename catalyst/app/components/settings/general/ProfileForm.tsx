@@ -69,13 +69,13 @@ export default function ProfileForm({ user, profile }: { user: User; profile: an
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-3xl">
-      <div className="flex items-center gap-6 mb-4">
-        <label className="relative flex items-center justify-center size-24 rounded-full bg-slate-800 border-2 border-white/10 group cursor-pointer overflow-hidden shrink-0">
+    <div className="flex flex-col gap-8 w-full max-w-3xl">
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-8 mb-4 text-center sm:text-left pt-2 sm:pt-0">
+        <label className="relative flex items-center justify-center size-24 sm:size-28 rounded-full bg-slate-800 border-2 border-white/10 group cursor-pointer overflow-hidden shrink-0 shadow-neon">
           {avatarUrl ? (
             <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
           ) : (
-            <UserIcon className="size-10 text-slate-500" />
+            <UserIcon className="size-10 sm:size-12 text-slate-500" />
           )}
           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
             {isUploading ? (
@@ -92,9 +92,9 @@ export default function ProfileForm({ user, profile }: { user: User; profile: an
             disabled={isUploading}
           />
         </label>
-        <div>
-          <h3 className="text-lg font-bold text-white mb-1">Avatar</h3>
-          <p className="text-sm text-slate-400">
+        <div className="flex flex-col gap-1.5">
+          <h3 className="text-lg sm:text-xl font-bold text-white">Profile Photo</h3>
+          <p className="text-sm text-slate-400 max-w-[280px] sm:max-w-md">
             Click the image to upload a new avatar. Recommended size: 256x256px.
           </p>
         </div>

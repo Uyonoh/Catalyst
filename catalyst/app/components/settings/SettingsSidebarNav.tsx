@@ -18,7 +18,7 @@ export default function SettingsSidebarNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-1">
+    <nav className="flex flex-row lg:flex-col gap-1">
       {NAV_ITEMS.map((item) => {
         const isActive = pathname === item.href;
         const Icon = item.icon;
@@ -27,20 +27,20 @@ export default function SettingsSidebarNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${
+            className={`flex items-center gap-2 sm:gap-3 px-4 py-2.5 sm:py-3 rounded-xl transition-all group whitespace-nowrap ${
               isActive
-                ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
+                ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
                 : "text-slate-400 hover:text-white hover:bg-white/5 border border-transparent"
             }`}
           >
             <Icon
-              className={`size-5 transition-colors ${
+              className={`size-4 sm:size-5 transition-colors ${
                 isActive
                   ? "text-cyan-400"
                   : "text-slate-500 group-hover:text-slate-300"
               }`}
             />
-            <span className="font-medium">{item.title}</span>
+            <span className="font-medium text-sm sm:text-base">{item.title}</span>
           </Link>
         );
       })}
