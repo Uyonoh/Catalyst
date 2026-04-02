@@ -4,6 +4,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import SettingsSidebarNav from "../components/settings/SettingsSidebarNav";
 import { useUser } from "../context/AuthContext";
+import { Skeleton } from "../components/Skeleton";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -54,11 +55,21 @@ export default function SettingsLayout({
               </div>
             </aside>
 
-            {/* Main Content Area */}
+            {/* Main Content Area Skeleton */}
             <section className="flex-1 w-full min-w-0">
-              <div className="glass-panel p-4 sm:p-6 md:p-10 rounded-2xl sm:rounded-3xl animate-fadeIn border-white/5">
-                <div className="min-h-screen bg-background-dark flex items-center justify-center">
-                  <div className="size-12 border-4 border-cyan-500/20 border-t-cyan-400 rounded-full animate-spin" />
+              <div className="glass-panel p-4 sm:p-6 md:p-10 rounded-2xl sm:rounded-3xl animate-fadeIn border-white/5 flex flex-col gap-8">
+                <div className="flex flex-col gap-2">
+                  <Skeleton className="h-8 w-48 mb-2" />
+                  <Skeleton className="h-4 w-64" />
+                </div>
+                <div className="flex flex-col gap-6">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="flex flex-col gap-3">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-12 w-full rounded-xl" />
+                    </div>
+                  ))}
+                  <Skeleton className="h-12 w-32 rounded-xl self-end mt-4" />
                 </div>
               </div>
             </section>

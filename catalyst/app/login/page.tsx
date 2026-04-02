@@ -5,6 +5,7 @@ import { supabaseBrowser } from "../lib/supabase-browser";
 import { LayoutGrid } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Skeleton } from "../components/Skeleton";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -174,7 +175,28 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex flex-col items-center justify-center p-4 text-slate-400">Loading...</div>}>
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="flex items-center gap-3 mb-10">
+          <Skeleton variant="circle" width={40} height={40} />
+          <Skeleton width={120} height={32} />
+        </div>
+        <div className="w-full max-w-md glass-panel p-8 rounded-3xl flex flex-col gap-6">
+          <Skeleton className="h-8 w-48 self-center" />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-12 w-full rounded-xl" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-12 w-full rounded-xl" />
+            </div>
+          </div>
+          <Skeleton className="h-12 w-full rounded-xl mt-2" />
+        </div>
+      </div>
+    }>
       <LoginForm />
     </Suspense>
   );
