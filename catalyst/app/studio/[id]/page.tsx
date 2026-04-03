@@ -1,7 +1,7 @@
 import React from "react";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-import { createClient } from "../../lib/supabase-server";
+import { createClient, getServerUser } from "../../lib/supabase-server";
 import PromptEditorView from "./PromptEditorView";
 
 interface PageProps {
@@ -38,6 +38,7 @@ export default async function PromptViewEditPage({ params, searchParams }: PageP
   const id = resolvedParams.id;
   const isPrivate = resolvedSearchParams.private === "true";
   
+  const user = await getServerUser();
   const promptData = await getPrompt(id, isPrivate);
 
   if (!promptData) {
@@ -65,6 +66,7 @@ export default async function PromptViewEditPage({ params, searchParams }: PageP
     content: promptData.content || promptData.snippet || "",
     raw_input: promptData.raw_input || "No raw intent available",
     target_model: promptData.target_model || "",
+    user_id: promptData.user_id,
   };
 
   return (
@@ -76,9 +78,10 @@ export default async function PromptViewEditPage({ params, searchParams }: PageP
 
       <div className="relative z-10 min-h-screen flex flex-col">
         <Header />
-        <PromptEditorView id={id} initialData={initialData} />
+        <PromptEditorView id={id} initialData={initialData} currentUserId={user?.id} />
         <Footer />
       </div>
     </>
   );
 }
+
