@@ -1,17 +1,21 @@
 import React from "react";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-import { supabase } from "../../lib/supabase";
+import { createClient } from "../../lib/supabase-server";
 import PromptEditorView from "./PromptEditorView";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-async function getPrompt(id: string) {
+async function getPrompt(id: string, isPrivate: boolean = false) {
   try {
-    const { data, error } = await supabase
-      .from("prompts_public")
+    const supabaseClient = await createClient();
+    const table = isPrivate ? "prompts" : "prompts_public";
+    
+    const { data, error } = await supabaseClient
+      .from(table)
       .select("*")
       .eq("id", id)
       .single();
@@ -28,10 +32,13 @@ async function getPrompt(id: string) {
   }
 }
 
-export default async function PromptViewEditPage({ params }: PageProps) {
+export default async function PromptViewEditPage({ params, searchParams }: PageProps) {
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   const id = resolvedParams.id;
-  const promptData = await getPrompt(id);
+  const isPrivate = resolvedSearchParams.private === "true";
+  
+  const promptData = await getPrompt(id, isPrivate);
 
   if (!promptData) {
     return (
