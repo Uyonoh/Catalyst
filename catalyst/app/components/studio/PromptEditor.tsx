@@ -9,6 +9,7 @@ import {
   Loader2, 
   Sparkles, 
   Copy, 
+  Check,
   Save, 
   Lock, 
   Globe,
@@ -29,6 +30,7 @@ const ICON_MAP: Record<string, any> = {
 };
 
 interface PromptEditorProps {
+  title?: string;
   initialEditedText: string;
   initialRawIntent: string;
   isAuthor: boolean;
@@ -36,20 +38,24 @@ interface PromptEditorProps {
   onDiscard?: () => void;
   onSave?: (text: string) => void;
   isLoading?: boolean;
+  className?: string;
 }
 
 export default function PromptEditor({
+  title = "Refined Output",
   initialEditedText,
   initialRawIntent,
   isAuthor,
   selectedModelId,
   onDiscard,
   onSave,
-  isLoading = false
+  isLoading = false,
+  className
 }: PromptEditorProps) {
   const router = useRouter();
   const [editedText, setEditedText] = useState(initialEditedText);
-  const selectedModel = MODELS.find(m => m.id === selectedModelId) || MODELS[0];
+  const [copied, setCopied] = useState(false);
+  const selectedModel = MODELS.find(m => m.id === selectedModelId || m.name === selectedModelId) || MODELS[0];
 
   useEffect(() => {
     setEditedText(initialEditedText);
@@ -58,6 +64,8 @@ export default function PromptEditor({
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(editedText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy text: ", err);
     }
@@ -71,11 +79,17 @@ export default function PromptEditor({
     if (onDiscard) onDiscard();
   };
 
+  const baseContainerClass = "flex-1 w-full max-w-[1000px] mx-auto px-4 sm:px-6 flex flex-col gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500";
+  const finalContainerClass = className ? `${baseContainerClass} ${className}` : `${baseContainerClass} pt-4 pb-12`;
+
   return (
-    <div className="flex-1 w-full max-w-[1000px] mx-auto pt-4 pb-12 px-4 sm:px-6 flex flex-col gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className={finalContainerClass}>
       <div className="flex items-center gap-4 mb-2">
         <button 
-          onClick={() => router.back()}
+          onClick={() => {
+            if (onDiscard) onDiscard();
+            else router.back();
+          }}
           className="text-slate-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-xl border border-white/5 active:scale-95 flex items-center justify-center shrink-0"
         >
           <ArrowLeft className="size-6" />
@@ -106,7 +120,7 @@ export default function PromptEditor({
                   <Sparkles className="size-5" />
                 </div>
                 <div>
-                  <h2 className="text-white font-bold tracking-tight text-lg">Refined Output</h2>
+                  <h2 className="text-white font-bold tracking-tight text-lg">{title}</h2>
                   <p className="text-xs text-slate-400 font-medium">Ready for your AI model</p>
                 </div>
               </div>
@@ -114,10 +128,10 @@ export default function PromptEditor({
               <div className="flex items-center gap-2">
                 <button 
                   onClick={handleCopy}
-                  className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-white/5 rounded-lg transition-all"
-                  title="Copy to clipboard"
+                  className={`p-2 rounded-lg transition-all ${copied ? "text-emerald-400" : "text-slate-400 hover:text-cyan-400 hover:bg-white/5"}`}
+                  title={copied ? "Copied!" : "Copy to clipboard"}
                 >
-                  <Copy className="size-5" />
+                  {copied ? <Check className="size-5" /> : <Copy className="size-5" />}
                 </button>
               </div>
             </div>

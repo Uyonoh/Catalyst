@@ -41,3 +41,11 @@ yarn-error.log*
 next-env.d.ts
 
 *.sql
+
+# agent
+.agent
+.agent/*
+.agent/**
+
+# todo
+TODO.md

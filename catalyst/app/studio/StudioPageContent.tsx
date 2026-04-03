@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import RawIntentPanel from "../components/studio/RawIntentPanel";
 import LiveAnalysisPanel from "../components/studio/LiveAnalysisPanel";
 import OptimizationSettings from "../components/studio/OptimizationSettings";
 import { WorkspaceProvider, useWorkspace } from "../context/WorkspaceContext";
+import { useUser } from "../context/AuthContext";
+import { supabase } from "../lib/supabase";
 import PromptEditor from "../components/studio/PromptEditor";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -19,29 +22,32 @@ export default function StudioPageContent() {
 
   return (
     <WorkspaceProvider>
-      <StudioContent 
-        showAnalysis={showAnalysis} 
-        handleToggle={handleToggle} 
-        isTransitioning={isTransitioning} 
-        setIsTransitioning={setIsTransitioning} 
+      <StudioContent
+        showAnalysis={showAnalysis}
+        handleToggle={handleToggle}
+        isTransitioning={isTransitioning}
+        setIsTransitioning={setIsTransitioning}
       />
     </WorkspaceProvider>
   );
 }
 
-function StudioContent({ 
-  showAnalysis, 
-  handleToggle, 
-  isTransitioning, 
-  setIsTransitioning 
-}: { 
-  showAnalysis: boolean; 
-  handleToggle: () => void; 
-  isTransitioning: boolean; 
+function StudioContent({
+  showAnalysis,
+  handleToggle,
+  isTransitioning,
+  setIsTransitioning,
+}: {
+  showAnalysis: boolean;
+  handleToggle: () => void;
+  isTransitioning: boolean;
   setIsTransitioning: (v: boolean) => void;
 }) {
   const { parsedPrompt, input, selectedModel } = useWorkspace();
   const [showEditor, setShowEditor] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { user } = useUser();
+  const router = useRouter();
 
   useEffect(() => {
     if (parsedPrompt) {
@@ -57,17 +63,43 @@ function StudioContent({
       </div>
 
       {showEditor && parsedPrompt ? (
-         <PromptEditor
-           initialEditedText={parsedPrompt}
-           initialRawIntent={input}
-           isAuthor={true}
-           selectedModelId={selectedModel}
-           onDiscard={() => setShowEditor(false)}
-           onSave={(text) => {
-             console.log("Saving prompt:", text);
-             setShowEditor(false); 
-           }}
-         />
+        <PromptEditor
+          title="Newly Generated Prompt"
+          initialEditedText={parsedPrompt}
+          initialRawIntent={input}
+          isAuthor={true}
+          selectedModelId={selectedModel}
+          isLoading={isSaving}
+          onDiscard={() => setShowEditor(false)}
+          onSave={async (text) => {
+            if (!user) {
+              router.push("/login?redirect=/studio");
+              return;
+            }
+            try {
+              setIsSaving(true);
+              const { error } = await supabase.from("prompts").insert({
+                user_id: user.id,
+                title: "Untitled Generated Prompt",
+                content: text,
+                snippet:
+                  text.substring(0, 150) + (text.length > 150 ? "..." : ""),
+                raw_input: input,
+                target_model: selectedModel,
+              });
+              if (error) {
+                console.error("Failed to save prompt", error);
+              } else {
+                setShowEditor(false);
+                router.push("/library");
+              }
+            } catch (err) {
+              console.error("Error saving prompt", err);
+            } finally {
+              setIsSaving(false);
+            }
+          }}
+        />
       ) : (
         <main className="flex-1 w-full max-w-[1100px] mx-auto pt-16 pb-12 px-4 sm:px-6 flex flex-col gap-6 md:gap-8 animate-in fade-in duration-300">
           <section className="flex items-start justify-between gap-4">

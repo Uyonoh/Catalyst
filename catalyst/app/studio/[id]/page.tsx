@@ -39,8 +39,13 @@ export default async function PromptViewEditPage({ params }: PageProps) {
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-white mb-2">Prompt not found</h1>
-            <p className="text-slate-400">The prompt you're looking for doesn't exist or you don't have access.</p>
+            <h1 className="text-2xl font-bold text-white mb-2">
+              Prompt not found
+            </h1>
+            <p className="text-slate-400">
+              The prompt you're looking for doesn't exist or you don't have
+              access.
+            </p>
           </div>
         </main>
         <Footer />
@@ -51,7 +56,7 @@ export default async function PromptViewEditPage({ params }: PageProps) {
   const initialData = {
     title: promptData.title || "Untitled",
     content: promptData.content || promptData.snippet || "",
-    raw_intent: promptData.raw_intent || "No raw intent available",
+    raw_input: promptData.raw_input || "No raw intent available",
     target_model: promptData.target_model || "",
   };
 
