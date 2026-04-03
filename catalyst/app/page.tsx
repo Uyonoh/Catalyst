@@ -5,9 +5,11 @@ import QuickAccessModels from "./components/home/QuickAccessModels";
 import StatsOverview from "./components/home/StatsOverview";
 import RecentPrompts from "./components/home/RecentPrompts";
 import { getRecentPrompts } from "./lib/prompts";
+import { getServerUser } from "./lib/supabase-server";
 
 export default async function Home() {
-  const recentPrompts = await getRecentPrompts();
+  const user = await getServerUser();
+  const recentPrompts = await getRecentPrompts(user?.id || "");
 
   return (
     <>

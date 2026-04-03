@@ -1,13 +1,13 @@
-import { supabase } from "./supabase";
+import { createClient } from "../lib/supabase-server";
 import { LibraryItem } from "../components/library/LibraryCard";
 
-export async function getRecentPrompts(): Promise<LibraryItem[]> {
+export async function getRecentPrompts(userId: string): Promise<LibraryItem[]> {
+  const supabase = await createClient();
   const { data, error } = await supabase
-    .from("prompts_public")
-    .select(
-      "id, title, updated_at, snippet, content, target_model, model_color, tag, icon, icon_color, has_gradient",
-    )
-    .order("updated_at", { ascending: false })
+    .from("prompts")
+    .select("id, title, updated_at, snippet, content, target_model, model_color, tag, icon, icon_color, has_gradient")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
     .limit(5);
 
   if (error) {
