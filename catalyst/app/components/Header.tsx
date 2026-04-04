@@ -1,6 +1,16 @@
 "use client";
 
-import { Bell, Menu, X, LayoutGrid, LogOut, User as UserIcon, Library, Sparkles, History as HistoryIcon } from "lucide-react";
+import {
+  Bell,
+  Menu,
+  X,
+  LayoutGrid,
+  LogOut,
+  User as UserIcon,
+  Library,
+  Sparkles,
+  History as HistoryIcon,
+} from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { useUser } from "../context/AuthContext";
@@ -18,7 +28,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/10 glass-panel-dark">
+    <header className={`sticky top-0 z-50 w-full border-b border-white/10 glass-panel-dark transition-colors duration-300 ${isMobileMenuOpen ? '!bg-[#101922]' : ''}`}>
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
@@ -71,7 +81,7 @@ export default function Header() {
               </Link>
             )}
           </div>
-          
+
           {/* User actions */}
           <div className="flex items-center gap-3 border-l border-white/10 pl-6">
             {user ? (
@@ -124,7 +134,7 @@ export default function Header() {
         {/* Mobile Menu */}
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <nav className="absolute top-16 left-0 right-0 glass-panel-dark border-t border-white/10 md:hidden animate-slideDown overflow-hidden">
+          <nav className="absolute top-16 left-0 right-0 bg-[#101922] border-t border-white/10 md:hidden animate-slideDown overflow-hidden">
             <div className="px-6 py-8 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Link
@@ -136,7 +146,9 @@ export default function Header() {
                     <Library className="size-5" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black mb-1">Workspace</span>
+                    <span className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black mb-1">
+                      Workspace
+                    </span>
                     <span className="text-base">Library</span>
                   </div>
                 </Link>
@@ -149,7 +161,9 @@ export default function Header() {
                     <Sparkles className="size-5" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black mb-1">Creator</span>
+                    <span className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black mb-1">
+                      Creator
+                    </span>
                     <span className="text-base">Studio</span>
                   </div>
                 </Link>
@@ -184,9 +198,11 @@ export default function Header() {
                         </div>
                         <div>
                           <p className="text-sm font-bold text-white leading-tight">
-                            {profile?.full_name || 'User Profile'}
+                            {profile?.full_name || "User Profile"}
                           </p>
-                          <p className="text-xs text-slate-500">Active Account</p>
+                          <p className="text-xs text-slate-500">
+                            Active Account
+                          </p>
                         </div>
                       </div>
                       <button
@@ -230,4 +246,3 @@ export default function Header() {
     </header>
   );
 }
-
