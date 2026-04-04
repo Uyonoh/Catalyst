@@ -21,8 +21,26 @@ import {
 } from "lucide-react";
 import { ICON_MAP } from "@/app/components/studio/ModelSelector";
 
+export interface RecentItem {
+  id: string;
+  title: string;
+  updated_at: string;
+  snippet: string;
+  content: string;
+  model: string;
+  model_color: string;
+  tag: string;
+  icon: string;
+  icon_color: string;
+  has_gradient: boolean;
+  raw_input: string;
+  target_model: string;
+  created_at: string;
+  is_public: boolean;
+}
+
 interface RecentPromptsProps {
-  prompts: LibraryItem[];
+  prompts: RecentItem[];
 }
 
 // Fixed mapping for mockup consistency
@@ -136,7 +154,7 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                   )}
                 </button>
                 <a
-                  href={`/studio/${prompt?.id}`}
+                  href={`/studio/${prompt.id}${!prompt.is_public ? "?private=true" : ""}`}
                   className="p-1.5 hover:bg-white/10 rounded-md text-slate-400 hover:text-cyan-400 transition-colors flex items-center justify-center"
                   title="Edit"
                 >

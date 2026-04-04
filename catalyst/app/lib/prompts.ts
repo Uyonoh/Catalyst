@@ -1,11 +1,11 @@
 import { createClient } from "../lib/supabase-server";
-import { LibraryItem } from "../components/library/LibraryCard";
+import { RecentItem } from "../components/home/RecentPrompts";
 
-export async function getRecentPrompts(userId: string): Promise<LibraryItem[]> {
+export async function getRecentPrompts(userId: string): Promise<RecentItem[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("prompts")
-    .select("id, title, updated_at, snippet, content, target_model, model_color, tag, icon, icon_color, has_gradient")
+    .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(5);
@@ -19,7 +19,7 @@ export async function getRecentPrompts(userId: string): Promise<LibraryItem[]> {
   return (data || []).map((item: any) => ({
     ...item,
     model: item.target_model,
-  })) as LibraryItem[];
+  })) as RecentItem[];
 }
 
 const PROMPTS = [
