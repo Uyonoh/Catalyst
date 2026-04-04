@@ -66,6 +66,49 @@
   }
 }
 
+@keyframes clickPulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.97); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes feedbackGhost {
+  0% { box-shadow: 0 0 0 0 rgba(37, 140, 244, 0.4); }
+  100% { box-shadow: 0 0 0 10px rgba(37, 140, 244, 0); }
+}
+
+/* Click feedback global states */
+[data-clicking="true"] {
+  animation: clickPulse 1.2s infinite ease-in-out !important;
+  position: relative;
+  filter: brightness(1.2) contrast(1.1);
+}
+
+[data-clicking="true"]::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  animation: feedbackGhost 1.2s infinite ease-out;
+  pointer-events: none;
+  z-index: 10;
+}
+
+[data-feedback-style="ripple"] {
+  animation: rippleScale 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+[data-feedback-style="ripple"]::after {
+  inset: -12px;
+  background: radial-gradient(circle at center, rgba(37, 140, 244, 0.15) 0%, transparent 70%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@keyframes rippleScale {
+  0% { transform: scale(1); }
+  100% { transform: scale(0.95); opacity: 0.9; }
+}
+
 @keyframes shimmer {
   from {
     transform: translateX(-100%);

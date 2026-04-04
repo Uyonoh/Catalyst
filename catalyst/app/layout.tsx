@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
+import { ClickFeedbackProvider } from "./components/ClickFeedbackProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,7 +28,9 @@ export default function RootLayout({
       <body
         className={`${inter.className} bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display min-h-screen flex flex-col overflow-x-hidden selection:bg-cyan-500/30`}
       >
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <ClickFeedbackProvider>{children}</ClickFeedbackProvider>
+        </AuthProvider>
       </body>
     </html>
   );
