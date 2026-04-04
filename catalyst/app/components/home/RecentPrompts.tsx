@@ -118,7 +118,7 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                 })()}
                 <span className="text-xs text-slate-400">{prompt.model}</span>
               </div>
-              <div className="flex items-center gap-1 text-cyan-400 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+              <div className="flex items-center gap-1 text-cyan-400 text-xs font-medium sm:opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
                 <button
                   onClick={(e) => {
                     e.preventDefault();

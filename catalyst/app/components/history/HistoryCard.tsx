@@ -2,17 +2,17 @@
 
 import React, { useState } from "react";
 import GlassPanel from "../GlassPanel";
-import { 
-  Copy, 
-  Check, 
-  Edit, 
-  Clock, 
+import {
+  Copy,
+  Check,
+  Edit,
+  Clock,
   ArrowRight,
   Sparkles,
   Zap,
   Cpu,
   BrainCircuit,
-  Trash2
+  Trash2,
 } from "lucide-react";
 import { formatUpdated } from "../library/LibraryCard";
 import { supabase } from "../../lib/supabase";
@@ -64,10 +64,15 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (confirm("Are you sure you want to delete this prompt from your history?")) {
+    if (
+      confirm("Are you sure you want to delete this prompt from your history?")
+    ) {
       setIsDeleting(true);
       try {
-        const { error } = await supabase.from("prompts").delete().eq("id", item.id);
+        const { error } = await supabase
+          .from("prompts")
+          .delete()
+          .eq("id", item.id);
         if (error) throw error;
         if (onDelete) onDelete(item.id);
       } catch (err) {
@@ -80,9 +85,9 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
   const Icon = MODEL_ICONS[item.target_model] || BrainCircuit;
 
   return (
-    <GlassPanel 
-      hoverable 
-      className={`p-5 flex flex-col gap-4 group cursor-pointer relative overflow-hidden active:scale-[0.98] transition-all h-full ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}
+    <GlassPanel
+      hoverable
+      className={`p-5 flex flex-col gap-4 group relative overflow-hidden active:scale-[0.98] transition-all h-full ${isDeleting ? "opacity-50 pointer-events-none" : ""}`}
     >
       <div className="flex justify-between items-start z-10">
         <div className="flex items-center gap-3">
@@ -99,7 +104,7 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
             </div>
           </div>
         </div>
-        
+
         <div className="flex gap-1">
           <button
             onClick={handleDelete}
@@ -113,18 +118,22 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-1.5">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Raw Intent</span>
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+            Raw Intent
+          </span>
           <p className="text-slate-400 text-sm line-clamp-2 italic bg-white/5 p-2 rounded-lg border border-white/5">
             "{item.raw_input}"
           </p>
         </div>
 
         <div className="flex items-center justify-center py-1">
-          <ArrowRight className="size-4 text-cyan-500/40" />
+          {/* <ArrowRight className="size-4 text-cyan-500/40" />- - - */}
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-[10px] font-bold text-cyan-500/70 uppercase tracking-wider">Optimized Prompt</span>
+          <span className="text-[10px] font-bold text-cyan-500/70 uppercase tracking-wider">
+            Optimized Prompt
+          </span>
           <p className="text-slate-200 text-sm line-clamp-3 font-mono bg-cyan-500/5 p-3 rounded-lg border border-cyan-500/10 group-hover:border-cyan-500/30 transition-colors">
             {item.content}
           </p>
@@ -137,26 +146,33 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
             {item.target_model}
           </span>
         </div>
-        
+
         <div className="flex gap-2">
+          {/* Only display text on larger screens (> sm) */}
           <button
             onClick={handleCopy}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              copied 
-                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
+              copied
+                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
                 : "bg-white/5 text-slate-400 hover:bg-cyan-500/10 hover:text-cyan-400 border border-white/10 hover:border-cyan-500/30"
             }`}
           >
-            {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-            {copied ? "Copied" : "Copy"}
+            {copied ? (
+              <Check className="size-3.5" />
+            ) : (
+              <Copy className="size-3.5" />
+            )}
+            <span className="hidden sm:block">
+              {copied ? "Copied" : "Copy"}
+            </span>
           </button>
-          
+
           <a
-            href={`/studio/${item.id}${!item.is_public ? '?private=true' : ''}`}
+            href={`/studio/${item.id}${!item.is_public ? "?private=true" : ""}`}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 transition-all shadow-[0_0_12px_rgba(6,182,212,0.1)]"
           >
             <Edit className="size-3.5" />
-            Edit
+            <span className="hidden sm:block">Edit</span>
           </a>
         </div>
       </div>
