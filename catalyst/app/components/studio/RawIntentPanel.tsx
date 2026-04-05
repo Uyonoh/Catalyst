@@ -1,19 +1,21 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import GlassPanel from "../GlassPanel";
 import { useWorkspace } from "../../context/WorkspaceContext";
 import { useUser } from "../../context/AuthContext";
 import { useRouter } from "next/navigation";
 import ModelSelector, { MODELS } from "./ModelSelector";
-import { 
-  FilePenLine, 
-  Zap, 
-  ImagePlus, 
-  Mic, 
-  History, 
-  Loader2, 
-  Sparkles 
+import PromptControlsPanel from "./PromptControlsPanel";
+import {
+  FilePenLine,
+  Zap,
+  ImagePlus,
+  Mic,
+  History,
+  Loader2,
+  Sparkles,
+  Settings2,
 } from "lucide-react";
 
 export default function RawIntentPanel() {
@@ -25,10 +27,12 @@ export default function RawIntentPanel() {
     result,
     isGenerating,
     parseIntent,
+    controls,
   } = useWorkspace();
   const { user } = useUser();
   const router = useRouter();
-  
+  const [showControls, setShowControls] = useState(false);
+
   const selectedModel =
     MODELS.find((m) => m.id === selectedModelId) || MODELS[0];
 
@@ -84,19 +88,41 @@ export default function RawIntentPanel() {
                   </span>
                 </div>
               )}
-              <ModelSelector />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowControls(!showControls)}
+                  className={`p-2 rounded-lg transition-all ${showControls ? "bg-cyan-500 text-white shadow-neon" : "bg-white/5 text-slate-400 hover:text-white"}`}
+                  title="Prompt Refinement Settings"
+                >
+                  <Settings2 className="size-5 md:size-4" />
+                </button>
+                <ModelSelector />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Textarea */}
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          className="w-full flex-1 bg-transparent border-none text-base md:text-xl text-white placeholder:text-slate-600 focus:ring-0 resize-none leading-relaxed focus:outline-none min-h-[120px] md:min-h-[150px]"
-          placeholder="Describe what you want to create... (e.g. 'I want a picture of a cyberpunk cat in a neon city raining at night')"
-          aria-label="Prompt input"
-        />
+        {/* Content Area - Toggle between Textarea and Controls */}
+        <div className="relative flex-1 flex flex-col min-h-0">
+          <div className={`transition-all duration-300 flex-1 flex flex-col ${showControls ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"}`}>
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className="w-full flex-1 bg-transparent border-none text-base md:text-xl text-white placeholder:text-slate-600 focus:ring-0 resize-none leading-relaxed focus:outline-none min-h-[120px] md:min-h-[150px]"
+              placeholder="Describe what you want to create... (e.g. 'I want a picture of a cyberpunk cat in a neon city raining at night')"
+              aria-label="Prompt input"
+            />
+          </div>
+
+          {/* Prompt Controls Panel Overlay */}
+          <div 
+            className={`absolute inset-0 z-10 transition-all duration-500 transform ${showControls ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0 pointer-events-none"}`}
+          >
+            <div className="h-full overflow-y-auto pr-1 custom-scrollbar">
+               <PromptControlsPanel />
+            </div>
+          </div>
+        </div>
 
         {/* Action Buttons - Mobile: Icons only in a grid */}
         <div className="flex justify-between">
@@ -133,22 +159,23 @@ export default function RawIntentPanel() {
 
         {/* Catalyze Button - Better mobile sizing */}
         <button
-          className={`relative overflow-hidden bg-gradient-to-r from-cyan-500 to-primary text-white font-bold py-3.5 px-6 rounded-lg shadow-neon hover:shadow-neon-strong transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 w-full sm:w-auto ${(!input.trim() || isGenerating) ? "opacity-70 pointer-events-none" : ""}`}
+          className={`relative overflow-hidden bg-gradient-to-r from-cyan-500 to-primary text-white font-bold py-3.5 px-6 rounded-lg shadow-neon hover:shadow-neon-strong transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 w-full sm:w-auto ${!input.trim() || isGenerating ? "opacity-70 pointer-events-none" : ""}`}
           onClick={() => {
             if (!user) {
               if (typeof window !== "undefined") {
-                 localStorage.setItem("catalyst_guest_input", input);
+                localStorage.setItem("catalyst_guest_input", input);
               }
               router.push("/login?next=/studio");
               return;
             }
-            parseIntent(input);
+            if (showControls) setShowControls(false);
+            parseIntent({ text: input, modelId: selectedModel.id, controls });
           }}
           disabled={!input.trim() || isGenerating}
           aria-label="Generate prompt"
         >
           <div
-            className={`absolute inset-0 bg-white/20 hover:bg-transparent transition-colors ${(!input.trim() || isGenerating) ? "opacity-50" : ""}`}
+            className={`absolute inset-0 bg-white/20 hover:bg-transparent transition-colors ${!input.trim() || isGenerating ? "opacity-50" : ""}`}
           />
           {isGenerating ? (
             <>
@@ -158,7 +185,7 @@ export default function RawIntentPanel() {
           ) : (
             <>
               <Sparkles className="size-5" />
-              <span>Generate Prompt</span>
+              <span>{showControls ? "Apply & Generate" : "Generate Prompt"}</span>
             </>
           )}
         </button>

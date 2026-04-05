@@ -1,15 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useWorkspace } from "../../context/WorkspaceContext";
 import GlassPanel from "../GlassPanel";
-import { 
-  Aperture, 
-  Target, 
-  Ruler, 
-  Zap, 
-  SlidersHorizontal, 
-  ChevronUp, 
-  ChevronDown 
+import {
+  Aperture,
+  Target,
+  Ruler,
+  Zap,
+  SlidersHorizontal,
+  ChevronUp,
+  ChevronDown,
+  Type,
+  Workflow,
+  HelpCircle,
 } from "lucide-react";
 
 const ICON_MAP: Record<string, any> = {
@@ -19,46 +23,39 @@ const ICON_MAP: Record<string, any> = {
   bolt: Zap,
 };
 
-const SETTINGS = [
-  {
-    id: "creativity",
-    title: "Creativity",
-    description: "Allow model to hallucinate details.",
-    icon: "shutter_speed",
-    color: "purple",
-    defaultValue: 75,
-    type: "slider" as const,
-  },
-  {
-    id: "precision",
-    title: "Precision",
-    description: "Adherence to raw intent.",
-    icon: "ads_click",
-    color: "cyan",
-    defaultValue: 50,
-    type: "slider" as const,
-  },
-  {
-    id: "length",
-    title: "Length",
-    description: "Output verbosity level.",
-    icon: "straighten",
-    color: "green",
-    defaultValue: 25,
-    type: "slider" as const,
-  },
-  {
-    id: "token",
-    title: "Token Usage",
-    description: "450 / 1000 credits.",
-    icon: "bolt",
-    color: "slate",
-    defaultValue: 45,
-    type: "progress" as const,
-  },
-];
-
 export default function OptimizationSettings() {
+  const { controls, setControls } = useWorkspace();
+
+  const SETTINGS = [
+    {
+      id: "creativity",
+      title: "Creativity",
+      description: "Allow model to hallucinate details.",
+      icon: "shutter_speed",
+      color: "purple",
+      defaultValue: controls.creativity ?? 0.75,
+      type: "slider" as const,
+    },
+    {
+      id: "precision",
+      title: "Precision",
+      description: "Adherence to raw intent.",
+      icon: "ads_click",
+      color: "cyan",
+      defaultValue: controls.precision ?? 0.5,
+      type: "slider" as const,
+    },
+    // {
+    //   id: "token",
+    //   title: "Token Usage",
+    //   description: "450 / 1000 credits.",
+    //   icon: "bolt",
+    //   color: "slate",
+    //   defaultValue: 45,
+    //   type: "progress" as const,
+    // },
+  ];
+
   const [settings, setSettings] = useState(
     SETTINGS.reduce(
       (acc, setting) => {
@@ -69,6 +66,15 @@ export default function OptimizationSettings() {
     ),
   );
   const [showSettings, setShowSettings] = useState(false);
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleClose = () => setActiveTooltip(null);
+    if (activeTooltip) {
+      window.addEventListener("click", handleClose);
+    }
+    return () => window.removeEventListener("click", handleClose);
+  }, [activeTooltip]);
 
   const handleReset = () => {
     const defaultSettings = SETTINGS.reduce(
@@ -171,7 +177,7 @@ export default function OptimizationSettings() {
             <GlassPanel
               key={setting.id}
               hoverable
-              className="p-5 rounded-xl cursor-pointer group border border-white/5 hover:border-cyan-500/30"
+              className="p-5 rounded-xl cursor-default group border border-white/5 hover:border-cyan-500/30"
             >
               <div className="flex justify-between items-start mb-3">
                 <div
@@ -215,6 +221,130 @@ export default function OptimizationSettings() {
             </GlassPanel>
           );
         })}
+
+        {/* Length Toggle */}
+        <GlassPanel
+          hoverable
+          className="p-5 rounded-xl cursor-default group border border-white/5 hover:border-cyan-500/30"
+        >
+          <div className="flex justify-between items-start mb-3">
+            <div
+              className={`p-2 rounded-lg bg-[#1b2127] text-emerald-400 group-hover:text-emerald-300 transition-colors`}
+              style={{}}
+            >
+              <Type className="size-6" />
+            </div>
+            <span
+              className={`text-xs font-bold bg-emerald-800/20 text-emerald-400 group-hover:text-emerald-300 px-2 py-1 rounded`}
+            >
+              {controls.length ?? "short"}
+            </span>
+          </div>
+
+          <h3 className="text-white font-bold mb-1">Output Length</h3>
+          <p className="text-slate-400 text-sm">
+            Set the length of the prompt.
+          </p>
+
+          {/* <div className=""> */}
+          <div className="grid grid-cols-3 gap-2 w-full mt-6">
+            {["short", "medium", "long"].map((l) => (
+              <button
+                key={l}
+                onClick={() => setControls({ length: l as any })}
+                className={`py-1.5 text-[10px] font-bold rounded-md border transition-all uppercase tracking-wider ${
+                  controls.length === l
+                    ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
+                    : "bg-slate-900/50 border-white/5 text-slate-500 hover:text-slate-300 hover:bg-white/5"
+                }`}
+              >
+                {l}
+              </button>
+            ))}
+          </div>
+          {/* </div> */}
+        </GlassPanel>
+
+        {/* Reasoning Strategy */}
+        <GlassPanel
+          hoverable
+          className="p-5 rounded-xl cursor-default group border border-white/5 hover:border-cyan-500/30"
+        >
+          <div className="flex justify-between items-start mb-3">
+            <div
+              className={`p-2 rounded-lg bg-[#1b2127] text-amber-400 group-hover:text-amber-300 transition-colors`}
+            >
+              <Workflow className="size-6" />
+            </div>
+            <span
+              className={`text-xs font-bold bg-amber-500/20 text-amber-400 group-hover:text-amber-300 px-2 py-1 rounded capitalize`}
+            >
+              {(controls.strategy ?? "default").replace("_", " ")}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5 mb-1">
+            <h3 className="text-white font-bold text-sm">Reasoning Strategy</h3>
+            <div className="group/info relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveTooltip(
+                    activeTooltip === "strategy" ? null : "strategy",
+                  );
+                }}
+                className="focus:outline-none flex items-center justify-center p-0.5 -m-0.5"
+                aria-label="Show strategy info"
+              >
+                <HelpCircle className="size-3.5 text-slate-500 hover:text-slate-400 cursor-help transition-colors" />
+              </button>
+              <div
+                className={`absolute bottom-full -left-20 sm:left-1/2 sm:-translate-x-1/2 mb-2 ${
+                  activeTooltip === "strategy"
+                    ? "block"
+                    : "hidden group-hover/info:block"
+                } w-52 p-3 bg-[#0f172a] border border-white/10 rounded-xl text-[10px] text-slate-400 leading-relaxed z-50 shadow-2xl pointer-events-none animate-fadeIn`}
+              >
+                <div className="space-y-2">
+                  <div>
+                    <p className="font-bold text-amber-400 uppercase tracking-wider text-[9px] mb-0.5">
+                      Standard
+                    </p>
+                    <p>Direct optimization. Best for simple prompts.</p>
+                  </div>
+                  <div className="pt-1 border-t border-white/5">
+                    <p className="font-bold text-amber-400 uppercase tracking-wider text-[9px] mb-0.5">
+                      Thought
+                    </p>
+                    <p>Explicit step-by-step reasoning before output.</p>
+                  </div>
+                </div>
+                {/* Arrow */}
+                <div className="absolute top-full left-1.5 sm:left-1/2 sm:-translate-x-1/2 border-8 border-transparent border-t-[#0f172a] hidden sm:block" />
+              </div>
+            </div>
+          </div>
+          <p className="text-slate-400 text-[11px]">Agent reasoning mode.</p>
+
+          <div className="grid grid-cols-2 gap-2 w-full mt-6">
+            {[
+              { id: "default", label: "Standard" },
+              { id: "chain_of_thought", label: "Thought" },
+            ].map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setControls({ strategy: s.id as any })}
+                className={`py-1.5 text-[10px] font-bold rounded-md border transition-all uppercase tracking-wider ${
+                  controls.strategy === s.id
+                    ? "bg-amber-500/20 border-amber-500/50 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]"
+                    : "bg-slate-900/50 border-white/5 text-slate-500 hover:text-slate-300 hover:bg-white/5"
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </GlassPanel>
       </div>
     </>
   );

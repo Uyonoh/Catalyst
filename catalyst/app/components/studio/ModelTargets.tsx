@@ -4,7 +4,7 @@ import { useState } from "react";
 import GlassPanel from "../GlassPanel";
 import { LayoutGrid, Zap } from "lucide-react";
 
-const MODELS = [
+export const MODELS = [
   { id: "midjourney", name: "Midjourney v6", type: "Img", checked: true },
   { id: "claude", name: "Claude 3 Opus", type: "Txt", checked: false },
   { id: "gpt", name: "GPT-4 Turbo", type: "Txt", checked: false },
