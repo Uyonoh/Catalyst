@@ -9,6 +9,7 @@ import { WorkspaceProvider, useWorkspace } from "../context/WorkspaceContext";
 import { useUser } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
 import PromptEditor from "../components/studio/PromptEditor";
+import Notification, { NotificationType } from "../components/Notification";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function StudioPageContent() {
@@ -46,6 +47,8 @@ function StudioContent({
   const { parsedPrompt, input, selectedModel } = useWorkspace();
   const [showEditor, setShowEditor] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
+  const [notification, setNotification] = useState<{ message: string; type: NotificationType } | null>(null);
   const { user } = useUser();
   const router = useRouter();
 
@@ -68,9 +71,17 @@ function StudioContent({
           initialEditedText={parsedPrompt}
           initialRawIntent={input}
           isAuthor={true}
+          isPublic={isPublic}
           selectedModelId={selectedModel}
           isLoading={isSaving}
           onDiscard={() => setShowEditor(false)}
+          onVisibilityChange={(val) => {
+            setIsPublic(val);
+            setNotification({
+              message: `Visibility set to ${val ? "Public" : "Private"}`,
+              type: "info"
+            });
+          }}
           onSave={async (text) => {
             if (!user) {
               router.push("/login?redirect=/studio");
@@ -86,15 +97,18 @@ function StudioContent({
                   text.substring(0, 150) + (text.length > 150 ? "..." : ""),
                 raw_input: input,
                 target_model: selectedModel,
+                is_public: isPublic,
               });
               if (error) {
                 console.error("Failed to save prompt", error);
+                setNotification({ message: "Failed to save prompt", type: "error" });
               } else {
                 setShowEditor(false);
                 router.push("/library");
               }
             } catch (err) {
               console.error("Error saving prompt", err);
+              setNotification({ message: "An error occurred", type: "error" });
             } finally {
               setIsSaving(false);
             }
@@ -181,6 +195,14 @@ function StudioContent({
       )}
 
       <div className="fixed bottom-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-900/50 to-transparent pointer-events-none" />
+      
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
     </>
   );
 }

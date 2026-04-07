@@ -67,6 +67,7 @@ export default async function PromptViewEditPage({ params, searchParams }: PageP
     raw_input: promptData.raw_input || "No raw intent available",
     target_model: promptData.target_model || "",
     user_id: promptData.user_id,
+    is_public: promptData.is_public ?? (isPrivate ? false : true),
   };
 
   return (

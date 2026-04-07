@@ -34,9 +34,11 @@ interface PromptEditorProps {
   initialEditedText: string;
   initialRawIntent: string;
   isAuthor: boolean;
+  isPublic?: boolean;
   selectedModelId?: string;
   onDiscard?: () => void;
   onSave?: (text: string) => void;
+  onVisibilityChange?: (isPublic: boolean) => void;
   isLoading?: boolean;
   className?: string;
 }
@@ -46,9 +48,11 @@ export default function PromptEditor({
   initialEditedText,
   initialRawIntent,
   isAuthor,
+  isPublic = false,
   selectedModelId,
   onDiscard,
   onSave,
+  onVisibilityChange,
   isLoading = false,
   className
 }: PromptEditorProps) {
@@ -209,10 +213,27 @@ export default function PromptEditor({
 
               <div className="flex justify-between items-center py-2">
                 <span className="text-slate-400 text-sm">Visibility</span>
-                <div className="flex items-center gap-1.5">
-                  <Globe className="size-4 text-slate-500" />
-                  <span className="text-xs text-slate-300 font-medium">Private</span>
-                </div>
+                <button 
+                  onClick={() => onVisibilityChange?.(!isPublic)}
+                  disabled={isLoading}
+                  className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border transition-all ${
+                    isPublic 
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
+                      : "bg-white/5 border-white/10 text-slate-400 hover:text-white"
+                  } hover:scale-105 active:scale-95 cursor-pointer`}
+                >
+                  {isPublic ? (
+                    <>
+                      <Globe className="size-4" />
+                      <span className="text-xs font-medium uppercase tracking-tight">Public</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="size-4" />
+                      <span className="text-xs font-medium uppercase tracking-tight">Private</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </GlassPanel>

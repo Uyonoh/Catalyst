@@ -1,4 +1,5 @@
 import Header from "../components/Header";
+export const revalidate = 60;
 import Footer from "../components/Footer";
 import LibraryBackground from "../components/library/LibraryBackground";
 import LibraryHero from "../components/library/LibraryHero";
