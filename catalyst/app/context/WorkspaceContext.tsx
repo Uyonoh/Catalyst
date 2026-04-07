@@ -34,6 +34,9 @@ interface WorkspaceContextType {
     modelId: string;
     controls?: PromptControls;
   }) => Promise<void>;
+  generationError: string | null;
+  retryCount: number;
+  clearGenerationError: () => void;
   preferences: any;
 }
 
@@ -81,6 +84,13 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   // LLM Parsing state
   const [parsedPrompt, setParsedPrompt] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const clearGenerationError = () => {
+    setGenerationError(null);
+    setRetryCount(0);
+  };
 
   const parseIntent = async ({
     text,
@@ -95,22 +105,45 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
     setIsGenerating(true);
     setParsedPrompt(null);
+    setGenerationError(null);
+    setRetryCount(0);
 
     const activeControls = overrideControls || controls;
+    const maxRetries = 3;
+    let attempt = 0;
+
+    const executeRequest = async (): Promise<boolean> => {
+      try {
+        const response = await fetch("/api/parse", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, model, controls: activeControls }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to generate prompt");
+        }
+
+        const data = await response.json();
+        setParsedPrompt(data.refinedPrompt);
+        return true;
+      } catch (err: any) {
+        console.error(`Attempt ${attempt + 1} failed:`, err);
+        if (attempt < maxRetries) {
+          attempt++;
+          setRetryCount(attempt);
+          const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          return executeRequest();
+        }
+        setGenerationError(err.message || "Failed to generate prompt after several attempts. Please try again later.");
+        return false;
+      }
+    };
 
     try {
-      const response = await fetch("/api/parse", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, model, controls: activeControls }),
-      });
-
-      if (!response.ok) throw new Error("Failed to generate prompt");
-
-      const data = await response.json();
-      setParsedPrompt(data.refinedPrompt);
-    } catch (err) {
-      console.error("Error parsing intent:", err);
+      await executeRequest();
     } finally {
       setIsGenerating(false);
     }
@@ -131,6 +164,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         parsedPrompt,
         isGenerating,
         parseIntent,
+        generationError,
+        retryCount,
+        clearGenerationError,
         preferences,
       }}
     >

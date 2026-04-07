@@ -89,6 +89,7 @@ export default function OptimizationSettings() {
 
   const handleSliderChange = (id: string, value: number) => {
     setSettings((prev) => ({ ...prev, [id]: value }));
+    setControls({ [id]: value });
   };
 
   const getLevelLabel = (value: number, type: string) => {
@@ -246,7 +247,6 @@ export default function OptimizationSettings() {
             Set the length of the prompt.
           </p>
 
-          {/* <div className=""> */}
           <div className="grid grid-cols-3 gap-2 w-full mt-6">
             {["short", "medium", "long"].map((l) => (
               <button
@@ -262,7 +262,6 @@ export default function OptimizationSettings() {
               </button>
             ))}
           </div>
-          {/* </div> */}
         </GlassPanel>
 
         {/* Reasoning Strategy */}

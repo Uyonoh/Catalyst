@@ -16,6 +16,8 @@ import {
   Loader2,
   Sparkles,
   Settings2,
+  AlertCircle,
+  RefreshCcw,
 } from "lucide-react";
 
 export default function RawIntentPanel() {
@@ -28,6 +30,9 @@ export default function RawIntentPanel() {
     isGenerating,
     parseIntent,
     controls,
+    generationError,
+    retryCount,
+    clearGenerationError,
   } = useWorkspace();
   const { user } = useUser();
   const router = useRouter();
@@ -84,7 +89,9 @@ export default function RawIntentPanel() {
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
                   </span>
                   <span className="text-[10px] font-black uppercase text-cyan-400 tracking-widest">
-                    Generating Refinement
+                    {retryCount > 0
+                      ? `Retrying Refinement (${retryCount}/3)`
+                      : "Generating Refinement"}
                   </span>
                 </div>
               )}
@@ -104,7 +111,9 @@ export default function RawIntentPanel() {
 
         {/* Content Area - Toggle between Textarea and Controls */}
         <div className="relative flex-1 flex flex-col min-h-0">
-          <div className={`transition-all duration-300 flex-1 flex flex-col ${showControls ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"}`}>
+          <div
+            className={`transition-all duration-300 flex-1 flex flex-col ${showControls ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"}`}
+          >
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -115,13 +124,53 @@ export default function RawIntentPanel() {
           </div>
 
           {/* Prompt Controls Panel Overlay */}
-          <div 
+          <div
             className={`absolute inset-0 z-10 transition-all duration-500 transform ${showControls ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0 pointer-events-none"}`}
           >
             <div className="h-full overflow-y-auto pr-1 custom-scrollbar">
-               <PromptControlsPanel />
+              <PromptControlsPanel />
             </div>
           </div>
+
+          {/* Error Overlay */}
+          {generationError && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center animate-in fade-in zoom-in duration-300 px-4">
+              <div className="w-full max-w-md bg-rose-500/20 border border-rose-500/20 rounded-2xl p-6 backdrop-blur-sm shadow-2xl flex flex-col items-center text-center gap-4">
+                <div className="size-12 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-400">
+                  <AlertCircle className="size-6" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-rose-100 font-bold text-lg">
+                    Generation Failed
+                  </h3>
+                  <p className="text-rose-300 text-sm leading-relaxed">
+                    {generationError}
+                  </p>
+                </div>
+                <div className="flex gap-3 w-full sm:w-auto">
+                  <button
+                    onClick={() => clearGenerationError()}
+                    className="flex-1 sm:flex-none px-6 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 transition-colors text-sm font-medium"
+                  >
+                    Dismiss
+                  </button>
+                  <button
+                    onClick={() =>
+                      parseIntent({
+                        text: input,
+                        modelId: selectedModel.id,
+                        controls,
+                      })
+                    }
+                    className="flex-1 sm:flex-none px-6 py-2 rounded-xl bg-rose-500 text-white hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20 text-sm font-bold flex items-center justify-center gap-2"
+                  >
+                    <RefreshCcw className="size-4" />
+                    <span className="hidden sm:block">Retry</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Action Buttons - Mobile: Icons only in a grid */}
@@ -180,12 +229,18 @@ export default function RawIntentPanel() {
           {isGenerating ? (
             <>
               <Loader2 className="size-5 animate-spin" />
-              <span>Generating...</span>
+              <span>
+                {retryCount > 0
+                  ? `Retrying (${retryCount}/3)...`
+                  : "Generating..."}
+              </span>
             </>
           ) : (
             <>
               <Sparkles className="size-5" />
-              <span>{showControls ? "Apply & Generate" : "Generate Prompt"}</span>
+              <span>
+                {showControls ? "Apply & Generate" : "Generate Prompt"}
+              </span>
             </>
           )}
         </button>

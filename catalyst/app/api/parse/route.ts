@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     const prompt = buildPrompt({ text, model: modelId, controls });
     
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
     });
     const refinedText = response.text || "";
