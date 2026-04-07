@@ -84,6 +84,13 @@
   filter: brightness(1.2) contrast(1.1);
 }
 
+/* Override for buttons to play only once */
+button[data-clicking="true"],
+button[data-clicking="true"]::after,
+button[data-feedback-style="ripple"] {
+  animation-iteration-count: 1 !important;
+}
+
 [data-clicking="true"]::after {
   content: '';
   position: absolute;
@@ -95,7 +102,7 @@
 }
 
 [data-feedback-style="ripple"] {
-  animation: rippleScale 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1) !important;
+  animation: rippleScale 2s infinite cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 [data-feedback-style="ripple"]::after {
@@ -105,8 +112,8 @@
 }
 
 @keyframes rippleScale {
-  0% { transform: scale(1); }
-  100% { transform: scale(0.95); opacity: 0.9; }
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.95); opacity: 0.9; }
 }
 
 @keyframes shimmer {
