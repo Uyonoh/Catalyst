@@ -43,6 +43,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ refinedPrompt: refinedText.trim() });
   } catch (error: any) {
     console.error("LLM Parsing Error:", error);
+    // error.message is a string: {"error":{"code":503,"message":"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.","status":"UNAVAILABLE"}}
+    // Need to index the actual message in that sting.
+    const message = JSON.parse(error.message);
+
+    const err1 = "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.";
+    const err2 = "You exceeded your current quota";
+
+    if (message.error.message.includes(err1) || message.error.message.includes(err2)) {
+        return NextResponse.json(
+          { error: "Our servers are currently experiencing high demand. Please try again later." },
+          { status: 503 },
+        );
+      }
+    // else if (message.error.message.includes(err2)) {
+    //     return NextResponse.json(
+    //       { error: "You exceeded your current quota" },
+    //       { status: 429 },
+    //     );
+    //   }
+
     return NextResponse.json(
       { error: "Failed to parse intent with LLM" },
       { status: 500 },
