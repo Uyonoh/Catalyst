@@ -5,7 +5,8 @@ import GlassPanel from "../GlassPanel";
 import { useWorkspace } from "../../context/WorkspaceContext";
 import { useUser } from "../../context/AuthContext";
 import { useRouter } from "next/navigation";
-import ModelSelector, { MODELS } from "./ModelSelector";
+import ModelSelector from "./ModelSelector";
+import { useCatalog } from "../../context/CatalogContext";
 import PromptControlsPanel from "./PromptControlsPanel";
 import {
   FilePenLine,
@@ -34,12 +35,13 @@ export default function RawIntentPanel() {
     retryCount,
     clearGenerationError,
   } = useWorkspace();
+  const { models } = useCatalog();
   const { user } = useUser();
   const router = useRouter();
   const [showControls, setShowControls] = useState(false);
 
   const selectedModel =
-    MODELS.find((m) => m.id === selectedModelId) || MODELS[0];
+    models.find((m) => m.slug === selectedModelId) || models[0];
 
   return (
     <div className="relative group flex flex-col h-full">
@@ -158,7 +160,7 @@ export default function RawIntentPanel() {
                     onClick={() =>
                       parseIntent({
                         text: input,
-                        modelId: selectedModel.id,
+                        modelId: selectedModel.slug,
                         controls,
                       })
                     }
@@ -218,7 +220,7 @@ export default function RawIntentPanel() {
               return;
             }
             if (showControls) setShowControls(false);
-            parseIntent({ text: input, modelId: selectedModel.id, controls });
+            parseIntent({ text: input, modelId: selectedModel.slug, controls });
           }}
           disabled={!input.trim() || isGenerating}
           aria-label="Generate prompt"

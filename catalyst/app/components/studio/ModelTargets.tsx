@@ -3,15 +3,10 @@
 import { useState } from "react";
 import GlassPanel from "../GlassPanel";
 import { LayoutGrid, Zap } from "lucide-react";
-
-export const MODELS = [
-  { id: "midjourney", name: "Midjourney v6", type: "Img", checked: true },
-  { id: "claude", name: "Claude 3 Opus", type: "Txt", checked: false },
-  { id: "gpt", name: "GPT-4 Turbo", type: "Txt", checked: false },
-  { id: "llama", name: "Llama 3", type: "Txt", checked: false },
-];
+import { useCatalog } from "../../context/CatalogContext";
 
 export default function ModelTargets() {
+  const { models } = useCatalog();
   const [selectedModel, setSelectedModel] = useState("midjourney");
 
   return (
@@ -28,21 +23,21 @@ export default function ModelTargets() {
           className="flex flex-col gap-2 overflow-y-auto pr-2"
           style={{ maxHeight: "240px" }}
         >
-          {MODELS.map((model) => (
+          {models.map((model) => (
             <label
-              key={model.id}
-              className={`relative flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all border ${selectedModel === model.id ? "border-cyan-500/50 bg-cyan-500/10 hover:bg-cyan-500/20" : "border-transparent bg-white/5 hover:bg-white/10 hover:border-white/10"}`}
+              key={model.slug}
+              className={`relative flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all border ${selectedModel === model.slug ? "border-cyan-500/50 bg-cyan-500/10 hover:bg-cyan-500/20" : "border-transparent bg-white/5 hover:bg-white/10 hover:border-white/10"}`}
             >
               <input
                 type="radio"
                 name="model"
-                checked={selectedModel === model.id}
-                onChange={() => setSelectedModel(model.id)}
+                checked={selectedModel === model.slug}
+                onChange={() => setSelectedModel(model.slug)}
                 className="w-4 h-4 text-cyan-500 bg-transparent border-slate-500 focus:ring-cyan-500 focus:ring-offset-0"
               />
               <span className="text-white font-bold text-sm">{model.name}</span>
               <span
-                className={`ml-auto text-xs px-2 py-0.5 rounded ${selectedModel === model.id ? "text-cyan-200 bg-cyan-900/40" : "text-slate-400 bg-slate-800/40"}`}
+                className={`ml-auto text-xs px-2 py-0.5 rounded ${selectedModel === model.slug ? "text-cyan-200 bg-cyan-900/40" : "text-slate-400 bg-slate-800/40"}`}
               >
                 {model.type}
               </span>

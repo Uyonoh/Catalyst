@@ -15,6 +15,7 @@ interface PromptEditorViewProps {
     target_model: string;
     user_id?: string;
     is_public: boolean;
+    icon?: string;
   };
 }
 
@@ -31,7 +32,7 @@ export default function PromptEditorView({
   
   const isAuthor = !!currentUserId && currentUserId === initialData.user_id;
 
-  const handleSave = async (text: string) => {
+  const handleSave = async (text: string, categorySlug: string) => {
     try {
       setIsSaving(true);
       
@@ -42,6 +43,7 @@ export default function PromptEditorView({
           .update({
             content: text,
             snippet: text.substring(0, 150) + (text.length > 150 ? "..." : ""),
+            icon: categorySlug,
           })
           .eq("id", id);
 
@@ -60,6 +62,7 @@ export default function PromptEditorView({
             target_model: initialData.target_model,
             user_id: currentUserId,
             is_public: isPublic, // Preserve the chosen visibility for copies
+            icon: categorySlug,
           });
 
         if (error) {
@@ -123,6 +126,7 @@ export default function PromptEditorView({
         isAuthor={isAuthor}
         isPublic={isPublic}
         selectedModelId={initialData.target_model}
+        initialCategory={initialData.icon}
         onDiscard={handleDiscard}
         onSave={handleSave}
         onVisibilityChange={handleVisibilityChange}

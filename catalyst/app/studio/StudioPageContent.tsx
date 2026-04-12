@@ -82,7 +82,7 @@ function StudioContent({
               type: "info"
             });
           }}
-          onSave={async (text) => {
+          onSave={async (text, categorySlug) => {
             if (!user) {
               router.push("/login?redirect=/studio");
               return;
@@ -98,6 +98,7 @@ function StudioContent({
                 raw_input: input,
                 target_model: selectedModel,
                 is_public: isPublic,
+                icon: categorySlug,
               });
               if (error) {
                 console.error("Failed to save prompt", error);

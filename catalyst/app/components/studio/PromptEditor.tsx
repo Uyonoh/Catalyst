@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import GlassPanel from "../GlassPanel";
-import { MODELS } from "./ModelSelector";
+import { useCatalog } from "../../context/CatalogContext";
 import { 
   ArrowLeft, 
   Loader2, 
@@ -36,8 +36,9 @@ interface PromptEditorProps {
   isAuthor: boolean;
   isPublic?: boolean;
   selectedModelId?: string;
+  initialCategory?: string;
   onDiscard?: () => void;
-  onSave?: (text: string) => void;
+  onSave?: (text: string, category: string) => void;
   onVisibilityChange?: (isPublic: boolean) => void;
   isLoading?: boolean;
   className?: string;
@@ -50,6 +51,7 @@ export default function PromptEditor({
   isAuthor,
   isPublic = false,
   selectedModelId,
+  initialCategory = "chat",
   onDiscard,
   onSave,
   onVisibilityChange,
@@ -57,9 +59,11 @@ export default function PromptEditor({
   className
 }: PromptEditorProps) {
   const router = useRouter();
+  const { models, categories } = useCatalog();
   const [editedText, setEditedText] = useState(initialEditedText);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [copied, setCopied] = useState(false);
-  const selectedModel = MODELS.find(m => m.id === selectedModelId || m.name === selectedModelId) || MODELS[0];
+  const selectedModel = models.find(m => m.slug === selectedModelId || m.name === selectedModelId) || models[0] || { name: "Unknown", icon: "chat" };
 
   useEffect(() => {
     setEditedText(initialEditedText);
@@ -76,7 +80,7 @@ export default function PromptEditor({
   };
 
   const handleApply = () => {
-    if (onSave) onSave(editedText);
+    if (onSave) onSave(editedText, selectedCategory);
   };
 
   const handleDiscard = () => {
@@ -208,7 +212,18 @@ export default function PromptEditor({
 
               <div className="flex justify-between items-center py-2 border-b border-white/5">
                 <span className="text-slate-400 text-sm">Category</span>
-                <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 font-medium">Text Gen</span>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  disabled={isLoading}
+                  className="text-xs bg-[#101922] text-slate-300 px-2.5 py-1 rounded-lg border border-white/10 focus:outline-none focus:border-cyan-500/50 cursor-pointer"
+                >
+                  {categories.map((cat) => (
+                    <option key={cat.slug} value={cat.slug}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="flex justify-between items-center py-2">

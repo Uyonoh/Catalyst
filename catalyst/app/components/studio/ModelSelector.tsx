@@ -14,6 +14,8 @@ import {
   FileText,
   Code,
 } from "lucide-react";
+import { useCatalog } from "../../context/CatalogContext";
+import { Model } from "../../lib/models";
 
 export const ICON_MAP: Record<string, any> = {
   chat: MessageSquare,
@@ -26,56 +28,6 @@ export const ICON_MAP: Record<string, any> = {
   code: Code,
 };
 
-export const MODELS = [
-  {
-    id: "gpt",
-    name: "GPT-4 Turbo",
-    brief: "GPT-4T",
-    type: "Txt",
-    icon: "chat",
-    color: "green",
-  },
-  {
-    id: "claude",
-    name: "Claude 3 Opus",
-    brief: "CLAUDE 3",
-    type: "Txt",
-    icon: "auto_awesome",
-    color: "purple",
-  },
-  {
-    id: "llama",
-    name: "Llama 3",
-    brief: "LLAMA 3",
-    type: "Txt",
-    icon: "terminal",
-    color: "orange",
-  },
-  {
-    id: "dalle",
-    name: "DALL-E 3",
-    brief: "DALLE 3",
-    type: "Img",
-    icon: "image",
-    color: "pink",
-  },
-  {
-    id: "stablediffusion",
-    name: "Stable Diffusion",
-    brief: "SDXL",
-    type: "Img",
-    icon: "filter_frames",
-    color: "blue",
-  },
-  {
-    id: "midjourney",
-    name: "Midjourney v6",
-    brief: "MJ v6",
-    type: "Img",
-    icon: "palette",
-    color: "cyan",
-  },
-];
 
 export const getModelColor = (color: string) => {
   const colors: Record<string, string> = {
@@ -97,8 +49,9 @@ export default function ModelSelector() {
     selectedModel: selectedModelId,
     setSelectedModel: setSelectedModelId,
   } = useWorkspace();
+  const { models } = useCatalog();
   const selectedModel =
-    MODELS.find((m) => m.id === selectedModelId) || MODELS[0];
+    models.find((m) => m.slug === selectedModelId) || models[0];
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -117,8 +70,8 @@ export default function ModelSelector() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleModelSelect = (model: (typeof MODELS)[0]) => {
-    setSelectedModelId(model.id);
+  const handleModelSelect = (model: Model) => {
+    setSelectedModelId(model.slug);
     setIsDropdownOpen(false);
     console.log(`Model selected: ${model.name}`);
   };
@@ -165,16 +118,16 @@ export default function ModelSelector() {
         <div className="absolute right-0 mt-2 w-72 md:w-80 z-50">
           <div className="glass-panel-dark rounded-xl p-2 border border-white/20 shadow-2xl shadow-black/50 animate-fadeIn">
             <div className="max-h-64 overflow-y-auto pr-1 thin-scrollbar">
-              {MODELS.map((model) => (
+              {models.map((model) => (
                 <button
-                  key={model.id}
+                  key={model.slug}
                   onClick={() => handleModelSelect(model)}
-                  className={`flex items-center gap-3 w-full p-3 rounded-lg text-left transition-all hover:bg-white/5 ${selectedModel.id === model.id ? "bg-cyan-500/10 border border-cyan-500/30" : "border border-transparent"}`}
+                  className={`flex items-center gap-3 w-full p-3 rounded-lg text-left transition-all hover:bg-white/5 ${selectedModel.slug === model.slug ? "bg-cyan-500/10 border border-cyan-500/30" : "border border-transparent"}`}
                   aria-label={`Select ${model.name}`}
                 >
                   <div
                     className={`p-2 rounded-lg ${getModelColor(
-                      model.id === selectedModel.id ? model.color : "slate",
+                      model.slug === selectedModel.slug ? model.color : "slate",
                     )
                       .replace("text-", "bg-")
                       .replace("/50", "/20")
@@ -197,7 +150,7 @@ export default function ModelSelector() {
                     </div>
                   </div>
                   <span
-                    className={`text-[10px] md:text-xs px-2 py-1 rounded flex-shrink-0 ${selectedModel.id === model.id ? "bg-cyan-900/40 text-cyan-200" : "bg-slate-800/40 text-slate-400"}`}
+                    className={`text-[10px] md:text-xs px-2 py-1 rounded flex-shrink-0 ${selectedModel.slug === model.slug ? "bg-cyan-900/40 text-cyan-200" : "bg-slate-800/40 text-slate-400"}`}
                   >
                     {model.type}
                   </span>

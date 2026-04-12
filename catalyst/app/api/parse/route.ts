@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
-import { MODELS } from "@/app/components/studio/ModelSelector";
 import { buildPrompt } from "@/app/lib/prompts/builder";
 
 // Initialize Gemini API

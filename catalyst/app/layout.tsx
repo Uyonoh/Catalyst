@@ -4,6 +4,10 @@ import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
 import { ClickFeedbackProvider } from "./components/ClickFeedbackProvider";
 
+import { getCategories } from "./lib/categories";
+import { getModels } from "./lib/models";
+import { CatalogProvider } from "./context/CatalogContext";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -12,11 +16,16 @@ export const metadata: Metadata = {
     "Transform your raw ideas into high-performance AI prompts with our Studio's live analysis and professional library.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [categories, models] = await Promise.all([
+    getCategories(),
+    getModels(),
+  ]);
+
   return (
     <html lang="en" className="dark">
       <head>
@@ -28,9 +37,11 @@ export default function RootLayout({
       <body
         className={`${inter.className} bg-background-dark text-slate-900 dark:text-white font-display min-h-screen flex flex-col overflow-x-hidden selection:bg-cyan-500/30`}
       >
-        <AuthProvider>
-          <ClickFeedbackProvider>{children}</ClickFeedbackProvider>
-        </AuthProvider>
+        <CatalogProvider categories={categories} models={models}>
+          <AuthProvider>
+            <ClickFeedbackProvider>{children}</ClickFeedbackProvider>
+          </AuthProvider>
+        </CatalogProvider>
       </body>
     </html>
   );

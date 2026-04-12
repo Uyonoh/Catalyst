@@ -12,6 +12,7 @@ import {
   MODEL_BADGE_TOKENS,
   MODEL_BADGE_FALLBACK,
 } from "../../lib/promptTokens";
+import { useCatalog } from "../../context/CatalogContext";
 
 export interface HistoryItem {
   id: string;
@@ -136,7 +137,14 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
       <div className="mt-auto pt-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {(() => {
-            const colorKey = TARGET_MODEL_COLOR_MAP[item.target_model] || "cyan";
+            const { models } = useCatalog();
+            const modelColorMap = Object.fromEntries(
+              models.map((m) => [m.slug, m.color]),
+            );
+            const colorKey =
+              modelColorMap[item.target_model] ||
+              TARGET_MODEL_COLOR_MAP[item.target_model] ||
+              "cyan";
             const token = MODEL_BADGE_TOKENS[colorKey] || MODEL_BADGE_FALLBACK;
             return (
               <span

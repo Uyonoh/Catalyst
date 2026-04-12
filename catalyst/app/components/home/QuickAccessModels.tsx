@@ -9,6 +9,8 @@ import {
   Image as ImageIcon 
 } from "lucide-react";
 
+import { useCatalog } from "../../context/CatalogContext";
+
 const ICON_MAP: Record<string, any> = {
   chat: MessageSquare,
   auto_awesome: Sparkles,
@@ -17,40 +19,18 @@ const ICON_MAP: Record<string, any> = {
   image: ImageIcon,
 };
 
-const MODELS = [
-  {
-    name: "GPT-4",
-    provider: "OpenAI",
-    icon: "chat",
-    colorClass: "bg-green-500/20 text-green-400",
-  },
-  {
-    name: "Claude 3",
-    provider: "Anthropic",
-    icon: "auto_awesome",
-    colorClass: "bg-purple-500/20 text-purple-400",
-  },
-  {
-    name: "Midjourney",
-    provider: "Midjourney",
-    icon: "palette",
-    colorClass: "bg-cyan-500/20 text-cyan-400",
-  },
-  {
-    name: "Llama 3",
-    provider: "Meta",
-    icon: "terminal",
-    colorClass: "bg-orange-500/20 text-orange-400",
-  },
-  {
-    name: "DALL-E",
-    provider: "OpenAI",
-    icon: "image",
-    colorClass: "bg-pink-500/20 text-pink-400",
-  },
-];
-
 export default function QuickAccessModels() {
+  const { models } = useCatalog();
+
+  // Map database colors to Tailwind classes (static mapping for purging safety)
+  const colorMap: Record<string, string> = {
+    green: "bg-green-500/20 text-green-400",
+    purple: "bg-purple-500/20 text-purple-400",
+    cyan: "bg-cyan-500/20 text-cyan-400",
+    orange: "bg-orange-500/20 text-orange-400",
+    pink: "bg-pink-500/20 text-pink-400",
+    blue: "bg-blue-500/20 text-blue-400",
+  };
   return (
     <div
       className="glass-panel rounded-2xl p-6 mb-12 animate-slideDown"
@@ -66,13 +46,13 @@ export default function QuickAccessModels() {
         </a>
       </div>
       <div className="flex gap-4 overflow-x-auto pb-2 dropdown-scroll">
-        {MODELS.map((model) => (
+        {models.map((model) => (
           <div
-            key={model.name}
+            key={model.slug}
             className="flex h-12 min-w-[140px] cursor-pointer hover:bg-white/5 transition-colors items-center gap-x-3 rounded-xl bg-white/5 border border-white/5 pl-3 pr-5 group"
           >
             <div
-              className={`size-8 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform ${model.colorClass}`}
+              className={`size-8 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform ${colorMap[model.color] || "bg-slate-500/20 text-slate-400"}`}
             >
               {(() => {
                 const Icon = ICON_MAP[model.icon];
@@ -80,9 +60,11 @@ export default function QuickAccessModels() {
               })()}
             </div>
             <div className="flex flex-col">
-              <span className="text-white text-sm font-bold">{model.name}</span>
+              <span className="text-white text-sm font-bold">
+                {model.brief}
+              </span>
               <span className="text-slate-400 text-[10px] uppercase tracking-wider">
-                {model.provider}
+                {model.provider || "AI Model"}
               </span>
             </div>
           </div>
