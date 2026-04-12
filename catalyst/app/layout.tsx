@@ -26,7 +26,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.className} bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display min-h-screen flex flex-col overflow-x-hidden selection:bg-cyan-500/30`}
+        className={`${inter.className} bg-background-dark text-slate-900 dark:text-white font-display min-h-screen flex flex-col overflow-x-hidden selection:bg-cyan-500/30`}
       >
         <AuthProvider>
           <ClickFeedbackProvider>{children}</ClickFeedbackProvider>
