@@ -9,17 +9,19 @@ import {
 import {
   LayoutGrid,
   List,
-  MoreHorizontal,
   Bot,
-  Brain,
-  Cloud,
-  Sparkles,
   Copy,
   Check,
   ArrowRight,
   Plus,
 } from "lucide-react";
 import { ICON_MAP } from "@/app/components/studio/ModelSelector";
+import {
+  PROMPT_TYPE_TOKENS,
+  PROMPT_TYPE_FALLBACK,
+  MODEL_BADGE_TOKENS,
+  MODEL_BADGE_FALLBACK,
+} from "../../lib/promptTokens";
 
 export interface RecentItem {
   id: string;
@@ -43,18 +45,6 @@ interface RecentPromptsProps {
   prompts: RecentItem[];
 }
 
-// Fixed mapping for mockup consistency
-const MappedColors = {
-  green: "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]",
-  yellow: "bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]",
-  purple: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]",
-};
-
-const MappedTextColors = {
-  green: "text-green-400",
-  yellow: "text-yellow-400",
-  purple: "text-purple-400",
-};
 
 export default function RecentPrompts({ prompts }: RecentPromptsProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -96,24 +86,40 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div
-                  className={`size-2 rounded-full ${MappedColors[prompt.icon_color as keyof typeof MappedColors] || MappedColors.green}`}
+                  className={`size-2 rounded-full ${prompt.is_public ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" : "bg-slate-500"}`}
                 ></div>
                 <span
-                  className={`text-xs font-mono ${MappedTextColors[prompt.icon_color as keyof typeof MappedTextColors] || MappedTextColors.green}`}
+                  className={`text-[10px] font-bold uppercase tracking-wider ${prompt.is_public ? "text-emerald-400" : "text-slate-500"}`}
                 >
-                  {/* {prompt.status} */}Published
+                  {prompt.is_public ? "Public" : "Private"}
                 </span>
               </div>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-slate-500 leading-none">
                 {formatUpdated(prompt.updated_at)}
               </span>
             </div>
-            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
-              {prompt.title}
-            </h3>
-            <p className="text-slate-400 text-sm mb-4 line-clamp-2">
-              {prompt.snippet}
-            </p>
+            <div className="flex items-start gap-4 mb-4">
+              {(() => {
+                const token =
+                  PROMPT_TYPE_TOKENS[prompt.icon] || PROMPT_TYPE_FALLBACK;
+                const { Icon } = token;
+                return (
+                  <div
+                    className={`size-10 rounded-lg ${token.bg} flex items-center justify-center ${token.text} border ${token.border} group-hover:scale-110 transition-transform flex-shrink-0`}
+                  >
+                    <Icon className="size-5" />
+                  </div>
+                );
+              })()}
+              <div className="min-w-0">
+                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-cyan-400 transition-colors truncate">
+                  {prompt.title}
+                </h3>
+                <p className="text-slate-400 text-sm line-clamp-2">
+                  {prompt.snippet}
+                </p>
+              </div>
+            </div>
             <div className="flex items-center gap-2 mb-4">
               {prompt.tag && (
                 <span className="px-2 py-1 rounded bg-white/5 text-[10px] text-slate-300 border border-white/5">
@@ -128,13 +134,24 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
               <div className="flex items-center gap-2">
                 {(() => {
                   const Icon = ICON_MAP[prompt.icon];
-                  return Icon ? (
-                    <Icon className="size-4 text-slate-500" />
-                  ) : (
-                    <Bot className="size-4 text-slate-500" />
+                  const token =
+                    MODEL_BADGE_TOKENS[prompt.model_color] ||
+                    MODEL_BADGE_FALLBACK;
+                  return (
+                    <div
+                      className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${token.bg} border ${token.border} ${token.text}`}
+                    >
+                      {Icon ? (
+                        <Icon className="size-3.5" />
+                      ) : (
+                        <Bot className="size-3.5" />
+                      )}
+                      <span className="text-[10px] font-bold uppercase tracking-wide">
+                        {prompt.model}
+                      </span>
+                    </div>
                   );
                 })()}
-                <span className="text-xs text-slate-400">{prompt.model}</span>
               </div>
               <div className="flex items-center gap-1 text-cyan-400 text-xs font-medium sm:opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
                 <button

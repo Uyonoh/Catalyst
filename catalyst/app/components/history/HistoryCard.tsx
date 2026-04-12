@@ -2,31 +2,16 @@
 
 import React, { useState } from "react";
 import GlassPanel from "../GlassPanel";
-import {
-  Copy,
-  Check,
-  Edit,
-  Clock,
-  ArrowRight,
-  Sparkles,
-  Zap,
-  Cpu,
-  BrainCircuit,
-  Trash2,
-} from "lucide-react";
+import { Clock, Copy, Check, Edit, Trash2 } from "lucide-react";
 import { formatUpdated } from "../library/LibraryCard";
 import { supabase } from "../../lib/supabase";
-
-const MODEL_ICONS: Record<string, any> = {
-  "gpt-4": BrainCircuit,
-  "gpt-4-turbo": BrainCircuit,
-  "gpt-4o": BrainCircuit,
-  "claude-3-opus": Cpu,
-  "claude-3-sonnet": Cpu,
-  "claude-3-haiku": Cpu,
-  "gemini-1.5-pro": Sparkles,
-  "gemini-1.5-flash": Zap,
-};
+import {
+  PROMPT_TYPE_TOKENS,
+  PROMPT_TYPE_FALLBACK,
+  TARGET_MODEL_COLOR_MAP,
+  MODEL_BADGE_TOKENS,
+  MODEL_BADGE_FALLBACK,
+} from "../../lib/promptTokens";
 
 export interface HistoryItem {
   id: string;
@@ -82,8 +67,6 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
     }
   };
 
-  const Icon = MODEL_ICONS[item.target_model] || BrainCircuit;
-
   return (
     <GlassPanel
       hoverable
@@ -91,9 +74,19 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
     >
       <div className="flex justify-between items-start z-10">
         <div className="flex items-center gap-3">
-          <div className="size-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20 group-hover:scale-110 transition-transform">
-            <Icon className="size-5" />
-          </div>
+          {(() => {
+            // History entries don't have icon metadata yet, default to sparkles/creative
+            const token =
+              PROMPT_TYPE_TOKENS["auto_awesome"] || PROMPT_TYPE_FALLBACK;
+            const { Icon } = token;
+            return (
+              <div
+                className={`size-10 rounded-lg ${token.bg} flex items-center justify-center ${token.text} border ${token.border} group-hover:scale-110 transition-transform`}
+              >
+                <Icon className="size-5" />
+              </div>
+            );
+          })()}
           <div>
             <h3 className="text-white font-bold leading-tight group-hover:text-cyan-400 transition-colors line-clamp-1">
               {item.title || "Untitled Prompt"}
@@ -142,9 +135,17 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
 
       <div className="mt-auto pt-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20 text-[10px] font-semibold text-cyan-400 uppercase tracking-wide">
-            {item.target_model}
-          </span>
+          {(() => {
+            const colorKey = TARGET_MODEL_COLOR_MAP[item.target_model] || "cyan";
+            const token = MODEL_BADGE_TOKENS[colorKey] || MODEL_BADGE_FALLBACK;
+            return (
+              <span
+                className={`px-2 py-0.5 rounded ${token.bg} border ${token.border} text-[10px] font-semibold ${token.text} uppercase tracking-wide`}
+              >
+                {item.target_model}
+              </span>
+            );
+          })()}
         </div>
 
         <div className="flex gap-2">

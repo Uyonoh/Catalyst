@@ -2,32 +2,13 @@
 
 import React, { useState } from "react";
 import GlassPanel from "../GlassPanel";
+import { Star, Copy, Check, Edit } from "lucide-react";
 import {
-  MoreVertical,
-  Copy,
-  Check,
-  Edit,
-  Sparkles,
-  MessageSquare,
-  Image as ImageIcon,
-  Terminal,
-  Box,
-  Palette,
-  FileText,
-  Code,
-  Star,
-} from "lucide-react";
-
-const ICON_MAP: Record<string, any> = {
-  auto_awesome: Sparkles,
-  chat: MessageSquare,
-  image: ImageIcon,
-  terminal: Terminal,
-  filter_frames: Box,
-  palette: Palette,
-  article: FileText,
-  code: Code,
-};
+  PROMPT_TYPE_TOKENS,
+  PROMPT_TYPE_FALLBACK,
+  MODEL_BADGE_TOKENS,
+  MODEL_BADGE_FALLBACK,
+} from "../../lib/promptTokens";
 
 export interface LibraryItem {
   id: string;
@@ -86,18 +67,17 @@ export default function LibraryCard({ item }: LibraryCardProps) {
       )}
       <div className="flex justify-between items-start z-10">
         <div className="flex items-center gap-3">
-          <div
-            className={`size-10 rounded-lg bg-${item.icon_color}-500/10 flex items-center justify-center text-${item.icon_color}-400 border border-${item.icon_color}-500/20`}
-          >
-            {(() => {
-              const Icon = ICON_MAP[item.icon];
-              return Icon ? (
+          {(() => {
+            const token = PROMPT_TYPE_TOKENS[item.icon] || PROMPT_TYPE_FALLBACK;
+            const { Icon } = token;
+            return (
+              <div
+                className={`size-10 rounded-lg ${token.bg} flex items-center justify-center ${token.text} border ${token.border} group-hover:scale-110 transition-transform`}
+              >
                 <Icon className="size-5" />
-              ) : (
-                <FileText className="size-5" />
-              );
-            })()}
-          </div>
+              </div>
+            );
+          })()}
           <div>
             <h3 className="text-white font-bold leading-tight group-hover:text-cyan-400 transition-colors">
               {item.title}
@@ -109,7 +89,7 @@ export default function LibraryCard({ item }: LibraryCardProps) {
         </div>
         {/* Add favourite button */}
         <button
-          className="text-slate-500 hover:text-cyan-400 transition-colors"
+          className="text-slate-500 hover:text-yellow-400 transition-colors"
           aria-label="Favourite"
         >
           <Star className="size-5" />
@@ -121,11 +101,17 @@ export default function LibraryCard({ item }: LibraryCardProps) {
       </p>
       <div className="mt-auto pt-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span
-            className={`px-2 py-1 rounded bg-${item.model_color}-500/10 border border-${item.model_color}-500/20 text-[10px] font-semibold text-${item.model_color}-400 uppercase tracking-wide`}
-          >
-            {item.model}
-          </span>
+          {(() => {
+            const token =
+              MODEL_BADGE_TOKENS[item.model_color] || MODEL_BADGE_FALLBACK;
+            return (
+              <span
+                className={`px-2 py-1 rounded ${token.bg} border ${token.border} text-[10px] font-semibold ${token.text} uppercase tracking-wide`}
+              >
+                {item.model}
+              </span>
+            );
+          })()}
           <span className="text-slate-500 text-xs font-medium">{item.tag}</span>
         </div>
         <div className="flex gap-1 sm:opacity-0 group-hover:opacity-100 transition-opacity">
