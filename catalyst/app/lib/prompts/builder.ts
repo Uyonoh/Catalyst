@@ -28,10 +28,10 @@ Refinement Directives:
   })
 - Output Length: ${length} (${
     length === "short"
-      ? "minimal wording"
+      ? "concise"
       : length === "long"
-      ? "comprehensive detail"
-      : "moderate detail"
+      ? "verbose"
+      : "balanced"
   })
 `;
 }
@@ -46,8 +46,8 @@ Your task is to transform a "Raw Intent" into a highly effective prompt optimize
 
 Core Rules:
 1. Preserve the original intent exactly.
-2. Structure the output using the following sections:
-   ${profile.structure.join("\n   ")}
+${controls.length != "short" ? `2. Structure the output using the following sections:
+   ${profile.structure.join("\n   ")}` : "Structure the output in a way that is easy to understand"}
 3. Use clear, professional, unambiguous language.
 4. DO NOT include any explanations or conversational filler—output ONLY the final refined prompt.
 5. ${
@@ -57,7 +57,6 @@ Core Rules:
   }
 
 Model Optimization Notes:
-- Writing Style: ${profile.style}
 - Ensure alignment with how ${modelId.toUpperCase()} models interpret instructions.
 
 ${buildControlDirectives(controls)}

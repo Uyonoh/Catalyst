@@ -49,8 +49,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [selectedModel, setSelectedModel] = useState("gpt");
   const [controls, setControlsState] = useState<PromptControls>({
     creativity: 0.5,
-    precision: 0.5,
-    length: "medium",
+    precision: 0.75,
+    length: "short",
     strategy: "default",
     failureHandling: true,
   });
@@ -137,7 +137,10 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
           await new Promise((resolve) => setTimeout(resolve, delay));
           return executeRequest();
         }
-        setGenerationError(err.message || "Failed to generate prompt after several attempts. Please try again later.");
+        setGenerationError(
+          err.message ||
+            "Failed to generate prompt after several attempts. Please try again later.",
+        );
         return false;
       }
     };

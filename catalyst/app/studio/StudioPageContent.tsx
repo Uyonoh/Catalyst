@@ -48,7 +48,10 @@ function StudioContent({
   const [showEditor, setShowEditor] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
-  const [notification, setNotification] = useState<{ message: string; type: NotificationType } | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: NotificationType;
+  } | null>(null);
   const { user } = useUser();
   const router = useRouter();
 
@@ -79,7 +82,7 @@ function StudioContent({
             setIsPublic(val);
             setNotification({
               message: `Visibility set to ${val ? "Public" : "Private"}`,
-              type: "info"
+              type: "info",
             });
           }}
           onSave={async (text, categorySlug) => {
@@ -102,7 +105,10 @@ function StudioContent({
               });
               if (error) {
                 console.error("Failed to save prompt", error);
-                setNotification({ message: "Failed to save prompt", type: "error" });
+                setNotification({
+                  message: "Failed to save prompt",
+                  type: "error",
+                });
               } else {
                 setShowEditor(false);
                 router.push("/library");
@@ -123,8 +129,7 @@ function StudioContent({
                 Prompt Studio
               </h1>
               <p className="text-slate-400 text-base md:text-lg">
-                Transform your raw ideas into optimized prompts with live
-                analysis.
+                Transform your raw ideas into optimized, targeted prompts.
               </p>
             </div>
 
@@ -196,7 +201,7 @@ function StudioContent({
       )}
 
       <div className="fixed bottom-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-900/50 to-transparent pointer-events-none" />
-      
+
       {notification && (
         <Notification
           message={notification.message}

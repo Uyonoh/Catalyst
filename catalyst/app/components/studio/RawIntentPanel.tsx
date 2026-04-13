@@ -61,7 +61,7 @@ export default function RawIntentPanel() {
                 Raw Intent
               </span>
               {/* Mobile Analysis Indicator */}
-              <div className="md:hidden flex items-center gap-1.5 ml-1 transition-opacity duration-300">
+              {/* <div className="md:hidden flex items-center gap-1.5 ml-1 transition-opacity duration-300">
                 {isLoading ? (
                   <>
                     <span className="relative flex h-2 w-2">
@@ -80,7 +80,7 @@ export default function RawIntentPanel() {
                     </span>
                   </div>
                 ) : null}
-              </div>
+              </div> */}
             </div>
             {/* Desktop Model Selection */}
             <div className="flex items-center gap-3">
@@ -98,13 +98,13 @@ export default function RawIntentPanel() {
                 </div>
               )}
               <div className="flex items-center gap-2">
-                <button
+                {/* <button
                   onClick={() => setShowControls(!showControls)}
                   className={`p-2 rounded-lg transition-all ${showControls ? "bg-cyan-500 text-white shadow-neon" : "bg-white/5 text-slate-400 hover:text-white"}`}
                   title="Prompt Refinement Settings"
                 >
                   <Settings2 className="size-5 md:size-4" />
-                </button>
+                </button> */}
                 <ModelSelector />
               </div>
             </div>
@@ -123,15 +123,6 @@ export default function RawIntentPanel() {
               placeholder="Describe what you want to create... (e.g. 'I want a picture of a cyberpunk cat in a neon city raining at night')"
               aria-label="Prompt input"
             />
-          </div>
-
-          {/* Prompt Controls Panel Overlay */}
-          <div
-            className={`absolute inset-0 z-10 transition-all duration-500 transform ${showControls ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0 pointer-events-none"}`}
-          >
-            <div className="h-full overflow-y-auto pr-1 custom-scrollbar">
-              <PromptControlsPanel />
-            </div>
           </div>
 
           {/* Error Overlay */}

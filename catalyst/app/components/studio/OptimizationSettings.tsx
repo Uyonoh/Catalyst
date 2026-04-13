@@ -33,7 +33,7 @@ export default function OptimizationSettings() {
       description: "Allow model to hallucinate details.",
       icon: "shutter_speed",
       color: "purple",
-      defaultValue: controls.creativity ?? 0.75,
+      defaultValue: controls.creativity ? controls.creativity * 100 : 75,
       type: "slider" as const,
     },
     {
@@ -42,7 +42,7 @@ export default function OptimizationSettings() {
       description: "Adherence to raw intent.",
       icon: "ads_click",
       color: "cyan",
-      defaultValue: controls.precision ?? 0.5,
+      defaultValue: controls.precision ? controls.precision * 100 : 50,
       type: "slider" as const,
     },
     // {
@@ -89,7 +89,7 @@ export default function OptimizationSettings() {
 
   const handleSliderChange = (id: string, value: number) => {
     setSettings((prev) => ({ ...prev, [id]: value }));
-    setControls({ [id]: value });
+    setControls({ [id]: value / 100 }); // Sliders use 0-100, but controls use 0-1
   };
 
   const getLevelLabel = (value: number, type: string) => {

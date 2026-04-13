@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { buildPrompt } from "@/app/lib/prompts/builder";
+import { exec } from "child_process";
 
 // Initialize Gemini API
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
@@ -44,9 +45,10 @@ export async function POST(req: NextRequest) {
     console.error("LLM Parsing Error:", error);
     // error.message is a string: {"error":{"code":503,"message":"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.","status":"UNAVAILABLE"}}
     // Need to index the actual message in that sting.
-    const message = JSON.parse(error.message);
+    try {
+      const message = JSON.parse(error.message);
 
-    const err1 = "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.";
+      const err1 = "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.";
     const err2 = "You exceeded your current quota";
 
     if (message.error.message.includes(err1) || message.error.message.includes(err2)) {
@@ -61,6 +63,12 @@ export async function POST(req: NextRequest) {
     //       { status: 429 },
     //     );
     //   }
+
+    } catch (err) {
+      // error.message is not json
+      const message = error.message;
+      console.error("Parsing error: ", message);
+    }
 
     return NextResponse.json(
       { error: "Failed to parse intent with LLM" },
