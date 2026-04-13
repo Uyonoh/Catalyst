@@ -8,11 +8,11 @@ import { Loader2, Check } from "lucide-react";
 
 export default function AnalysisPreferencesForm({ user, preferences }: { user: User; preferences: any }) {
   const [prefs, setPrefs] = useState({
+    ...preferences,
     analysisDepth: preferences?.analysisDepth || "standard",
     autoAnalyze: preferences?.autoAnalyze ?? true,
     defaultOutputFormat: preferences?.defaultOutputFormat || "MARKDOWN",
     defaultTone: preferences?.defaultTone || "PROFESSIONAL",
-    ...preferences
   });
 
   const [isSaving, setIsSaving] = useState(false);

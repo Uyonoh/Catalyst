@@ -63,7 +63,7 @@ export default function PromptEditor({
   const router = useRouter();
   const { models, categories } = useCatalog();
   const [editedText, setEditedText] = useState(initialEditedText);
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory || "");
   const [editedTitle, setEditedTitle] = useState(title);
   const [editedTags, setEditedTags] = useState(initialTags);
   const [copied, setCopied] = useState(false);
