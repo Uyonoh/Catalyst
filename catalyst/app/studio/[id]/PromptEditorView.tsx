@@ -16,6 +16,7 @@ interface PromptEditorViewProps {
     user_id?: string;
     is_public: boolean;
     icon?: string;
+    tag?: string;
   };
 }
 
@@ -32,7 +33,7 @@ export default function PromptEditorView({
   
   const isAuthor = !!currentUserId && currentUserId === initialData.user_id;
 
-  const handleSave = async (text: string, categorySlug: string) => {
+  const handleSave = async (title: string, text: string, categorySlug: string, tags: string) => {
     try {
       setIsSaving(true);
       
@@ -41,9 +42,11 @@ export default function PromptEditorView({
         const { error } = await supabase
           .from("prompts")
           .update({
+            title,
             content: text,
             snippet: text.substring(0, 150) + (text.length > 150 ? "..." : ""),
             icon: categorySlug,
+            tag: tags,
           })
           .eq("id", id);
 
@@ -55,7 +58,7 @@ export default function PromptEditorView({
         const { error } = await supabase
           .from("prompts")
           .insert({
-            title: initialData.title,
+            title,
             content: text,
             snippet: text.substring(0, 150) + (text.length > 150 ? "..." : ""),
             raw_input: initialData.raw_input,
@@ -63,6 +66,7 @@ export default function PromptEditorView({
             user_id: currentUserId,
             is_public: isPublic, // Preserve the chosen visibility for copies
             icon: categorySlug,
+            tag: tags,
           });
 
         if (error) {
@@ -127,6 +131,7 @@ export default function PromptEditorView({
         isPublic={isPublic}
         selectedModelId={initialData.target_model}
         initialCategory={initialData.icon}
+        initialTags={initialData.tag || ""}
         onDiscard={handleDiscard}
         onSave={handleSave}
         onVisibilityChange={handleVisibilityChange}

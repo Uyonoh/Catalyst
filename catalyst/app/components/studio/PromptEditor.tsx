@@ -37,8 +37,9 @@ interface PromptEditorProps {
   isPublic?: boolean;
   selectedModelId?: string;
   initialCategory?: string;
+  initialTags?: string;
   onDiscard?: () => void;
-  onSave?: (text: string, category: string) => void;
+  onSave?: (title: string, text: string, category: string, tags: string) => void;
   onVisibilityChange?: (isPublic: boolean) => void;
   isLoading?: boolean;
   className?: string;
@@ -52,6 +53,7 @@ export default function PromptEditor({
   isPublic = false,
   selectedModelId,
   initialCategory = "chat",
+  initialTags = "",
   onDiscard,
   onSave,
   onVisibilityChange,
@@ -62,12 +64,16 @@ export default function PromptEditor({
   const { models, categories } = useCatalog();
   const [editedText, setEditedText] = useState(initialEditedText);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [editedTitle, setEditedTitle] = useState(title);
+  const [editedTags, setEditedTags] = useState(initialTags);
   const [copied, setCopied] = useState(false);
   const selectedModel = models.find(m => m.slug === selectedModelId || m.name === selectedModelId) || models[0] || { name: "Unknown", icon: "chat" };
 
   useEffect(() => {
     setEditedText(initialEditedText);
-  }, [initialEditedText]);
+    setEditedTitle(title);
+    setEditedTags(initialTags);
+  }, [initialEditedText, title, initialTags]);
 
   const handleCopy = async () => {
     try {
@@ -80,7 +86,7 @@ export default function PromptEditor({
   };
 
   const handleApply = () => {
-    if (onSave) onSave(editedText, selectedCategory);
+    if (onSave) onSave(editedTitle, editedText, selectedCategory, editedTags);
   };
 
   const handleDiscard = () => {
@@ -127,9 +133,15 @@ export default function PromptEditor({
                 <div className="bg-cyan-500/20 p-2 rounded-xl text-cyan-400 border border-cyan-500/30">
                   <Sparkles className="size-5" />
                 </div>
-                <div>
-                  <h2 className="text-white font-bold tracking-tight text-lg">{title}</h2>
-                  <p className="text-xs text-slate-400 font-medium">Ready for your AI model</p>
+                <div className="flex-1">
+                  <input
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    disabled={isLoading}
+                    placeholder="Prompt Title"
+                    className="w-full text-white font-bold tracking-tight text-lg bg-transparent border-none p-0 focus:outline-none focus:ring-0 placeholder:text-slate-500/50"
+                  />
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">Ready for your AI model</p>
                 </div>
               </div>
               
@@ -224,6 +236,18 @@ export default function PromptEditor({
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div className="flex justify-between items-center py-2 border-b border-white/5">
+                <span className="text-slate-400 text-sm">Tags</span>
+                <input
+                  type="text"
+                  value={editedTags}
+                  onChange={(e) => setEditedTags(e.target.value)}
+                  disabled={isLoading}
+                  placeholder="e.g. Code, Web"
+                  className="w-32 text-xs bg-[#101922] text-slate-300 px-2.5 py-1 rounded-lg border border-white/10 focus:outline-none focus:border-cyan-500/50 text-right"
+                />
               </div>
 
               <div className="flex justify-between items-center py-2">

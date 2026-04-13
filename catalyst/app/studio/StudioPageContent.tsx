@@ -85,7 +85,7 @@ function StudioContent({
               type: "info",
             });
           }}
-          onSave={async (text, categorySlug) => {
+          onSave={async (title, text, categorySlug, tags) => {
             if (!user) {
               router.push("/login?redirect=/studio");
               return;
@@ -94,7 +94,7 @@ function StudioContent({
               setIsSaving(true);
               const { error } = await supabase.from("prompts").insert({
                 user_id: user.id,
-                title: "Untitled Generated Prompt",
+                title: title || "Untitled Generated Prompt",
                 content: text,
                 snippet:
                   text.substring(0, 150) + (text.length > 150 ? "..." : ""),
@@ -102,6 +102,7 @@ function StudioContent({
                 target_model: selectedModel,
                 is_public: isPublic,
                 icon: categorySlug,
+                tag: tags,
               });
               if (error) {
                 console.error("Failed to save prompt", error);
