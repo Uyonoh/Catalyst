@@ -9,13 +9,33 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-async function getPrompt(id: string, isPrivate: boolean = false) {
+async function getPrompt(id: string, isPrivate: boolean, hasUser: boolean) {
   try {
     const supabaseClient = await createClient();
-    const table = isPrivate ? "prompts" : "prompts_public";
     
+    // If explicitly querying private or if user logged in (might be the author)
+    if (isPrivate || hasUser) {
+      const { data, error } = await supabaseClient
+        .from("prompts")
+        .select("*")
+        .eq("id", id)
+        .single();
+        
+      if (!error && data) {
+        return data;
+      }
+      
+      // If we failed to fetch the prompt, and we were explicitly asking for private,
+      // then we should not fall back to public. The user simply doesn't have access.
+      if (isPrivate) {
+        console.error("Failed to fetch private prompt:", error);
+        return null;
+      }
+    }
+
+    // Fallback for unauthenticated viewers or if the logged-in user isn't the author
     const { data, error } = await supabaseClient
-      .from(table)
+      .from("prompts_public")
       .select("*")
       .eq("id", id)
       .single();
@@ -39,7 +59,7 @@ export default async function PromptViewEditPage({ params, searchParams }: PageP
   const isPrivate = resolvedSearchParams.private === "true";
   
   const user = await getServerUser();
-  const promptData = await getPrompt(id, isPrivate);
+  const promptData = await getPrompt(id, isPrivate, !!user);
 
   if (!promptData) {
     return (
