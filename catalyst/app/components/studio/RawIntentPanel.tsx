@@ -98,13 +98,6 @@ export default function RawIntentPanel() {
                 </div>
               )}
               <div className="flex items-center gap-2">
-                {/* <button
-                  onClick={() => setShowControls(!showControls)}
-                  className={`p-2 rounded-lg transition-all ${showControls ? "bg-cyan-500 text-white shadow-neon" : "bg-white/5 text-slate-400 hover:text-white"}`}
-                  title="Prompt Refinement Settings"
-                >
-                  <Settings2 className="size-5 md:size-4" />
-                </button> */}
                 <ModelSelector />
               </div>
             </div>

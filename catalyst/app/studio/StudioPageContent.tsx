@@ -140,7 +140,7 @@ function StudioContent({
               </p>
             </div>
 
-            <button
+            {/* <button
               id="toggle-analysis-panel"
               onClick={handleToggle}
               aria-label={
@@ -169,7 +169,7 @@ function StudioContent({
               <span className="hidden sm:inline whitespace-nowrap">
                 {showAnalysis ? "Hide Analysis" : "Show Analysis"}
               </span>
-            </button>
+            </button> */}
           </section>
 
           <div className="flex flex-col lg:flex-row gap-6">
