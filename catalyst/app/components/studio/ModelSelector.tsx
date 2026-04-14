@@ -30,7 +30,6 @@ export const ICON_MAP: Record<string, any> = {
   video: Video,
 };
 
-
 export const getModelColor = (color: string) => {
   const colors: Record<string, string> = {
     cyan: "text-cyan-400 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:bg-cyan-500/10",
@@ -150,11 +149,13 @@ export default function ModelSelector() {
                       {model.name}
                     </div>
                     <div className="text-xs text-slate-400 truncate">
-                      {getModelModes(model).map((m) => MODE_LABELS[m]).join(" · ")}
+                      {getModelModes(model)
+                        .map((m) => MODE_LABELS[m])
+                        .join(" · ")}
                     </div>
                   </div>
                   <span
-                    className={`text-[10px] md:text-xs px-2 py-1 rounded flex-shrink-0 ${selectedModel.slug === model.slug ? "bg-cyan-900/40 text-cyan-200" : "bg-slate-800/40 text-slate-400"}`}
+                    className={`text-[10px] md:text-xs px-2 py-1 rounded flex-shrink-0 ${selectedModel.slug === model.slug ? "bg-cyan-900/40 text-cyan-200" : "bg-slate-800/40 text-white"}`}
                   >
                     {model.type}
                   </span>
