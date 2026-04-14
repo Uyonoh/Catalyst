@@ -77,12 +77,16 @@ export default function PromptEditorView({
       console.error("Error saving prompt:", err);
     } finally {
       setIsSaving(false);
-      router.push("/library");
+      router.push("/history");
     }
   };
 
   const handleDiscard = () => {
-    router.back();
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/library");
+    }
   };
 
   const handleVisibilityChange = async (newVisibility: boolean) => {

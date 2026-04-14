@@ -77,7 +77,13 @@ function StudioContent({
           isPublic={isPublic}
           selectedModelId={selectedModel}
           isLoading={isSaving}
-          onDiscard={() => setShowEditor(false)}
+          onDiscard={() => {
+            if (window.history.length > 1) {
+              router.back();
+            } else {
+              router.push("/library");
+            }
+          }}
           onVisibilityChange={(val) => {
             setIsPublic(val);
             setNotification({
@@ -112,7 +118,7 @@ function StudioContent({
                 });
               } else {
                 setShowEditor(false);
-                router.push("/library");
+                router.push("/history");
               }
             } catch (err) {
               console.error("Error saving prompt", err);
