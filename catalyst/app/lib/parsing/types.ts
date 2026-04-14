@@ -19,7 +19,16 @@ export interface ParsingResult {
   intentClarity: number; // 0 to 1
   intent: string;
   entities: Entity[];
-  targetModel?: "gpt" | "claude" | "dalle" | "llama";
+  targetModel?:
+    | "gpt"
+    | "claude"
+    | "gemini"
+    | "llama"
+    | "grok"
+    | "dalle"
+    | "stablediffusion"
+    | "midjourney"
+    | "veo";
   suggestedFormat?: "json" | "markdown" | "natural_language";
   raw?: any;
 }

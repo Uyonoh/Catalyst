@@ -6,7 +6,8 @@ import {
   Sparkles, 
   Palette, 
   Terminal, 
-  Image as ImageIcon 
+  Image as ImageIcon,
+  Video,
 } from "lucide-react";
 
 import { useCatalog } from "../../context/CatalogContext";
@@ -17,6 +18,7 @@ const ICON_MAP: Record<string, any> = {
   palette: Palette,
   terminal: Terminal,
   image: ImageIcon,
+  video: Video,
 };
 
 export default function QuickAccessModels() {
@@ -30,6 +32,8 @@ export default function QuickAccessModels() {
     orange: "bg-orange-500/20 text-orange-400",
     pink: "bg-pink-500/20 text-pink-400",
     blue: "bg-blue-500/20 text-blue-400",
+    yellow: "bg-yellow-500/20 text-yellow-400",
+    rose: "bg-rose-500/20 text-rose-400",
   };
   return (
     <div

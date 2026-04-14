@@ -13,6 +13,7 @@ import {
   Zap,
   FileText,
   Code,
+  Video,
 } from "lucide-react";
 import { useCatalog } from "../../context/CatalogContext";
 import { Model } from "../../lib/models";
@@ -26,6 +27,7 @@ export const ICON_MAP: Record<string, any> = {
   palette: Palette,
   article: FileText,
   code: Code,
+  video: Video,
 };
 
 
@@ -40,6 +42,9 @@ export const getModelColor = (color: string) => {
       "text-orange-400 border-orange-500/50 shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:bg-orange-500/10",
     pink: "text-pink-400 border-pink-500/50 shadow-[0_0_15px_rgba(236,72,153,0.3)] hover:bg-pink-500/10",
     blue: "text-blue-400 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:bg-blue-500/10",
+    yellow:
+      "text-yellow-400 border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.3)] hover:bg-yellow-500/10",
+    rose: "text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)] hover:bg-rose-500/10",
   };
   return colors[color] || colors.cyan;
 };

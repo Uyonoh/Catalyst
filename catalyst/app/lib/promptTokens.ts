@@ -135,17 +135,26 @@ export const MODEL_BADGE_FALLBACK = {
 
 /** Derive model color from target_model string (for HistoryCard) */
 export const TARGET_MODEL_COLOR_MAP: Record<string, string> = {
+  "gpt": "green",
   "gpt-4": "green",
   "gpt-4-turbo": "green",
   "gpt-4o": "green",
+  "claude": "purple",
   "claude-3-opus": "purple",
   "claude-3-sonnet": "purple",
   "claude-3-haiku": "purple",
+  "gemini": "yellow",
   "gemini-1.5-pro": "yellow",
   "gemini-1.5-flash": "yellow",
+  "llama": "orange",
   "llama-3": "orange",
   "llama-3.1": "orange",
+  "grok": "cyan",
+  "dalle": "pink",
   "dall-e-3": "pink",
+  "stablediffusion": "blue",
   "stable-diffusion-xl": "blue",
+  "midjourney": "cyan",
   "midjourney-v6": "cyan",
+  "veo": "rose",
 };

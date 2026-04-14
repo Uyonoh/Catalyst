@@ -26,12 +26,18 @@ export async function POST(req: NextRequest) {
       targetModel = TargetModel.CLAUDE_3_5_SONNET;
     } else if (model === "gemini") {
       targetModel = TargetModel.GEMINI_1_5_PRO;
-    } else if (
-      model === "stablediffusion" ||
-      model === "midjourney" ||
-      model === "dalle"
-    ) {
+    } else if (model === "llama") {
+      targetModel = TargetModel.LLAMA_3;
+    } else if (model === "grok") {
+      targetModel = TargetModel.GROK_1;
+    } else if (model === "dalle") {
+      targetModel = TargetModel.DALLE_3;
+    } else if (model === "stablediffusion") {
       targetModel = TargetModel.STABLE_DIFFUSION_XL;
+    } else if (model === "midjourney") {
+      targetModel = TargetModel.MIDJOURNEY_V6;
+    } else if (model === "veo") {
+      targetModel = TargetModel.VEO_VIDEO;
     }
 
     // For Phase 1, we use the fast RegexParser
