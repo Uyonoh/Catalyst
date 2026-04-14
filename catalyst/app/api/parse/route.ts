@@ -8,7 +8,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 export async function POST(req: NextRequest) {
   try {
-    const { text, model: modelId, controls } = await req.json();
+    const { text, model: modelId, controls, mode } = await req.json();
 
     if (!text || typeof text !== "string") {
       return NextResponse.json(
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         });
     }
 
-    const prompt = buildPrompt({ text, model: modelId, controls });
+    const prompt = buildPrompt({ text, model: modelId, controls, mode });
     
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",

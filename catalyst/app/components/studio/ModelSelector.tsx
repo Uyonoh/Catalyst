@@ -16,7 +16,7 @@ import {
   Video,
 } from "lucide-react";
 import { useCatalog } from "../../context/CatalogContext";
-import { Model } from "../../lib/models";
+import { Model, MODE_LABELS, getModelModes } from "../../lib/models-shared";
 
 export const ICON_MAP: Record<string, any> = {
   chat: MessageSquare,
@@ -150,8 +150,7 @@ export default function ModelSelector() {
                       {model.name}
                     </div>
                     <div className="text-xs text-slate-400 truncate">
-                      AI{" "}
-                      {model.type === "Img" ? "Image Generation" : "Text Model"}
+                      {getModelModes(model).map((m) => MODE_LABELS[m]).join(" · ")}
                     </div>
                   </div>
                   <span

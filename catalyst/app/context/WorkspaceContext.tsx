@@ -11,12 +11,15 @@ import { useParsing } from "../hooks/useParsing";
 import { OptimizedPrompt } from "../lib/engine/types";
 import { useUser } from "./AuthContext";
 import { PromptControls } from "../lib/prompts/builder";
+import { ModelMode, getDefaultMode, FALLBACK_MODELS } from "../lib/models-shared";
 
 interface WorkspaceContextType {
   input: string;
   setInput: (text: string) => void;
   selectedModel: string;
   setSelectedModel: (model: string) => void;
+  selectedMode: ModelMode;
+  setSelectedMode: (mode: ModelMode) => void;
   controls: PromptControls;
   setControls: (controls: Partial<PromptControls>) => void;
   result: OptimizedPrompt | null;
@@ -28,10 +31,12 @@ interface WorkspaceContextType {
   parseIntent: ({
     text,
     modelId,
+    mode,
     controls,
   }: {
     text: string;
     modelId: string;
+    mode?: ModelMode;
     controls?: PromptControls;
   }) => Promise<void>;
   generationError: string | null;
@@ -47,6 +52,7 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState("gpt");
+  const [selectedMode, setSelectedMode] = useState<ModelMode>("text");
   const [controls, setControlsState] = useState<PromptControls>({
     creativity: 0.5,
     precision: 0.75,
@@ -58,6 +64,14 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const setControls = (newControls: Partial<PromptControls>) => {
     setControlsState((prev) => ({ ...prev, ...newControls }));
   };
+
+  // Auto-reset mode on model change
+  useEffect(() => {
+    const model = FALLBACK_MODELS.find((m: any) => m.slug === selectedModel);
+    if (model) {
+      setSelectedMode(getDefaultMode(model));
+    }
+  }, [selectedModel]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -95,10 +109,12 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const parseIntent = async ({
     text,
     modelId: model,
+    mode: overrideMode,
     controls: overrideControls,
   }: {
     text: string;
     modelId: string;
+    mode?: ModelMode;
     controls?: PromptControls;
   }) => {
     if (!text.trim()) return;
@@ -109,6 +125,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     setRetryCount(0);
 
     const activeControls = overrideControls || controls;
+    const activeMode = overrideMode || selectedMode;
     const maxRetries = 3;
     let attempt = 0;
 
@@ -117,7 +134,12 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         const response = await fetch("/api/parse", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, model, controls: activeControls }),
+          body: JSON.stringify({
+            text,
+            model,
+            controls: activeControls,
+            mode: activeMode,
+          }),
         });
 
         if (!response.ok) {
@@ -159,6 +181,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         setInput,
         selectedModel,
         setSelectedModel,
+        selectedMode,
+        setSelectedMode,
         controls,
         setControls,
         result,

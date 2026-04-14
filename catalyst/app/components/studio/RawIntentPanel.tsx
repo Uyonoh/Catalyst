@@ -6,6 +6,7 @@ import { useWorkspace } from "../../context/WorkspaceContext";
 import { useUser } from "../../context/AuthContext";
 import { useRouter } from "next/navigation";
 import ModelSelector from "./ModelSelector";
+import ModeSelector from "./ModeSelector";
 import { useCatalog } from "../../context/CatalogContext";
 import PromptControlsPanel from "./PromptControlsPanel";
 import {
@@ -26,6 +27,7 @@ export default function RawIntentPanel() {
     input,
     setInput,
     selectedModel: selectedModelId,
+    selectedMode,
     isLoading,
     result,
     isGenerating,
@@ -98,6 +100,7 @@ export default function RawIntentPanel() {
                 </div>
               )}
               <div className="flex items-center gap-2">
+                <ModeSelector />
                 <ModelSelector />
               </div>
             </div>
@@ -145,6 +148,7 @@ export default function RawIntentPanel() {
                       parseIntent({
                         text: input,
                         modelId: selectedModel.slug,
+                        mode: selectedMode,
                         controls,
                       })
                     }
@@ -204,7 +208,12 @@ export default function RawIntentPanel() {
               return;
             }
             if (showControls) setShowControls(false);
-            parseIntent({ text: input, modelId: selectedModel.slug, controls });
+            parseIntent({
+              text: input,
+              modelId: selectedModel.slug,
+              mode: selectedMode,
+              controls,
+            });
           }}
           disabled={!input.trim() || isGenerating}
           aria-label="Generate prompt"

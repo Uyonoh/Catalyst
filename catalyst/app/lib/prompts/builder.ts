@@ -1,4 +1,5 @@
 import { getProfileForModel } from "./profiles";
+import { ModelMode } from "../models-shared";
 
 export interface PromptControls {
   creativity?: number; // 0 to 1
@@ -36,8 +37,13 @@ Refinement Directives:
 `;
 }
 
-export function buildSystemPrompt(modelId: string, controls: PromptControls = {}) {
+export function buildSystemPrompt(
+  modelId: string,
+  controls: PromptControls = {},
+  mode: ModelMode = "text",
+) {
   const profile = getProfileForModel(modelId);
+  const modeInstruction = profile.modeInstructions[mode];
 
   let systemPrompt = `
 You are an expert prompt engineer.
@@ -46,8 +52,12 @@ Your task is to transform a "Raw Intent" into a highly effective prompt optimize
 
 Core Rules:
 1. Preserve the original intent exactly.
-${controls.length != "short" ? `2. Structure the output using the following sections:
-   ${profile.structure.join("\n   ")}` : "Structure the output in a way that is easy to understand"}
+${
+  controls.length != "short"
+    ? `2. Structure the output using the following sections:
+   ${profile.structure.join("\n   ")}`
+    : "Structure the output in a way that is easy to understand"
+}
 3. Use clear, professional, unambiguous language.
 4. DO NOT include any explanations or conversational filler—output ONLY the final refined prompt.
 5. ${
@@ -55,6 +65,14 @@ ${controls.length != "short" ? `2. Structure the output using the following sect
       ? "Break down complex tasks into step-by-step instructions."
       : "Keep instructions naturally structured."
   }
+
+${
+  modeInstruction
+    ? `Mode-Specific Instructions:
+- This is a ${mode.toUpperCase()} focused task.
+- ${modeInstruction}`
+    : ""
+}
 
 Model Optimization Notes:
 - Ensure alignment with how ${modelId.toUpperCase()} models interpret instructions.
@@ -77,7 +95,9 @@ Strategy Note:
   if (controls.outputMode === "json") {
     systemPrompt += `
 Output Format:
-- Return the final prompt as valid JSON with keys corresponding to the structure: ${profile.structure.map(s => s.toLowerCase().replace(/ /g, '_')).join(', ')}.
+- Return the final prompt as valid JSON with keys corresponding to the structure: ${profile.structure
+      .map((s) => s.toLowerCase().replace(/ /g, "_"))
+      .join(", ")}.
 `;
   }
 
@@ -95,12 +115,14 @@ export function buildPrompt({
   text,
   model = "gemini",
   controls = {},
+  mode = "text",
 }: {
   text: string;
   model: string;
   controls?: PromptControls;
+  mode?: ModelMode;
 }) {
-  const systemPrompt = buildSystemPrompt(model, controls);
+  const systemPrompt = buildSystemPrompt(model, controls, mode);
 
   return `${systemPrompt}
 
