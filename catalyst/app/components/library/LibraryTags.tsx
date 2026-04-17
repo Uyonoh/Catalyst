@@ -32,7 +32,15 @@ export default function LibraryTags() {
       }
     }
     
-    router.push(`${pathname}?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    
+    setTimeout(() => {
+      const el = document.getElementById("search-section");
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
+    }, 50);
   };
 
   return (

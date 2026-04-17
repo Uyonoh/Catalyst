@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, ListFilter, Plus } from "lucide-react";
+import { Search, ListFilter, Plus, X } from "lucide-react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 export default function LibrarySearch() {
@@ -9,6 +9,16 @@ export default function LibrarySearch() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
+
+  const hasFilters = searchParams.get("q") || searchParams.get("tag");
+
+  const scrollToSearch = () => {
+    const el = document.getElementById("search-section");
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
 
   useEffect(() => {
     const currentQ = searchParams.get("q") || "";
@@ -21,8 +31,9 @@ export default function LibrarySearch() {
       } else {
         params.delete("q");
       }
-      router.push(`${pathname}?${params.toString()}`);
-    }, 300);
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      if (searchTerm) scrollToSearch();
+    }, 500);
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm, pathname, router, searchParams]);
@@ -39,7 +50,7 @@ export default function LibrarySearch() {
   }, []);
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 mb-8">
+    <div id="search-section" className="flex flex-col md:flex-row gap-4 mb-8">
       {/* Search */}
       <div className="flex-1 group">
         <div className="flex w-full items-center rounded-xl h-12 glass-panel border border-white/10 overflow-hidden px-4 transition-all duration-300 focus-within:border-cyan-500/50 focus-within:shadow-[0_0_15px_rgba(6,182,212,0.3)]">
@@ -59,9 +70,19 @@ export default function LibrarySearch() {
       </div>
       {/* Sort/View Options */}
       <div className="flex gap-2 shrink-0">
-        <button className="h-12 px-4 rounded-xl glass-panel text-white hover:bg-white/10 border border-white/10 flex items-center gap-2 transition-colors active:scale-95">
-          <ListFilter className="size-5" />
-          <span className="text-sm font-medium">Filter</span>
+        <button
+          onClick={() => {
+            if (hasFilters) {
+              setSearchTerm("");
+              router.push(pathname, { scroll: false });
+            } else {
+              scrollToSearch();
+            }
+          }}
+          className="h-12 px-4 rounded-xl glass-panel text-white hover:bg-white/10 border border-white/10 flex items-center gap-2 transition-colors active:scale-95"
+        >
+          {hasFilters ? <X className="size-5" /> : <ListFilter className="size-5" />}
+          <span className="text-sm font-medium">{hasFilters ? "Clear" : "Filter"}</span>
         </button>
         <button
           className="h-12 w-12 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-lg hover:shadow-cyan-500/20 active:scale-95"
