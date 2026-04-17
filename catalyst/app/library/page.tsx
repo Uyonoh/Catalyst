@@ -10,13 +10,22 @@ import LibraryGrid from "../components/library/LibraryGrid";
 import { LibraryItem } from "../components/library/LibraryCard";
 import { supabase } from "../lib/supabase";
 
-async function getLibraryItems(): Promise<LibraryItem[]> {
-  const { data, error } = await supabase
+async function getLibraryItems(searchParams: { [key: string]: string | undefined }): Promise<LibraryItem[]> {
+  let query = supabase
     .from("prompts_public")
     .select(
       "id, title, updated_at, snippet, content, target_model, model_color, tag, icon, icon_color, has_gradient",
-    )
-    .order("created_at", { ascending: true });
+    );
+
+  if (searchParams.q) {
+    query = query.or(`title.ilike.%${searchParams.q}%,snippet.ilike.%${searchParams.q}%`);
+  }
+
+  if (searchParams.tag) {
+    query = query.eq('tag', searchParams.tag);
+  }
+
+  const { data, error } = await query.order("created_at", { ascending: true });
 
   if (error) {
     console.warn("Failed to fetch library items:", error.message);
@@ -30,8 +39,19 @@ async function getLibraryItems(): Promise<LibraryItem[]> {
   })) as LibraryItem[];
 }
 
-export default async function LibraryPage() {
-  const items = await getLibraryItems();
+export default async function LibraryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const resolvedSearchParams = await searchParams;
+  
+  const params = {
+    q: typeof resolvedSearchParams.q === 'string' ? resolvedSearchParams.q : undefined,
+    tag: typeof resolvedSearchParams.tag === 'string' ? resolvedSearchParams.tag : undefined,
+  };
+
+  const items = await getLibraryItems(params);
 
   return (
     <>

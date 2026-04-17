@@ -1,28 +1,55 @@
+"use client";
+
 import React from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 const TAGS = [
-  {
-    label: "All Prompts",
-    color: "bg-white",
-    text: "text-[#101922]",
-    active: true,
-  },
-  { label: "#Creative", color: "bg-cyan-400", active: false },
-  { label: "#Coding", color: "bg-green-400", active: false },
-  { label: "#Marketing", color: "bg-purple-400", active: false },
-  { label: "#Data Analysis", color: "bg-orange-400", active: false },
-  { label: "#Writing", color: "bg-blue-400", active: false },
+  { label: "All Prompts", color: "bg-white", text: "text-[#101922]" },
+  { label: "#Creative", color: "bg-cyan-400" },
+  { label: "#Coding", color: "bg-green-400" },
+  { label: "#Marketing", color: "bg-purple-400" },
+  { label: "#Data Analysis", color: "bg-orange-400" },
+  { label: "#Writing", color: "bg-blue-400" },
 ];
 
 export default function LibraryTags() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const currentTag = searchParams.get("tag");
+
+  const handleTagClick = (label: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    
+    if (label === "All Prompts") {
+      params.delete("tag");
+    } else {
+      if (currentTag === label) {
+        params.delete("tag"); // clicking active tag clears it
+      } else {
+        params.set("tag", label);
+      }
+    }
+    
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   return (
     <div className="flex gap-3 mb-8 overflow-x-auto pb-2 dropdown-scroll animate-fadeIn">
       {TAGS.map((tag) => {
-        if (tag.active && tag.label === "All Prompts") {
+        const isActive = tag.label === "All Prompts" ? !currentTag : currentTag === tag.label;
+
+        if (tag.label === "All Prompts") {
           return (
             <button
               key={tag.label}
-              className="whitespace-nowrap h-8 px-4 rounded-full bg-white text-[#101922] text-xs font-bold shadow-[0_0_10px_rgba(255,255,255,0.3)] transition-transform active:scale-95"
+              onClick={() => handleTagClick(tag.label)}
+              className={`whitespace-nowrap h-8 px-4 rounded-full text-xs font-bold transition-transform active:scale-95 ${
+                isActive 
+                  ? "bg-white text-[#101922] shadow-[0_0_10px_rgba(255,255,255,0.3)]" 
+                  : "glass-panel border border-white/10 text-slate-300 hover:text-white hover:border-cyan-500/30 font-medium"
+              }`}
             >
               {tag.label}
             </button>
@@ -32,9 +59,14 @@ export default function LibraryTags() {
         return (
           <button
             key={tag.label}
-            className={`whitespace-nowrap h-8 px-4 rounded-full glass-panel border border-white/10 text-slate-300 hover:text-white hover:border-cyan-500/30 text-xs font-medium transition-all flex items-center gap-1.5 active:scale-95`}
+            onClick={() => handleTagClick(tag.label)}
+            className={`whitespace-nowrap h-8 px-4 rounded-full glass-panel border transition-all flex items-center gap-1.5 active:scale-95 text-xs font-medium ${
+              isActive
+                ? "border-cyan-500/50 bg-white/10 text-white shadow-[0_0_10px_rgba(255,255,255,0.1)]"
+                : "border-white/10 text-slate-300 hover:text-white hover:border-cyan-500/30"
+            }`}
           >
-            <span className={`w-2 h-2 rounded-full ${tag.color}`}></span>
+            <span className={`w-2 h-2 rounded-full ${tag.color} ${isActive ? "shadow-[0_0_8px_currentColor]" : ""}`}></span>
             {tag.label}
           </button>
         );
