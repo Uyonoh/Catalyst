@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, Key, CreditCard, BarChart2, Lock, Bell, LogOut } from "lucide-react";
+import { Settings, Key, CreditCard, SlidersHorizontal, Lock, Bell, LogOut } from "lucide-react";
 import { useUser } from "../../context/AuthContext";
 
 const NAV_ITEMS = [
   { title: "General", href: "/settings/general", icon: Settings },
   { title: "API Keys", href: "/settings/api-keys", icon: Key },
   { title: "Subscriptions", href: "/settings/subscriptions", icon: CreditCard },
-  { title: "Live Analysis", href: "/settings/live-analysis", icon: BarChart2 },
+  { title: "Prompt Controls", href: "/settings/prompt-settings", icon: SlidersHorizontal },
   { title: "Privacy", href: "/settings/privacy", icon: Lock },
   { title: "Notifications", href: "/settings/notifications", icon: Bell },
 ];

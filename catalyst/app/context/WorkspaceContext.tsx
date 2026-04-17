@@ -50,6 +50,7 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(
 );
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
+  const { profile } = useUser();
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState("gpt");
   const [selectedMode, setSelectedMode] = useState<ModelMode>("text");
@@ -60,6 +61,17 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     strategy: "default",
     failureHandling: true,
   });
+
+  const [hasInitializedControls, setHasInitializedControls] = useState(false);
+
+  // Hydrate controls from user preferences once profile is loaded
+  useEffect(() => {
+    const userDefaults = profile?.preferences?.promptControls;
+    if (userDefaults && !hasInitializedControls) {
+      setControlsState((prev) => ({ ...prev, ...userDefaults }));
+      setHasInitializedControls(true);
+    }
+  }, [profile, hasInitializedControls]);
 
   const setControls = (newControls: Partial<PromptControls>) => {
     setControlsState((prev) => ({ ...prev, ...newControls }));
@@ -83,7 +95,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const { profile } = useUser();
   const preferences = profile?.preferences || {};
 
   // Use preference for autoAnalyze or default to true

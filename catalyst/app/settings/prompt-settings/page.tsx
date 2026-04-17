@@ -1,9 +1,9 @@
 import SettingsSectionHeader from "../../components/settings/SettingsSectionHeader";
-import AnalysisPreferencesForm from "../../components/settings/live-analysis/AnalysisPreferencesForm";
+import PromptSettingsForm from "../../components/settings/prompt-settings/PromptSettingsForm";
 import { createClient } from "../../lib/supabase-server";
 import { redirect } from "next/navigation";
 
-export default async function LiveAnalysisSettings() {
+export default async function PromptSettings() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -20,13 +20,13 @@ export default async function LiveAnalysisSettings() {
   return (
     <>
       <SettingsSectionHeader 
-        title="Live Analysis" 
-        description="Configure how the Catalyst Studio engine analyzes your prompts in real-time."
+        title="Prompt Controls" 
+        description="Configure the default optimization controls applied initially in the Catalyst Studio."
       />
       
       <div className="flex flex-col gap-10 animate-fadeIn">
         <section>
-          <AnalysisPreferencesForm user={user} preferences={profile?.preferences || {}} />
+          <PromptSettingsForm user={user} preferences={profile?.preferences || {}} />
         </section>
       </div>
     </>

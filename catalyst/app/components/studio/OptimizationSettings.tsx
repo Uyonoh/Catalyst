@@ -99,7 +99,7 @@ const SETTINGS: Setting[] = [
 ];
 
 export default function OptimizationSettings() {
-  const { controls, setControls } = useWorkspace();
+  const { controls, setControls, preferences } = useWorkspace();
   const [showSettings, setShowSettings] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
@@ -112,13 +112,14 @@ export default function OptimizationSettings() {
   }, [activeTooltip]);
 
   const handleReset = () => {
-    setControls({
+    const defaults = preferences?.promptControls || {
       creativity: 0.5,
       precision: 0.75,
       length: "short",
       strategy: "default",
       failureHandling: true,
-    });
+    };
+    setControls(defaults);
   };
 
   const getLevelLabel = (setting: Setting, value: any) => {
