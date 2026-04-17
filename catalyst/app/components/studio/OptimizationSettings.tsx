@@ -197,7 +197,7 @@ export default function OptimizationSettings() {
 
           <button
             onClick={() => setShowSettings(!showSettings)}
-            className="sm:hidden flex items-center gap-1 text-xs text-cyan-400 bg-cyan-500/10 px-3 py-1.5 rounded-full"
+            className="flex items-center gap-1 text-xs text-cyan-400 bg-cyan-500/10 px-3 py-1.5 rounded-full"
           >
             <span>{showSettings ? "Hide" : "Show"}</span>
             {showSettings ? (
@@ -209,7 +209,7 @@ export default function OptimizationSettings() {
         </div>
 
         <div
-          className={`${showSettings ? "flex" : "hidden sm:flex"} items-center justify-between sm:justify-end gap-4`}
+          className={`${showSettings ? "flex" : "hidden"} items-center justify-between sm:justify-end gap-4`}
         >
           <button
             onClick={handleReset}
@@ -221,7 +221,7 @@ export default function OptimizationSettings() {
       </div>
 
       <div
-        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 ${showSettings ? "grid" : "hidden sm:grid"} animate-fadeIn`}
+        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 ${showSettings ? "grid" : "hidden"} animate-fadeIn`}
       >
         {SETTINGS.map((setting) => {
           const colors = getColorStyles(setting.color);

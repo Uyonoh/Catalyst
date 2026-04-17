@@ -136,7 +136,7 @@ function StudioContent({
                 Prompt Studio
               </h1>
               <p className="text-slate-400 text-base md:text-lg">
-                Transform your raw ideas into optimized, targeted prompts.
+                Refine your ideas into high-quality, purpose-driven prompts.
               </p>
             </div>
 
