@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Check, Filter, SortDesc, Box, LayoutGrid, CheckSquare, Square } from "lucide-react";
+import {
+  X,
+  Check,
+  Filter,
+  SortDesc,
+  Box,
+  LayoutGrid,
+  CheckSquare,
+  Square,
+} from "lucide-react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCatalog } from "../../context/CatalogContext";
 
@@ -10,7 +19,10 @@ interface LibraryFiltersProps {
   onClose: () => void;
 }
 
-export default function LibraryFilters({ isOpen, onClose }: LibraryFiltersProps) {
+export default function LibraryFilters({
+  isOpen,
+  onClose,
+}: LibraryFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -18,25 +30,38 @@ export default function LibraryFilters({ isOpen, onClose }: LibraryFiltersProps)
 
   const [selectedModes, setSelectedModes] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedIcons, setSelectedIcons] = useState<string[]>([]);
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
   const [sort, setSort] = useState<string>("newest");
 
   // Sync with URL on mount or URL change
   useEffect(() => {
     if (!isOpen) return;
-    
+
     const modes = searchParams.get("modes")?.split(",").filter(Boolean) || [];
-    const tags = (searchParams.get("tags") || searchParams.get("tag"))?.split(",").filter(Boolean) || [];
+    const tags =
+      (searchParams.get("tags") || searchParams.get("tag"))
+        ?.split(",")
+        .filter(Boolean) || [];
+    const icons =
+      (searchParams.get("icons") || searchParams.get("icon"))
+        ?.split(",")
+        .filter(Boolean) || [];
     const mdls = searchParams.get("models")?.split(",").filter(Boolean) || [];
     const s = searchParams.get("sort") || "newest";
 
     setSelectedModes(modes);
     setSelectedTags(tags);
+    setSelectedIcons(icons);
     setSelectedModels(mdls);
     setSort(s);
   }, [isOpen, searchParams]);
 
-  const toggleItem = (list: string[], setList: React.Dispatch<React.SetStateAction<string[]>>, item: string) => {
+  const toggleItem = (
+    list: string[],
+    setList: React.Dispatch<React.SetStateAction<string[]>>,
+    item: string,
+  ) => {
     if (list.includes(item)) {
       setList(list.filter((i) => i !== item));
     } else {
@@ -46,17 +71,24 @@ export default function LibraryFilters({ isOpen, onClose }: LibraryFiltersProps)
 
   const applyFilters = () => {
     const params = new URLSearchParams(searchParams.toString());
-    
+
     if (selectedModes.length > 0) params.set("modes", selectedModes.join(","));
     else params.delete("modes");
 
     if (selectedTags.length > 0) params.set("tags", selectedTags.join(","));
     else {
       params.delete("tags");
-      params.delete("tag"); // clear legacy tag too
+      params.delete("tag");
     }
 
-    if (selectedModels.length > 0) params.set("models", selectedModels.join(","));
+    if (selectedIcons.length > 0) params.set("icons", selectedIcons.join(","));
+    else {
+      params.delete("icons");
+      params.delete("icon");
+    }
+
+    if (selectedModels.length > 0)
+      params.set("models", selectedModels.join(","));
     else params.delete("models");
 
     if (sort !== "newest") params.set("sort", sort);
@@ -69,16 +101,19 @@ export default function LibraryFilters({ isOpen, onClose }: LibraryFiltersProps)
   const clearAll = () => {
     setSelectedModes([]);
     setSelectedTags([]);
+    setSelectedIcons([]);
     setSelectedModels([]);
     setSort("newest");
-    
+
     const params = new URLSearchParams(searchParams.toString());
     params.delete("modes");
     params.delete("tags");
     params.delete("tag");
+    params.delete("icons");
+    params.delete("icon");
     params.delete("models");
     params.delete("sort");
-    
+
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
@@ -87,14 +122,14 @@ export default function LibraryFilters({ isOpen, onClose }: LibraryFiltersProps)
   return (
     <>
       {/* Mobile Drawer Overlay */}
-      <div 
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] md:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+      <div
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] md:hidden transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         onClick={onClose}
       />
-      
+
       {/* Drawer / Panel */}
-      <div 
-        className={`fixed inset-x-0 bottom-0 bg-[#0a0f14] border-t border-white/10 rounded-t-3xl z-[101] md:relative md:inset-auto md:bg-transparent md:border-none md:rounded-none md:z-0 md:mb-8 transition-transform duration-300 transform ${isOpen ? 'translate-y-0' : 'translate-y-full md:translate-y-0'}`}
+      <div
+        className={`fixed inset-x-0 bottom-0 bg-[#0a0f14] border-t border-white/10 rounded-t-3xl z-[101] md:relative md:inset-auto md:bg-transparent md:border-none md:rounded-none md:z-0 md:mb-8 transition-transform duration-300 transform ${isOpen ? "translate-y-0" : "translate-y-full md:translate-y-0"}`}
       >
         <div className="max-h-[85vh] overflow-y-auto dropdown-scroll md:max-h-none md:overflow-visible">
           <div className="p-6 md:p-8 glass-panel border border-white/10 md:rounded-2xl shadow-2xl">
@@ -105,18 +140,22 @@ export default function LibraryFilters({ isOpen, onClose }: LibraryFiltersProps)
                   <Filter className="size-5" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">Advanced Filters</h2>
-                  <p className="text-slate-500 text-xs">Refine your library searches</p>
+                  <h2 className="text-xl font-bold text-white">
+                    Advanced Filters
+                  </h2>
+                  <p className="text-slate-500 text-xs">
+                    Refine your library searches
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button 
+                <button
                   onClick={clearAll}
                   className="text-xs font-medium text-slate-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5"
                 >
                   Clear All
                 </button>
-                <button 
+                <button
                   onClick={onClose}
                   className="size-10 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-white transition-colors md:hidden"
                 >
@@ -135,14 +174,24 @@ export default function LibraryFilters({ isOpen, onClose }: LibraryFiltersProps)
                   {["Text", "Image", "Video"].map((mode) => (
                     <button
                       key={mode}
-                      onClick={() => toggleItem(selectedModes, setSelectedModes, mode.toLowerCase())}
+                      onClick={() =>
+                        toggleItem(
+                          selectedModes,
+                          setSelectedModes,
+                          mode.toLowerCase(),
+                        )
+                      }
                       className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all ${
                         selectedModes.includes(mode.toLowerCase())
                           ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30"
                           : "text-slate-400 hover:bg-white/5 border border-transparent"
                       }`}
                     >
-                      {selectedModes.includes(mode.toLowerCase()) ? <CheckSquare className="size-4" /> : <Square className="size-4" />}
+                      {selectedModes.includes(mode.toLowerCase()) ? (
+                        <CheckSquare className="size-4" />
+                      ) : (
+                        <Square className="size-4" />
+                      )}
                       <span className="text-sm font-medium">{mode}</span>
                     </button>
                   ))}
@@ -156,18 +205,34 @@ export default function LibraryFilters({ isOpen, onClose }: LibraryFiltersProps)
                 </label>
                 <div className="grid grid-cols-1 gap-1 max-h-[300px] overflow-y-auto dropdown-scroll pr-2">
                   {/* Common Hashtag Tags */}
-                  {["#Creative", "#Coding", "#Marketing", "#Data Analysis", "#Writing", "#Business", "#Dev"].map((tag) => (
+                  {[
+                    "#Creative",
+                    "#Coding",
+                    "#Marketing",
+                    "#Data Analysis",
+                    "#Writing",
+                    "#Business",
+                    "#Dev",
+                  ].map((tag) => (
                     <button
                       key={tag}
-                      onClick={() => toggleItem(selectedTags, setSelectedTags, tag)}
+                      onClick={() =>
+                        toggleItem(selectedTags, setSelectedTags, tag)
+                      }
                       className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all text-left ${
                         selectedTags.includes(tag)
                           ? "bg-purple-500/10 text-purple-400 border border-purple-500/30"
                           : "text-slate-400 hover:bg-white/5 border border-transparent"
                       }`}
                     >
-                      {selectedTags.includes(tag) ? <CheckSquare className="size-4" /> : <Square className="size-4" />}
-                      <span className="text-sm font-medium truncate">{tag}</span>
+                      {selectedTags.includes(tag) ? (
+                        <CheckSquare className="size-4" />
+                      ) : (
+                        <Square className="size-4" />
+                      )}
+                      <span className="text-sm font-medium truncate">
+                        {tag}
+                      </span>
                     </button>
                   ))}
                   <div className="h-px bg-white/10 my-2" />
@@ -175,15 +240,23 @@ export default function LibraryFilters({ isOpen, onClose }: LibraryFiltersProps)
                   {categories.map((cat) => (
                     <button
                       key={cat.id}
-                      onClick={() => toggleItem(selectedTags, setSelectedTags, cat.label)}
+                      onClick={() =>
+                        toggleItem(selectedTags, setSelectedTags, cat.slug)
+                      }
                       className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all text-left ${
-                        selectedTags.includes(cat.label)
+                        selectedTags.includes(cat.slug)
                           ? "bg-purple-500/10 text-purple-400 border border-purple-500/30"
                           : "text-slate-400 hover:bg-white/5 border border-transparent"
                       }`}
                     >
-                      {selectedTags.includes(cat.label) ? <CheckSquare className="size-4" /> : <Square className="size-4" />}
-                      <span className="text-sm font-medium truncate">{cat.label}</span>
+                      {selectedTags.includes(cat.slug) ? (
+                        <CheckSquare className="size-4" />
+                      ) : (
+                        <Square className="size-4" />
+                      )}
+                      <span className="text-sm font-medium truncate">
+                        {cat.label}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -198,15 +271,23 @@ export default function LibraryFilters({ isOpen, onClose }: LibraryFiltersProps)
                   {models.map((mod) => (
                     <button
                       key={mod.id}
-                      onClick={() => toggleItem(selectedModels, setSelectedModels, mod.name)}
+                      onClick={() =>
+                        toggleItem(selectedModels, setSelectedModels, mod.slug)
+                      }
                       className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all text-left ${
-                        selectedModels.includes(mod.name)
+                        selectedModels.includes(mod.slug)
                           ? "bg-blue-500/10 text-blue-400 border border-blue-500/30"
                           : "text-slate-400 hover:bg-white/5 border border-transparent"
                       }`}
                     >
-                      {selectedModels.includes(mod.name) ? <CheckSquare className="size-4" /> : <Square className="size-4" />}
-                      <span className="text-sm font-medium truncate">{mod.name}</span>
+                      {selectedModels.includes(mod.slug) ? (
+                        <CheckSquare className="size-4" />
+                      ) : (
+                        <Square className="size-4" />
+                      )}
+                      <span className="text-sm font-medium truncate">
+                        {mod.name}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -232,7 +313,9 @@ export default function LibraryFilters({ isOpen, onClose }: LibraryFiltersProps)
                           : "text-slate-400 hover:bg-white/5"
                       }`}
                     >
-                      <span className="text-sm font-medium">{option.label}</span>
+                      <span className="text-sm font-medium">
+                        {option.label}
+                      </span>
                       {sort === option.value && <Check className="size-4" />}
                     </button>
                   ))}
