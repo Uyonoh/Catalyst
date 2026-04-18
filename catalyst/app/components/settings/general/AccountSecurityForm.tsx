@@ -37,15 +37,27 @@ export default function AccountSecurityForm({ user }: { user: User }) {
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPassword) return;
+    if (!newPassword || !currentPassword) return;
 
     setIsPasswordSaving(true);
     setPasswordMessage(null);
     try {
-      // In a real scenario you might need to verify the old password first depending on your supabase settings.
-      // Supabase's updateUser({ password }) just updates the password if the user is authenticated.
+      // First verify the current password
+      if (user.email) {
+        const { error: verifyError } = await supabaseBrowser.auth.signInWithPassword({
+          email: user.email,
+          password: currentPassword,
+        });
+
+        if (verifyError) {
+          throw new Error("Current password is incorrect.");
+        }
+      }
+
+      // If verified, proceed to update
       const { error } = await supabaseBrowser.auth.updateUser({ password: newPassword });
       if (error) throw error;
+      
       setPasswordMessage({ type: "success", text: "Password updated successfully." });
       setCurrentPassword("");
       setNewPassword("");
