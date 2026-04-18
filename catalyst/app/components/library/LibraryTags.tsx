@@ -19,6 +19,7 @@ export default function LibraryTags() {
 
   const currentTag = searchParams.get("tag");
   const currentTags = searchParams.get("tags")?.split(",").filter(Boolean) || (currentTag ? [currentTag] : []);
+  const currentIcons = searchParams.get("icons")?.split(",").filter(Boolean) || (searchParams.get("icon") ? [searchParams.get("icon")] : []);
 
   const handleTagClick = (label: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -26,6 +27,8 @@ export default function LibraryTags() {
     if (label === "All Prompts") {
       params.delete("tag");
       params.delete("tags");
+      params.delete("icon");
+      params.delete("icons");
     } else {
       if (currentTags.includes(label)) {
         const newTags = currentTags.filter(t => t !== label);
@@ -56,7 +59,7 @@ export default function LibraryTags() {
     <div className="flex gap-3 mb-8 overflow-x-auto pb-2 dropdown-scroll animate-fadeIn">
       {TAGS.map((tag) => {
         const isActive = tag.label === "All Prompts" 
-          ? currentTags.length === 0 
+          ? currentTags.length === 0 && currentIcons.length === 0
           : currentTags.includes(tag.label);
 
         if (tag.label === "All Prompts") {

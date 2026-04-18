@@ -241,15 +241,15 @@ export default function LibraryFilters({
                     <button
                       key={cat.id}
                       onClick={() =>
-                        toggleItem(selectedTags, setSelectedTags, cat.slug)
+                        toggleItem(selectedIcons, setSelectedIcons, cat.slug)
                       }
                       className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all text-left ${
-                        selectedTags.includes(cat.slug)
+                        selectedIcons.includes(cat.slug)
                           ? "bg-purple-500/10 text-purple-400 border border-purple-500/30"
                           : "text-slate-400 hover:bg-white/5 border border-transparent"
                       }`}
                     >
-                      {selectedTags.includes(cat.slug) ? (
+                      {selectedIcons.includes(cat.slug) ? (
                         <CheckSquare className="size-4" />
                       ) : (
                         <Square className="size-4" />

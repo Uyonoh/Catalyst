@@ -16,6 +16,8 @@ export default function LibrarySearch() {
     searchParams.get("modes"),
     searchParams.get("tags"),
     searchParams.get("tag"),
+    searchParams.get("icons"),
+    searchParams.get("icon"),
     searchParams.get("models"),
     searchParams.get("sort") !== "newest" ? searchParams.get("sort") : null
   ].filter(Boolean).length;
