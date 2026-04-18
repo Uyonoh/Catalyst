@@ -24,6 +24,8 @@ export interface HistoryItem {
   created_at: string;
   updated_at: string;
   is_public: boolean;
+  icon?: string;
+  tag?: string;
 }
 
 interface HistoryCardProps {
@@ -76,9 +78,8 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
       <div className="flex justify-between items-start z-10">
         <div className="flex items-center gap-3">
           {(() => {
-            // History entries don't have icon metadata yet, default to sparkles/creative
             const token =
-              PROMPT_TYPE_TOKENS["auto_awesome"] || PROMPT_TYPE_FALLBACK;
+              PROMPT_TYPE_TOKENS[item.icon || "auto_awesome"] || PROMPT_TYPE_FALLBACK;
             const { Icon } = token;
             return (
               <div
@@ -95,6 +96,12 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
             <div className="flex items-center gap-2 text-slate-500 text-xs mt-0.5">
               <Clock className="size-3" />
               <span>{formatUpdated(item.updated_at || item.created_at)}</span>
+              {item.tag && (
+                <>
+                  <span className="text-slate-700">•</span>
+                  <span className="text-cyan-500/80 font-medium">{item.tag.startsWith("#") ? item.tag : `#${item.tag}`}</span>
+                </>
+              )}
             </div>
           </div>
         </div>

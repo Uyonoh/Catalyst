@@ -7,29 +7,140 @@ import { redirect } from "next/navigation";
 import HistoryList from "../components/history/HistoryList";
 import GlassPanel from "../components/GlassPanel";
 
-async function getHistoryItems(userId: string) {
+
+async function getHistoryItems(userId: string, searchParams: {
+  q?: string;
+  tags?: string;
+  icons?: string;
+  models?: string;
+  modes?: string;
+  sort?: string;
+}) {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("prompts")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .select("id, title, content, snippet, raw_input, target_model, created_at, updated_at, is_public, icon, tag")
+    .eq("user_id", userId);
+
+  // Search
+  if (searchParams.q) {
+    query = query.or(
+      `title.ilike.%${searchParams.q}%,content.ilike.%${searchParams.q}%,raw_input.ilike.%${searchParams.q}%`
+    );
+  }
+
+  // Tags
+  if (searchParams.tags) {
+    const tagsArray = searchParams.tags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    if (tagsArray.length > 0) {
+      query = query.in("tag", tagsArray);
+    }
+  }
+
+  // Icons / Categories
+  if (searchParams.icons) {
+    const iconsArray = searchParams.icons
+      .split(",")
+      .map((i) => i.trim())
+      .filter(Boolean);
+    if (iconsArray.length > 0) {
+      query = query.in("icon", iconsArray);
+    }
+  }
+
+  // Models
+  if (searchParams.models) {
+    const modelsArray = searchParams.models
+      .split(",")
+      .map((m) => m.trim())
+      .filter(Boolean);
+    if (modelsArray.length > 0) {
+      query = query.in("target_model", modelsArray);
+    }
+  }
+
+  // Sorting
+  const sort = searchParams.sort || "newest";
+  if (sort === "oldest") {
+    query = query.order("created_at", { ascending: true });
+  } else if (sort === "title") {
+    query = query.order("title", { ascending: true });
+  } else {
+    query = query.order("created_at", { ascending: false });
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("Failed to fetch history:", error.message);
     return [];
   }
-  return data || [];
+
+  let filteredData = data || [];
+  
+  // Modality filtering
+  if (searchParams.modes) {
+    const modesArray = searchParams.modes
+      .split(",")
+      .map((m) => m.trim().toLowerCase());
+    
+    filteredData = filteredData.filter((item: any) => {
+      const model = (item.target_model || "").toLowerCase();
+      if (
+        modesArray.includes("image") &&
+        (model.includes("midjourney") ||
+          model.includes("dall-e") ||
+          model.includes("stable diffusion"))
+      )
+        return true;
+      if (
+        modesArray.includes("video") &&
+        (model.includes("veo") || model.includes("sora"))
+      )
+        return true;
+      if (
+        modesArray.includes("text") &&
+        !(
+          model.includes("midjourney") ||
+          model.includes("dall-e") ||
+          model.includes("stable diffusion") ||
+          model.includes("veo") ||
+          model.includes("sora")
+        )
+      )
+        return true;
+      return false;
+    });
+  }
+
+  return filteredData;
 }
 
-export default async function HistoryPage() {
+export default async function HistoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const user = await getServerUser();
 
   if (!user) {
     redirect("/login?redirect=/history");
   }
 
-  const items = await getHistoryItems(user.id);
+  const resolvedSearchParams = await searchParams;
+  const params = {
+    q: typeof resolvedSearchParams.q === "string" ? resolvedSearchParams.q : undefined,
+    tags: typeof resolvedSearchParams.tags === "string" ? resolvedSearchParams.tags : undefined,
+    icons: typeof resolvedSearchParams.icons === "string" ? resolvedSearchParams.icons : undefined,
+    models: typeof resolvedSearchParams.models === "string" ? resolvedSearchParams.models : undefined,
+    modes: typeof resolvedSearchParams.modes === "string" ? resolvedSearchParams.modes : undefined,
+    sort: typeof resolvedSearchParams.sort === "string" ? resolvedSearchParams.sort : undefined,
+  };
+
+  const items = await getHistoryItems(user.id, params);
 
   return (
     <>
@@ -85,3 +196,4 @@ export default async function HistoryPage() {
     </>
   );
 }
+
