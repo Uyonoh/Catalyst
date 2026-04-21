@@ -1,6 +1,7 @@
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import LandingHero from "./components/landing/LandingHero";
+import LandingFeatures from "./components/landing/LandingFeatures";
 
 export default async function LandingPage() {
   return (
@@ -14,7 +15,7 @@ export default async function LandingPage() {
       <main className="flex-1 relative z-10">
         <LandingHero />
         
-        {/* Simple Section to bridge the gap if needed, or just end with CTA */}
+        <LandingFeatures />
         <section className="py-24 bg-white/[0.02]">
             <div className="max-w-4xl mx-auto px-4 text-center">
                 <h2 className="text-3xl font-black text-white mb-6">Ready to elevate your AI workflow?</h2>
