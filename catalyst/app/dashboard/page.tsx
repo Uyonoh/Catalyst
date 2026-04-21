@@ -6,9 +6,13 @@ import StatsOverview from "../components/home/StatsOverview";
 import RecentPrompts from "../components/home/RecentPrompts";
 import { getRecentPrompts } from "../lib/prompts";
 import { getServerUser } from "../lib/supabase-server";
+import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
   const user = await getServerUser();
+  if (!user) {
+    redirect("/login?redirect=/dashboard");
+  }
   const recentPrompts = await getRecentPrompts(user?.id || "");
 
   return (
