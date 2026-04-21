@@ -41,7 +41,7 @@ function LoginForm() {
           password,
         });
         if (error) throw error;
-        router.push(nextParam || "/");
+        router.push(nextParam || "/dashboard");
         router.refresh();
       } else {
         const { error } = await supabaseBrowser.auth.signUp({
@@ -70,7 +70,7 @@ function LoginForm() {
       const { error } = await supabaseBrowser.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}${nextParam ? decodeURIComponent(nextParam) : "/"}`,
+          redirectTo: `${window.location.origin}${nextParam ? decodeURIComponent(nextParam) : "/dashboard"}`,
         },
       });
       if (error) throw error;

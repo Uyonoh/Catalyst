@@ -57,6 +57,15 @@ export default function Header() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">
           <div className="flex items-center gap-1">
+            {user && (
+              <Link
+                href="/dashboard"
+                className="px-4 py-2 text-sm font-medium text-white hover:text-cyan-300 transition-colors rounded-lg hover:bg-white/5"
+                title="Go to dashboard"
+              >
+                Dashboard
+              </Link>
+            )}
             <Link
               href="/library"
               className="px-4 py-2 text-sm font-medium text-white hover:text-cyan-300 transition-colors rounded-lg hover:bg-white/5"
@@ -170,14 +179,24 @@ export default function Header() {
               </div>
 
               {user && (
-                <Link
-                  href="/history"
-                  className="flex items-center gap-3 px-5 py-4 text-sm font-bold text-slate-300 hover:text-white transition-colors rounded-2xl bg-white/5 border border-transparent hover:border-white/10 group"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <HistoryIcon className="size-5 text-slate-500 group-hover:text-white transition-colors" />
-                  History
-                </Link>
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center gap-3 px-5 py-4 text-sm font-bold text-slate-300 hover:text-white transition-colors rounded-2xl bg-white/5 border border-transparent hover:border-white/10 group"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <LayoutGrid className="size-5 text-cyan-500 group-hover:text-cyan-400 transition-colors" />
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/history"
+                    className="flex items-center gap-3 px-5 py-4 text-sm font-bold text-slate-300 hover:text-white transition-colors rounded-2xl bg-white/5 border border-transparent hover:border-white/10 group"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <HistoryIcon className="size-5 text-slate-500 group-hover:text-white transition-colors" />
+                    History
+                  </Link>
+                </>
               )}
 
               <div className="pt-6 border-t border-white/10">

@@ -1,31 +1,29 @@
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import HeroSection from "./components/home/HeroSection";
-import QuickAccessModels from "./components/home/QuickAccessModels";
-import StatsOverview from "./components/home/StatsOverview";
-import RecentPrompts from "./components/home/RecentPrompts";
-import { getRecentPrompts } from "./lib/prompts";
-import { getServerUser } from "./lib/supabase-server";
+import LandingHero from "./components/landing/LandingHero";
 
-export default async function Home() {
-  const user = await getServerUser();
-  const recentPrompts = await getRecentPrompts(user?.id || "");
-
+export default async function LandingPage() {
   return (
     <>
       <Header />
-
+      
       {/* Background Ambient Glows */}
-      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[#258cf4]/10 blur-[120px] pointer-events-none z-0"></div>
-      <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-cyan-500/10 blur-[120px] pointer-events-none z-0"></div>
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[#258cf4]/5 blur-[120px] pointer-events-none z-0"></div>
+      <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-cyan-500/5 blur-[120px] pointer-events-none z-0"></div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-[1200px] mx-auto pt-16 pb-12 px-4 md:px-8 relative z-10">
-        <HeroSection />
-        <QuickAccessModels />
-        <StatsOverview />
-        <RecentPrompts prompts={recentPrompts} />
+      <main className="flex-1 relative z-10">
+        <LandingHero />
+        
+        {/* Simple Section to bridge the gap if needed, or just end with CTA */}
+        <section className="py-24 bg-white/[0.02]">
+            <div className="max-w-4xl mx-auto px-4 text-center">
+                <h2 className="text-3xl font-black text-white mb-6">Ready to elevate your AI workflow?</h2>
+                <p className="text-slate-400 mb-10">Join professionals using Catalyst to build the future of AI communication.</p>
+                <div className="h-1 w-20 bg-cyan-500 mx-auto rounded-full mb-10" />
+            </div>
+        </section>
       </main>
+
       <Footer />
     </>
   );
