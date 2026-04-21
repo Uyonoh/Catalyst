@@ -11,7 +11,7 @@ import {
   Sparkles,
   History as HistoryIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useUser } from "../context/AuthContext";
 import { supabaseBrowser } from "../lib/supabase-browser";
@@ -19,8 +19,29 @@ import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const { user, profile, signOut } = useUser();
   const router = useRouter();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isMobileMenuOpen &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -42,6 +63,7 @@ export default function Header() {
 
         {/* Mobile Menu Button */}
         <button
+          ref={buttonRef}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="md:hidden flex items-center justify-center size-9 rounded-full hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
           aria-label="Toggle menu"
@@ -143,7 +165,10 @@ export default function Header() {
         {/* Mobile Menu */}
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <nav className="absolute top-16 left-0 right-0 bg-[#101922] border-t border-white/10 md:hidden animate-slideDown overflow-hidden">
+          <nav 
+            ref={menuRef}
+            className="absolute top-16 left-0 right-0 bg-[#101922] border-t border-white/10 md:hidden animate-slideDown overflow-hidden"
+          >
             <div className="px-6 py-8 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Link
