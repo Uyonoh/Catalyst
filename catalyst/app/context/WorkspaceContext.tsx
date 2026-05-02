@@ -11,7 +11,11 @@ import { useParsing } from "../hooks/useParsing";
 import { OptimizedPrompt } from "../lib/engine/types";
 import { useUser } from "./AuthContext";
 import { PromptControls } from "../lib/prompts/builder";
-import { ModelMode, getDefaultMode, FALLBACK_MODELS } from "../lib/models-shared";
+import {
+  ModelMode,
+  getDefaultMode,
+  FALLBACK_MODELS,
+} from "../lib/models-shared";
 
 interface WorkspaceContextType {
   input: string;
@@ -50,7 +54,7 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(
 );
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
-  const { profile } = useUser();
+  const { profile, refreshProfile } = useUser();
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState("gpt");
   const [selectedMode, setSelectedMode] = useState<ModelMode>("text");
@@ -97,8 +101,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   const preferences = profile?.preferences || {};
 
-  // Use preference for autoAnalyze or default to true
-  const autoAnalyze = preferences.autoAnalyze ?? true;
+  // Use preference for autoAnalyze or default to False
+  const autoAnalyze = preferences.autoAnalyze ?? false;
   // If autoAnalyze is false, we might want to tell useParsing not to run automatically,
   // but useParsing currently might not accept preferences. For now we pass input and selectedModel.
   const { result, isLoading, error } = useParsing(
@@ -160,6 +164,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
         const data = await response.json();
         setParsedPrompt(data.refinedPrompt);
+        if (refreshProfile) refreshProfile();
         return true;
       } catch (err: any) {
         console.error(`Attempt ${attempt + 1} failed:`, err);
