@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 
     if (!tokenResult.ok) {
       return NextResponse.json({
-        error: "daily_quota_exceeded",
+        error: "Daily quota exceeded",
         remaining: tokenResult.remaining,
         resets_at: tokenResult.resets_at,
         limit: tokenResult.limit,

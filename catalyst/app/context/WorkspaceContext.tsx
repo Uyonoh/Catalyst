@@ -159,7 +159,14 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to generate prompt");
+          const errorMessage = errorData.error || "Failed to generate prompt";
+
+          if (response.status === 402) {
+            setGenerationError(errorMessage);
+            return false;
+          }
+
+          throw new Error(errorMessage);
         }
 
         const data = await response.json();
