@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import SettingsFormRow from "../SettingsFormRow";
-import { Loader2, Zap, Check, ExternalLink } from "lucide-react";
+import { Loader2, Zap, Check, ExternalLink, InfinityIcon } from "lucide-react";
+import { useTokens } from "../../../hooks/useTokens";
 
 interface SubscriptionPanelProps {
   plan: string;
@@ -15,6 +16,7 @@ export default function SubscriptionPanel({
   promptsCount,
   analysesCount,
 }: SubscriptionPanelProps) {
+  const { dailyLimit, used, percentage, isExhausted } = useTokens();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const isPro = plan === "pro" || plan === "enterprise";
 
@@ -168,6 +170,46 @@ export default function SubscriptionPanel({
           >
             <div className="flex items-center justify-end gap-2 text-white font-mono text-xl">
               {analysesCount} <Zap className="size-5 text-yellow-500" />
+            </div>
+          </SettingsFormRow>
+
+          <SettingsFormRow
+            label="Daily Token Usage"
+            description="Daily tokens consumed by AI generations (resets at midnight UTC)."
+          >
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-end gap-2 text-white font-mono text-xl">
+                {plan === "enterprise" ? (
+                  <span className="flex items-center gap-1.5 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                    Unlimited <InfinityIcon className="w-5 h-5 text-purple-400" />
+                  </span>
+                ) : (
+                  <>
+                    {used.toLocaleString()}{" "}
+                    <span className="text-slate-500 text-sm font-sans">
+                      / {dailyLimit.toLocaleString()} tokens
+                    </span>
+                  </>
+                )}
+              </div>
+              {plan !== "enterprise" && (
+                <div className="w-full bg-black/40 h-2 rounded-full overflow-hidden">
+                  <div
+                    className={`${
+                      isExhausted
+                        ? "bg-red-500"
+                        : percentage >= 80
+                          ? "bg-red-500"
+                          : percentage >= 50
+                            ? "bg-amber-500"
+                            : "bg-emerald-500"
+                    } h-full rounded-full transition-all`}
+                    style={{
+                      width: `${Math.min(percentage, 100)}%`,
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </SettingsFormRow>
         </div>

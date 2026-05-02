@@ -40,7 +40,7 @@ export default function RawIntentPanel() {
     clearGenerationError,
   } = useWorkspace();
   const { models } = useCatalog();
-  const { user } = useUser();
+  const { user, profile } = useUser();
   const router = useRouter();
   const [showControls, setShowControls] = useState(false);
 
@@ -242,9 +242,11 @@ export default function RawIntentPanel() {
                 <span>
                   {showControls ? "Apply & Generate" : "Generate Prompt"}
                 </span>
-                <span className="text-[10px] font-normal opacity-80">
-                  Costs {cost} tokens
-                </span>
+                {profile?.plan !== "enterprise" && (
+                  <span className="text-[10px] font-normal opacity-80">
+                    Costs {cost} tokens
+                  </span>
+                )}
               </div>
             </>
           )}
