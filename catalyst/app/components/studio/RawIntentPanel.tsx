@@ -238,16 +238,9 @@ export default function RawIntentPanel() {
           ) : (
             <>
               <Sparkles className="size-5" />
-              <div className="flex flex-col items-start leading-tight">
-                <span>
-                  {showControls ? "Apply & Generate" : "Generate Prompt"}
-                </span>
-                {profile?.plan !== "enterprise" && (
-                  <span className="text-[10px] font-normal opacity-80">
-                    Costs {cost} tokens
-                  </span>
-                )}
-              </div>
+              <span>
+                {showControls ? "Apply & Generate" : "Generate Prompt"}
+              </span>
             </>
           )}
         </button>
