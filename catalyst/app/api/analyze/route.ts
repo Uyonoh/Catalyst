@@ -3,6 +3,7 @@ import { RegexParser } from "@/app/lib/parsing/strategies/RegexParser";
 import { AnalyzerService } from "@/app/lib/engine/AnalyzerService";
 import { CompilerService } from "@/app/lib/engine/CompilerService";
 import { TargetModel } from "@/app/lib/engine/types";
+import { createClient } from "@/app/lib/supabase-server";
 
 const parser = new RegexParser();
 const analyzerService = new AnalyzerService();
@@ -10,13 +11,40 @@ const compilerService = new CompilerService();
 
 export async function POST(req: NextRequest) {
   try {
-    const { text, model } = await req.json();
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (!user || authError) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { text, model, mode = "text" } = await req.json();
 
     if (!text || typeof text !== "string") {
       return NextResponse.json(
         { error: "Text prompt is required" },
         { status: 400 },
       );
+    }
+
+    // Call token check RPC
+    const { data: tokenResult, error: rpcError } = await supabase.rpc(
+      "consume_tokens",
+      { p_user_id: user.id, p_model: model, p_mode: mode }
+    );
+
+    if (rpcError) {
+      console.error("Token consumption error:", rpcError);
+      return NextResponse.json({ error: "Token check failed" }, { status: 500 });
+    }
+
+    if (!tokenResult.ok) {
+      return NextResponse.json({
+        error: "daily_quota_exceeded",
+        remaining: tokenResult.remaining,
+        resets_at: tokenResult.resets_at,
+        limit: tokenResult.limit,
+      }, { status: 402 });
     }
 
     let targetModel = TargetModel.CLAUDE_3_5_SONNET;
@@ -45,7 +73,8 @@ export async function POST(req: NextRequest) {
     const deconstructed = analyzerService.analyze(text);
     const optimized = compilerService.compile(deconstructed, targetModel);
 
-    return NextResponse.json(optimized);
+    // Return successful token deduction combined with the optimized result.
+    return NextResponse.json({ ...optimized, tokenResult });
   } catch (error) {
     console.error("Parsing Error:", error);
     return NextResponse.json(
@@ -54,3 +83,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

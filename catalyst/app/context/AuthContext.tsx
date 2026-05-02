@@ -6,15 +6,28 @@ import React, {
   useEffect,
   useState,
   ReactNode,
+  useCallback,
 } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabaseBrowser } from "../lib/supabase-browser";
 
+export interface Profile {
+  id: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  plan: 'free' | 'pro' | 'enterprise';
+  daily_tokens_used: number;
+  tokens_reset_at: string;
+  preferences: Record<string, unknown>;
+}
+
 interface AuthContextType {
   user: User | null;
-  profile: any | null; // Replace any with Profile type if available
+  profile: Profile | null;
   isLoading: boolean;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -22,37 +35,40 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   isLoading: true,
   signOut: async () => {},
+  refreshProfile: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const fetchProfileBackground = useCallback((userId: string) => {
+    const timeout = new Promise<void>((_, reject) =>
+      setTimeout(() => reject(new Error("fetchProfile timeout")), 5000)
+    );
+    const query = supabaseBrowser
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single()
+      .then(({ data: profileData }) => {
+        setProfile(profileData as Profile);
+      });
+
+    Promise.race([query, timeout]).catch((err) => {
+      console.warn("fetchProfile failed or timed out:", err.message);
+    });
+  }, []);
+
+  const refreshProfile = useCallback(async () => {
+    if (user) {
+      fetchProfileBackground(user.id);
+    }
+  }, [user, fetchProfileBackground]);
 
   useEffect(() => {
     let mounted = true;
-
-    // Fetch profile in the background — never blocks auth resolution.
-    // Uses a 5s timeout to guard against Supabase cold-start query hangs
-    // (the root cause of the infinite spinner: the DB query silently never
-    // resolves/rejects when called immediately after SIGNED_IN fires).
-    function fetchProfileBackground(userId: string) {
-      const timeout = new Promise<void>((_, reject) =>
-        setTimeout(() => reject(new Error("fetchProfile timeout")), 5000)
-      );
-      const query = supabaseBrowser
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single()
-        .then(({ data: profileData }) => {
-          if (mounted) setProfile(profileData);
-        });
-
-      Promise.race([query, timeout]).catch((err) => {
-        console.warn("fetchProfile failed or timed out:", err.message);
-      });
-    }
 
     const { data: authListener } = supabaseBrowser.auth.onAuthStateChange(
       (event, session) => {
@@ -61,17 +77,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (event === "INITIAL_SESSION") {
           const currentUser = session?.user ?? null;
           setUser(currentUser);
-          // Resolve loading immediately — don't wait on the DB query.
           if (mounted) setIsLoading(false);
-          // Fetch profile in background after loading resolves.
           if (currentUser) fetchProfileBackground(currentUser.id);
 
         } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
           const currentUser = session?.user ?? null;
           setUser(currentUser);
-          // Critical: resolve loading BEFORE fetching profile.
-          // Previously, awaiting fetchProfile here caused isLoading to
-          // stay true indefinitely when the DB query hung on cold starts.
           if (mounted) setIsLoading(false);
           if (currentUser) fetchProfileBackground(currentUser.id);
 
@@ -87,7 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       mounted = false;
       authListener?.subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchProfileBackground]);
 
   const signOut = async () => {
     try {
@@ -101,7 +112,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, isLoading, signOut }}>
+    <AuthContext.Provider value={{ user, profile, isLoading, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
@@ -114,3 +125,4 @@ export const useUser = () => {
   }
   return context;
 };
+

@@ -9,6 +9,8 @@ import ModelSelector from "./ModelSelector";
 import ModeSelector from "./ModeSelector";
 import { useCatalog } from "../../context/CatalogContext";
 import PromptControlsPanel from "./PromptControlsPanel";
+import { getPreviewCost } from "../../lib/tokens";
+import { TokensMobile } from "../TokenMeter";
 import {
   FilePenLine,
   Zap,
@@ -44,6 +46,8 @@ export default function RawIntentPanel() {
 
   const selectedModel =
     models.find((m) => m.slug === selectedModelId) || models[0];
+
+  const cost = getPreviewCost(selectedModel.slug, selectedMode);
 
   return (
     <div className="relative group flex flex-col h-full">
@@ -189,10 +193,11 @@ export default function RawIntentPanel() {
             </button>
           </div>
 
-          {/* Mobile: Token Counter (Moved from dropdown for cleaner access) */}
+          {/* Mobile: Token Counter replaced by TokenMeter in Header or hide here */}
           <div className="flex md:hidden items-center gap-2 pr-2 text-xs text-slate-400">
             <Zap className="size-3.5 text-cyan-400" />
-            <span className="font-mono font-medium">450/1000</span>
+            {/* <span className="font-mono font-medium">Cost: {cost}</span> */}
+            <TokensMobile />
           </div>
         </div>
 
@@ -233,9 +238,14 @@ export default function RawIntentPanel() {
           ) : (
             <>
               <Sparkles className="size-5" />
-              <span>
-                {showControls ? "Apply & Generate" : "Generate Prompt"}
-              </span>
+              <div className="flex flex-col items-start leading-tight">
+                <span>
+                  {showControls ? "Apply & Generate" : "Generate Prompt"}
+                </span>
+                <span className="text-[10px] font-normal opacity-80">
+                  Costs {cost} tokens
+                </span>
+              </div>
             </>
           )}
         </button>

@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useUser } from "../context/AuthContext";
 import { supabaseBrowser } from "../lib/supabase-browser";
 import { useRouter } from "next/navigation";
+import { TokenMeter } from "./TokenMeter";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -117,8 +118,9 @@ export default function Header() {
           <div className="flex items-center gap-3 border-l border-white/10 pl-6">
             {user ? (
               <>
+                <TokenMeter />
                 <button
-                  className="flex items-center justify-center size-9 rounded-xl hover:bg-white/10 text-slate-300 hover:text-white transition-all duration-300 group"
+                  className="flex items-center justify-center size-9 rounded-xl hover:bg-white/10 text-slate-300 hover:text-white transition-all duration-300 group hidden md:flex"
                   aria-label="Notifications"
                 >
                   <Bell className="size-5 group-hover:scale-110 transition-transform" />
