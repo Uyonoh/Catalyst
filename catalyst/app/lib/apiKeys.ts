@@ -1,6 +1,6 @@
 import { createClient } from "./supabase-server";
 
-export type AIProvider = "openai" | "anthropic" | "google";
+export type AIProvider = "openai" | "anthropic" | "google" | "groq" | "openrouter";
 
 /**
  * Gets a user's API key, prioritizing environment variables (Option C) 
@@ -42,6 +42,10 @@ function getEnvKey(provider: AIProvider): string | undefined {
       return process.env.ANTHROPIC_API_KEY;
     case "google":
       return process.env.GEMINI_API_KEY;
+    case "groq":
+      return process.env.GROQ_API_KEY;
+    case "openrouter":
+      return process.env.OPENROUTER_API_KEY;
     default:
       return undefined;
   }

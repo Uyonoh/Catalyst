@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenAI } from "@google/genai";
 import { buildPrompt } from "@/app/lib/prompts/builder";
 import { createClient } from "@/app/lib/supabase-server";
-
-// Initialize Gemini API
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+import { generateRefinedPrompt } from "@/app/lib/llm/router";
 
 export async function POST(req: NextRequest) {
   try {
@@ -51,23 +48,24 @@ export async function POST(req: NextRequest) {
       }, { status: 402 });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
+    const hasAnyKey = Object.keys(process.env).some(k => 
+      k.startsWith("GEMINI_API_KEY") || k.startsWith("GROQ_API_KEY") || k.startsWith("OPENROUTER_API_KEY")
+    );
+
+    if (!hasAnyKey) {
         // Fallback for development if API key is missing
-        console.warn("GEMINI_API_KEY is not set. Returning mock response.");
+        console.warn("No LLM API keys are set. Returning mock response.");
         return NextResponse.json({
-            refinedPrompt: `[MOCK REFINED PROMPT] ${text}\n\nThis is a placeholder refined prompt because the GEMINI_API_KEY environment variable is not configured. Please add it to your .env file to enable real LLM parsing.`,
+            refinedPrompt: `[MOCK REFINED PROMPT] ${text}\n\nThis is a placeholder refined prompt because no LLM API keys (GEMINI, GROQ, OPENROUTER) are configured. Please add them to your .env file.`,
             tokenResult
         });
     }
 
     const prompt = buildPrompt({ text, model: modelId, controls, mode });
     
-    let response;
+    let refinedText = "";
     try {
-      response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-      });
+      refinedText = await generateRefinedPrompt(prompt);
     } catch (llmError: any) {
       console.error("LLM Generation Failed. Reverting tokens.", llmError);
       
@@ -82,28 +80,24 @@ export async function POST(req: NextRequest) {
         console.error("Critical: Failed to revert tokens after LLM failure:", revertError);
       }
 
-      // Existing error response parsing
-      try {
-        const message = JSON.parse(llmError.message);
-        const err1 = "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.";
-        const err2 = "You exceeded your current quota";
+      const isRateLimit = llmError?.message && (
+        llmError.message.includes("exhausted") || 
+        llmError.message.includes("high demand") || 
+        llmError.message.includes("429")
+      );
 
-        if (message.error.message.includes(err1) || message.error.message.includes(err2)) {
-          return NextResponse.json(
-            { error: "Our servers are currently experiencing high demand. Please try again later." },
-            { status: 503 },
-          );
-        }
-      } catch (err) {
-        console.error("Parsing error: ", llmError.message);
+      if (isRateLimit) {
+        return NextResponse.json(
+          { error: "Our servers are currently experiencing high demand. Please try again later." },
+          { status: 503 },
+        );
       }
+      
       return NextResponse.json(
         { error: "Failed to parse intent with LLM" },
         { status: 500 },
       );
     }
-    
-    const refinedText = response.text || "";
 
     return NextResponse.json({ refinedPrompt: refinedText.trim(), tokenResult });
   } catch (error: any) {
