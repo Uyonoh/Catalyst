@@ -3,6 +3,7 @@
 import React from "react";
 import { useTokens } from "../hooks/useTokens";
 import { InfinityIcon } from "lucide-react";
+import Link from "next/link";
 
 export function TokenMeter() {
   const {
@@ -16,12 +17,15 @@ export function TokenMeter() {
 
   if (isEnterprise) {
     return (
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-full border border-indigo-500/20">
+      <Link
+        href="/settings/subscriptions#usage-stats"
+        className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-full border border-indigo-500/20 hover:bg-indigo-500/5 transition-colors cursor-pointer"
+      >
         <span className="text-xs font-semibold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
           ENTERPRISE
         </span>
         <InfinityIcon className="w-3.5 h-3.5 text-purple-400" />
-      </div>
+      </Link>
     );
   }
 
@@ -47,8 +51,9 @@ export function TokenMeter() {
   }
 
   return (
-    <div
-      className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10 group cursor-default transition-colors hover:bg-white/10 relative"
+    <Link
+      href="/settings/subscriptions#usage-stats"
+      className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10 group cursor-pointer transition-colors hover:bg-white/10 relative"
       title={
         isExhausted
           ? "Quota reached. Resets tomorrow at midnight UTC."
@@ -82,7 +87,7 @@ export function TokenMeter() {
           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
         </span>
       )}
-    </div>
+    </Link>
   );
 }
 
@@ -98,9 +103,12 @@ export function TokensMobile() {
 
   if (isEnterprise) {
     return (
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-full border border-indigo-500/20">
+      <Link
+        href="/settings/subscriptions#usage-stats"
+        className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-full border border-indigo-500/20 hover:bg-indigo-500/5 transition-colors cursor-pointer"
+      >
         <InfinityIcon className="w-3.5 h-3.5 text-purple-400" />
-      </div>
+      </Link>
     );
   }
 
@@ -126,8 +134,9 @@ export function TokensMobile() {
   }
 
   return (
-    <div
-      // className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10 group cursor-default transition-colors hover:bg-white/10 relative"
+    <Link
+      href="/settings/subscriptions#usage-stats"
+      className="cursor-pointer"
       title={
         isExhausted
           ? "Quota reached. Resets tomorrow at midnight UTC."
@@ -144,6 +153,6 @@ export function TokensMobile() {
           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
         </span>
       )}
-    </div>
+    </Link>
   );
 }
