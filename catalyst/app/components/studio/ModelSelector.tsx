@@ -161,25 +161,6 @@ export default function ModelSelector() {
                 </button>
               ))}
             </div>
-
-            {/* Quick Stats Footer - Desktop Only */}
-            <div className="hidden md:block mt-2 pt-2 border-t border-white/10">
-              <div className="px-3 py-2 text-xs text-slate-400">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="flex items-center gap-1">
-                    <Zap className="size-3.5 text-cyan-400" />
-                    <span>Token Usage</span>
-                  </span>
-                  <span>450/1000</span>
-                </div>
-                <div className="w-full bg-slate-800 rounded-full h-1">
-                  <div
-                    className="bg-cyan-500 h-1 rounded-full shadow-[0_0_8px_rgba(6,182,212,0.8)]"
-                    style={{ width: "45%" }}
-                  />
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       )}
