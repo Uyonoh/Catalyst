@@ -101,6 +101,7 @@ export default function ModelSelector() {
 
       {/* Mobile Toggle Indicator */}
       <div className="sm:hidden flex items-center gap-2">
+        <span className="text-xs text-slate-400 font-medium">Model:</span>
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#101922] border ${getModelColor(selectedModel.color).split(" shadow")[0]} text-xs font-bold transition-all active:scale-95`}
