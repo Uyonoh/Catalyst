@@ -62,8 +62,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     creativity: 0.5,
     precision: 0.75,
     length: "short",
-    strategy: "default",
+    outputFormat: "text",
+    strategy: "zero_shot",
     failureHandling: true,
+    tone: "neutral",
+    negativePrompt: "",
   });
 
   const [hasInitializedControls, setHasInitializedControls] = useState(false);

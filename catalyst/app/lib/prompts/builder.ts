@@ -5,9 +5,11 @@ export interface PromptControls {
   creativity?: number; // 0 to 1
   precision?: number; // 0 to 1
   length?: "short" | "medium" | "long";
-  outputMode?: "text" | "json";
-  strategy?: "default" | "chain_of_thought" | "few_shot";
+  outputFormat?: "text" | "json" | "yaml" | "markdown";
+  strategy?: "zero_shot" | "few_shot" | "chain_of_thought";
   failureHandling?: boolean;
+  tone?: "neutral" | "professional" | "casual" | "academic" | "creative" | "authoritative" | "friendly";
+  negativePrompt?: string;
 }
 
 export function buildControlDirectives({
@@ -90,15 +92,38 @@ Strategy Note:
 Strategy Note:
 - Provide multiple varied examples of well-refined output patterns (but don't output the examples themselves—just use them as guidance).
 `;
+  } else if (controls.strategy === "zero_shot") {
+    systemPrompt += `
+Strategy Note:
+- Provide the refined prompt directly and concisely without any preamble or examples.
+`;
   }
 
-  if (controls.outputMode === "json") {
+  if (controls.tone && controls.tone !== "neutral") {
+    systemPrompt += `
+Tone:
+- Write the optimized prompt in a ${controls.tone} tone.
+`;
+  }
+
+  if (controls.negativePrompt) {
+    systemPrompt += `
+Constraints:
+- DO NOT include, mention, or reference the following: ${controls.negativePrompt}
+`;
+  }
+
+  if (controls.outputFormat && controls.outputFormat !== "text") {
     systemPrompt += `
 Output Format:
-- Return the final prompt as valid JSON with keys corresponding to the structure: ${profile.structure
-      .map((s) => s.toLowerCase().replace(/ /g, "_"))
-      .join(", ")}.
+- Return the final prompt as valid ${controls.outputFormat.toUpperCase()}.
 `;
+    if (controls.outputFormat === "json") {
+      systemPrompt += `- Keys should correspond to the structure: ${profile.structure
+        .map((s) => s.toLowerCase().replace(/ /g, "_"))
+        .join(", ")}.
+`;
+    }
   }
 
   if (controls.failureHandling) {

@@ -14,6 +14,9 @@ import {
   Workflow,
   HelpCircle,
   ShieldCheck,
+  MessageSquare,
+  Ban,
+  FileOutput,
 } from "lucide-react";
 import { PromptControls } from "../../lib/prompts/builder";
 
@@ -24,18 +27,22 @@ const ICON_MAP: Record<string, any> = {
   strategy: Workflow,
   failureHandling: ShieldCheck,
   bolt: Zap,
+  tone: MessageSquare,
+  negativePrompt: Ban,
+  outputFormat: FileOutput,
 };
 
-type SettingType = "slider" | "options" | "toggle";
+type SettingType = "slider" | "options" | "toggle" | "textarea";
 
 interface Setting {
   id: keyof PromptControls;
   title: string;
   description: string;
   icon: string;
-  color: "purple" | "cyan" | "emerald" | "amber" | "blue" | "slate";
+  color: "purple" | "cyan" | "emerald" | "amber" | "blue" | "slate" | "rose";
   type: SettingType;
   options?: { id: string; label: string; info?: string }[];
+  fullWidth?: boolean;
 }
 
 const SETTINGS: Setting[] = [
@@ -58,7 +65,7 @@ const SETTINGS: Setting[] = [
   {
     id: "length",
     title: "Output Length",
-    description: "Set the length of the prompt.",
+    description: "The preferred verbosity of optimized prompts.",
     icon: "length",
     color: "emerald",
     type: "options",
@@ -85,16 +92,59 @@ const SETTINGS: Setting[] = [
     type: "options",
     options: [
       {
-        id: "default",
-        label: "Standard",
+        id: "zero_shot",
+        label: "Zero Shot",
         info: "Direct optimization. Best for simple prompts.",
       },
       {
+        id: "few_shot",
+        label: "Few Shot",
+        info: "Uses examples to guide the refinement process.",
+      },
+      {
         id: "chain_of_thought",
-        label: "Thought",
+        label: "COT",
         info: "Explicit step-by-step reasoning before output.",
       },
     ],
+  },
+  {
+    id: "outputFormat",
+    title: "Output Format",
+    description: "Desired structure for the final prompt.",
+    icon: "outputFormat",
+    color: "emerald",
+    type: "options",
+    options: [
+      { id: "text", label: "TEXT" },
+      { id: "json", label: "JSON" },
+      { id: "yaml", label: "YAML" },
+      { id: "markdown", label: "MD" },
+    ],
+  },
+  {
+    id: "tone",
+    title: "Output Tone",
+    description: "Select the desired voice for the prompt.",
+    icon: "tone",
+    color: "purple",
+    type: "options",
+    options: [
+      { id: "neutral", label: "Neutral" },
+      { id: "professional", label: "Professional" },
+      { id: "casual", label: "Casual" },
+      { id: "creative", label: "Creative" },
+      { id: "academic", label: "Academic" },
+    ],
+  },
+  {
+    id: "negativePrompt",
+    title: "Negative Prompt / Clauses",
+    description: "Specify what the model should NOT include in the output.",
+    icon: "negativePrompt",
+    color: "rose",
+    type: "textarea",
+    fullWidth: true,
   },
 ];
 
@@ -116,8 +166,11 @@ export default function OptimizationSettings() {
       creativity: 0.5,
       precision: 0.75,
       length: "short",
-      strategy: "default",
+      outputFormat: "text",
+      strategy: "zero_shot",
       failureHandling: true,
+      tone: "neutral",
+      negativePrompt: "",
     };
     setControls(defaults);
   };
@@ -132,13 +185,22 @@ export default function OptimizationSettings() {
     if (setting.type === "toggle") {
       return value ? "Active" : "Off";
     }
+    if (setting.type === "textarea") {
+      return value?.length > 0 ? "Configured" : "None";
+    }
     return value || "Default";
   };
 
   const getColorStyles = (color: string) => {
     const colorMap: Record<
       string,
-      { bg: string; text: string; border: string; accent: string; glass: string }
+      {
+        bg: string;
+        text: string;
+        border: string;
+        accent: string;
+        glass: string;
+      }
     > = {
       purple: {
         bg: "bg-purple-500/20",
@@ -175,6 +237,13 @@ export default function OptimizationSettings() {
         accent: "accent-blue-500",
         glass: "text-blue-400 group-hover:text-blue-300",
       },
+      rose: {
+        bg: "bg-rose-500/20",
+        text: "text-rose-300",
+        border: "border-rose-500/30",
+        accent: "accent-rose-500",
+        glass: "text-rose-400 group-hover:text-rose-300",
+      },
       slate: {
         bg: "bg-slate-800",
         text: "text-slate-400",
@@ -197,7 +266,7 @@ export default function OptimizationSettings() {
 
           <button
             onClick={() => setShowSettings(!showSettings)}
-            className="flex items-center gap-1 text-xs text-cyan-400 bg-cyan-500/10 px-3 py-1.5 rounded-full"
+            className="flex items-center gap-1 text-xs text-cyan-400 bg-cyan-500/10 mx-2 px-3 py-1.5 rounded-full"
           >
             <span>{showSettings ? "Hide" : "Show"}</span>
             {showSettings ? (
@@ -221,7 +290,7 @@ export default function OptimizationSettings() {
       </div>
 
       <div
-        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 ${showSettings ? "grid" : "hidden"} animate-fadeIn`}
+        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${showSettings ? "grid" : "hidden"} animate-fadeIn`}
       >
         {SETTINGS.map((setting) => {
           const colors = getColorStyles(setting.color);
@@ -233,7 +302,7 @@ export default function OptimizationSettings() {
             <GlassPanel
               key={setting.id}
               hoverable
-              className="p-5 rounded-xl cursor-default group border border-white/5 hover:border-cyan-500/30"
+              className={`p-5 rounded-xl cursor-default group border border-white/5 hover:border-cyan-500/30 ${setting.fullWidth ? "md:col-span-2 lg:col-span-4" : ""}`}
             >
               <div className="flex justify-between items-start mb-3">
                 <div
@@ -249,7 +318,9 @@ export default function OptimizationSettings() {
               </div>
 
               <div className="flex items-center gap-1.5 mb-1">
-                <h3 className="text-white font-bold text-sm">{setting.title}</h3>
+                <h3 className="text-white font-bold text-sm">
+                  {setting.title}
+                </h3>
                 {hasTooltip && (
                   <div className="group/info relative">
                     <button
@@ -292,7 +363,9 @@ export default function OptimizationSettings() {
                   </div>
                 )}
               </div>
-              <p className="text-slate-400 text-[11px]">{setting.description}</p>
+              <p className="text-slate-400 text-[11px]">
+                {setting.description}
+              </p>
 
               <div className="mt-6">
                 {setting.type === "slider" && (
@@ -302,24 +375,21 @@ export default function OptimizationSettings() {
                     max="100"
                     value={(value as number) * 100}
                     onChange={(e) =>
-                      setControls({ [setting.id]: parseInt(e.target.value) / 100 })
+                      setControls({
+                        [setting.id]: parseInt(e.target.value) / 100,
+                      })
                     }
                     className={`w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer ${colors.accent}`}
                   />
                 )}
 
                 {setting.type === "options" && (
-                  <div
-                    className={`grid gap-2 w-full animate-fadeIn`}
-                    style={{
-                      gridTemplateColumns: `repeat(${setting.options?.length || 1}, minmax(0, 1fr))`,
-                    }}
-                  >
+                  <div className="flex flex-wrap gap-2 w-full animate-fadeIn">
                     {setting.options?.map((opt) => (
                       <button
                         key={opt.id}
                         onClick={() => setControls({ [setting.id]: opt.id })}
-                        className={`py-1.5 text-[10px] font-bold rounded-md border transition-all uppercase tracking-wider ${
+                        className={`flex-1 py-1.5 text-[10px] font-bold rounded-md border transition-all uppercase tracking-wider ${
                           value === opt.id
                             ? `${colors.bg} ${colors.border.replace("/30", "/50")} ${colors.text} shadow-[0_0_10px_rgba(0,0,0,0.2)]`
                             : "bg-slate-900/50 border-white/5 text-slate-500 hover:text-slate-300 hover:bg-white/5"
@@ -342,6 +412,17 @@ export default function OptimizationSettings() {
                   >
                     {value ? "Enabled" : "Disabled"}
                   </button>
+                )}
+
+                {setting.type === "textarea" && (
+                  <textarea
+                    value={value as string}
+                    onChange={(e) =>
+                      setControls({ [setting.id]: e.target.value })
+                    }
+                    placeholder="E.g. No conversational filler, no extra context, avoid long sentences..."
+                    className="w-full bg-slate-900/50 border border-white/10 rounded-lg p-3 text-[11px] text-white placeholder:text-slate-600 focus:outline-none focus:border-rose-500/50 min-h-[80px] resize-none"
+                  />
                 )}
               </div>
             </GlassPanel>

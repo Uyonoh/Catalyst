@@ -2,16 +2,27 @@
 
 import React from "react";
 import { useWorkspace } from "../../context/WorkspaceContext";
-import { SlidersHorizontal, Target, Type, Workflow, ShieldAlert } from "lucide-react";
+import {
+  SlidersHorizontal,
+  Target,
+  Type,
+  Workflow,
+  ShieldAlert,
+  FileOutput,
+  MessageSquare,
+  Ban,
+} from "lucide-react";
 
 export default function PromptControlsPanel() {
   const { controls, setControls } = useWorkspace();
 
   return (
-    <div className="flex flex-col gap-6 p-4 rounded-xl bg-white/5 border border-white/10">
-      <div className="flex items-center gap-2 mb-2">
+    <div className="flex flex-col gap-6 p-4 rounded-xl bg-white/5 border border-white/10 overflow-y-auto max-h-[60vh] custom-scrollbar">
+      <div className="flex items-center gap-2 mb-1">
         <SlidersHorizontal className="size-4 text-cyan-400" />
-        <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Refinement Controls</h3>
+        <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
+          Refinement Controls
+        </h3>
       </div>
 
       {/* Creativity Slider */}
@@ -33,7 +44,9 @@ export default function PromptControlsPanel() {
           max="1"
           step="0.1"
           value={controls.creativity}
-          onChange={(e) => setControls({ creativity: parseFloat(e.target.value) })}
+          onChange={(e) =>
+            setControls({ creativity: parseFloat(e.target.value) })
+          }
           className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-500"
         />
         <div className="flex justify-between text-[9px] text-slate-500 font-medium uppercase tracking-tighter">
@@ -62,7 +75,9 @@ export default function PromptControlsPanel() {
           max="1"
           step="0.1"
           value={controls.precision}
-          onChange={(e) => setControls({ precision: parseFloat(e.target.value) })}
+          onChange={(e) =>
+            setControls({ precision: parseFloat(e.target.value) })
+          }
           className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
         />
         <div className="flex justify-between text-[9px] text-slate-500 font-medium uppercase tracking-tighter">
@@ -76,7 +91,7 @@ export default function PromptControlsPanel() {
       <div className="space-y-3">
         <label className="text-xs font-semibold text-slate-400 flex items-center gap-2">
           <span className="p-1 rounded bg-emerald-500/10 text-emerald-400">
-             <Type className="size-3" />
+            <Type className="size-3" />
           </span>
           Output Length
         </label>
@@ -97,6 +112,31 @@ export default function PromptControlsPanel() {
         </div>
       </div>
 
+      {/* Output Format Toggle */}
+      <div className="space-y-3">
+        <label className="text-xs font-semibold text-slate-400 flex items-center gap-2">
+          <span className="p-1 rounded bg-emerald-500/10 text-emerald-400">
+            <FileOutput className="size-3" />
+          </span>
+          Output Format
+        </label>
+        <div className="grid grid-cols-4 gap-2">
+          {["text", "json", "yaml", "markdown"].map((f) => (
+            <button
+              key={f}
+              onClick={() => setControls({ outputFormat: f as any })}
+              className={`py-1.5 text-[9px] font-bold rounded-md border transition-all uppercase tracking-wider ${
+                controls.outputFormat === f
+                  ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
+                  : "bg-slate-900/50 border-white/5 text-slate-500 hover:text-slate-300 hover:bg-white/5"
+              }`}
+            >
+              {f === "markdown" ? "MD" : f}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Strategy Selector */}
       <div className="space-y-3">
         <label className="text-xs font-semibold text-slate-400 flex items-center gap-2">
@@ -107,8 +147,17 @@ export default function PromptControlsPanel() {
         </label>
         <div className="flex flex-col gap-2">
           {[
-            { id: "default", label: "Standard Refinement", desc: "Fast & direct optimization" },
-            { id: "chain_of_thought", label: "Chain of Thought", desc: "Explains logic before output" },
+            {
+              id: "zero_shot",
+              label: "Zero Shot",
+              desc: "Fast & direct optimization",
+            },
+            { id: "few_shot", label: "Few Shot", desc: "Guided by examples" },
+            {
+              id: "chain_of_thought",
+              label: "Chain of Thought",
+              desc: "Explains logic before output",
+            },
           ].map((s) => (
             <button
               key={s.id}
@@ -120,9 +169,38 @@ export default function PromptControlsPanel() {
               }`}
             >
               <span className="text-[11px] font-bold">{s.label}</span>
-              <span className="text-[9px] opacity-60 font-medium">{s.desc}</span>
+              <span className="text-[9px] opacity-60 font-medium">
+                {s.desc}
+              </span>
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Output Tone */}
+      <div className="space-y-3">
+        <label className="text-xs font-semibold text-slate-400 flex items-center gap-2">
+          <span className="p-1 rounded bg-purple-500/10 text-purple-400">
+            <MessageSquare className="size-3" />
+          </span>
+          Output Tone
+        </label>
+        <div className="flex flex-wrap gap-1.5">
+          {["neutral", "professional", "casual", "creative", "academic"].map(
+            (t) => (
+              <button
+                key={t}
+                onClick={() => setControls({ tone: t as any })}
+                className={`px-3 py-1.5 text-[9px] font-bold rounded-md border transition-all uppercase tracking-wider ${
+                  controls.tone === t
+                    ? "bg-purple-500/20 border-purple-500/50 text-purple-400"
+                    : "bg-slate-900/50 border-white/5 text-slate-500 hover:text-slate-300"
+                }`}
+              >
+                {t}
+              </button>
+            ),
+          )}
         </div>
       </div>
 
@@ -131,16 +209,40 @@ export default function PromptControlsPanel() {
         <div className="flex items-center gap-2">
           <ShieldAlert className="size-4 text-orange-400" />
           <div className="flex flex-col">
-            <span className="text-[11px] font-bold text-orange-400">Robust Failure Handling</span>
-            <span className="text-[9px] text-orange-400/60 font-medium">Auto-resolve intent ambiguity</span>
+            <span className="text-[11px] font-bold text-orange-400">
+              Robust Failure Handling
+            </span>
+            <span className="text-[9px] text-orange-400/60 font-medium">
+              Auto-resolve intent ambiguity
+            </span>
           </div>
         </div>
         <button
-           onClick={() => setControls({ failureHandling: !controls.failureHandling })}
-           className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${controls.failureHandling ? "bg-orange-500" : "bg-slate-700"}`}
+          onClick={() =>
+            setControls({ failureHandling: !controls.failureHandling })
+          }
+          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${controls.failureHandling ? "bg-orange-500" : "bg-slate-700"}`}
         >
-          <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${controls.failureHandling ? "translate-x-5" : "translate-x-1"}`} />
+          <span
+            className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${controls.failureHandling ? "translate-x-5" : "translate-x-1"}`}
+          />
         </button>
+      </div>
+
+      {/* Negative Prompt */}
+      <div className="space-y-3">
+        <label className="text-xs font-semibold text-slate-400 flex items-center gap-2">
+          <span className="p-1 rounded bg-rose-500/10 text-rose-400">
+            <Ban className="size-3" />
+          </span>
+          Negative Clauses
+        </label>
+        <textarea
+          value={controls.negativePrompt}
+          onChange={(e) => setControls({ negativePrompt: e.target.value })}
+          placeholder="Exclude from prompt..."
+          className="w-full bg-slate-900/50 border border-white/10 rounded-lg p-2.5 text-[10px] text-white placeholder:text-slate-600 focus:outline-none focus:border-rose-500/50 min-h-[60px] resize-none"
+        />
       </div>
     </div>
   );

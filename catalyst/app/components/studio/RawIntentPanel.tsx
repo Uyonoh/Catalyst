@@ -66,43 +66,9 @@ export default function RawIntentPanel() {
               <span className="text-xs hidden sm:block md:text-sm font-bold text-slate-200 uppercase tracking-wider">
                 Raw Intent
               </span>
-              {/* Mobile Analysis Indicator */}
-              {/* <div className="md:hidden flex items-center gap-1.5 ml-1 transition-opacity duration-300">
-                {isLoading ? (
-                  <>
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
-                    </span>
-                    <span className="text-[9px] uppercase text-cyan-400 font-bold tracking-widest animate-pulse">
-                      Analyzing
-                    </span>
-                  </>
-                ) : result ? (
-                  <div className="flex items-center gap-1 bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
-                    <Zap className="size-2.5 text-emerald-400" />
-                    <span className="text-[8px] uppercase text-emerald-400 font-bold tracking-wider pt-[1px]">
-                      Ready
-                    </span>
-                  </div>
-                ) : null}
-              </div> */}
             </div>
-            {/* Desktop Model Selection */}
+            {/* Model Selection */}
             <div className="flex items-center gap-3">
-              {isGenerating && (
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 animate-pulse">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
-                  </span>
-                  <span className="text-[10px] font-black uppercase text-cyan-400 tracking-widest">
-                    {retryCount > 0
-                      ? `Retrying Refinement (${retryCount}/3)`
-                      : "Generating Refinement"}
-                  </span>
-                </div>
-              )}
               <div className="flex items-center gap-2">
                 <ModeSelector />
                 <ModelSelector />
