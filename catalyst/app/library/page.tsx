@@ -1,5 +1,4 @@
 import Header from "../components/Header";
-export const revalidate = 60;
 import Footer from "../components/Footer";
 import LibraryBackground from "../components/library/LibraryBackground";
 import LibraryHero from "../components/library/LibraryHero";
@@ -9,6 +8,15 @@ import LibraryTags from "../components/library/LibraryTags";
 import LibraryGrid from "../components/library/LibraryGrid";
 import { LibraryItem } from "../components/library/LibraryCard";
 import { supabase } from "../lib/supabase";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Library",
+  description:
+    "Browse, search, and manage prompts from the community. Your creative arsenal, organized.",
+};
+
+export const revalidate = 60;
 
 async function getLibraryItems(searchParams: {
   q?: string;

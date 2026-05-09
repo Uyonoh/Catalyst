@@ -11,9 +11,25 @@ import { CatalogProvider } from "./context/CatalogContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Catalyst Studio | Professional Prompt Optimization",
+  title: {
+    default: "Catalyst | Professional Prompt Optimization",
+    template: "%s | Catalyst",
+  },
   description:
-    "Transform your raw ideas into high-performance AI prompts with our Studio's live analysis and professional library.",
+    "Transform your raw ideas into high-performance AI prompts with our Studio and professional library.",
+  keywords: [
+    "Ai Propmt generator",
+    "Free prompts",
+    "Best ChatGPT propmts",
+    "Best Claude propmts",
+  ],
+  verification: {
+    // google: 'BW3giniw1EydeTftID8VS2n2elApCe7pjKByxwfwPiU' // Onomah
+    google: "cjK7AMrx63AvyjmZa2NMJ5OrBqexsGy0ToNSbO3vbJM",
+  },
+  alternates: {
+    canonical: "https://prompts.uyonoh.com",
+  },
 };
 
 export default async function RootLayout({
@@ -26,9 +42,29 @@ export default async function RootLayout({
     getModels(),
   ]);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Catalyst",
+    url: "https://prompts.uyonoh.com",
+    operatingSystem: "All",
+    applicationCategory: "WebApplication",
+    description:
+      "Transform your raw ideas into high-performance AI prompts with our Studio and professional library.",
+    offers: {
+      "@type": "Offer",
+      price: "0.00",
+      priceCurrency: "USD",
+    },
+  };
+
   return (
     <html lang="en" className="dark">
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap"
           rel="stylesheet"

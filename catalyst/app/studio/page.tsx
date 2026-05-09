@@ -2,6 +2,12 @@ import React from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import StudioPageContent from "./StudioPageContent";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Studio",
+  description: "Refine your ideas into high-quality, purpose-driven prompts.",
+};
 
 export default function StudioPage() {
   return (
