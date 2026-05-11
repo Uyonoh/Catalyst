@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/"],
+      disallow: ["/api/", "/settings", "/dashboard", "/history"],
     },
     sitemap: "https://prompts.uyonoh.com/sitemap.xml",
   };
