@@ -46,6 +46,7 @@ export default async function RootLayout({
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: "Catalyst",
+    alternateName: ["Catalyst Studio", "Catalyst AI Studio"],
     url: "https://prompts.uyonoh.com",
     operatingSystem: "All",
     applicationCategory: "WebApplication",

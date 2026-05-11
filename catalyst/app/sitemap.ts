@@ -5,7 +5,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const pages = ["library", "studio", "contact", "about", "privacy", "terms"];
 
-  const postEntries = pages.map((page) => ({
+  const sitePages = pages.map((page) => ({
     url: `${baseUrl}/${page}`,
     lastModified: new Date(),
     changeFrequency: "monthly" as const,
@@ -19,6 +19,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 1,
     },
-    ...postEntries,
+    ...sitePages,
   ];
 }
