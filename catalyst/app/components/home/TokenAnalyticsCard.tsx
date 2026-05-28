@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  InfinityIcon, 
-  HelpCircle, 
-  ChevronRight, 
-  TrendingUp, 
+import {
+  InfinityIcon,
+  HelpCircle,
+  ChevronRight,
+  TrendingUp,
   Sparkles,
   Bot,
   Zap
@@ -118,7 +118,7 @@ export default function TokenAnalyticsCard({
           <p className="text-slate-400 text-xs mt-0.5">Real-time resource utilization & ledger</p>
         </div>
         <div className="relative">
-          <button 
+          <button
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
             className="text-slate-500 hover:text-white transition-colors p-1"
@@ -230,7 +230,7 @@ export default function TokenAnalyticsCard({
         ) : (
           <div className="h-28 flex items-end justify-between px-2 pt-4 bg-white/[0.02] border border-white/5 rounded-xl">
             {weeklyChartData.map((day, idx) => {
-              const barHeightPercent = Math.max(10, Math.round((day.cost / maxWeeklyCost) * 100));
+              const barHeightPercent = Math.max(1, Math.round((day.cost / maxWeeklyCost) * 100));
               return (
                 <div key={idx} className="flex flex-col items-center flex-1 group relative">
                   {/* Tooltip on Hover */}
@@ -238,7 +238,7 @@ export default function TokenAnalyticsCard({
                     {day.cost} tokens
                   </div>
                   {/* Glowing Bar */}
-                  <div 
+                  <div
                     className="w-4/12 min-w-[8px] rounded-t bg-gradient-to-t from-cyan-600/40 to-cyan-400/90 group-hover:to-cyan-300 transition-all duration-500 ease-out"
                     style={{ height: `${barHeightPercent}px` }}
                   />
