@@ -1,41 +1,53 @@
 "use client";
 
-export default function StatsOverview() {
+interface StatsOverviewProps {
+  promptsCount: number;
+  workspacesCount: number;
+  analysesCount: number;
+  favoritesCount: number;
+}
+
+export default function StatsOverview({
+  promptsCount = 0,
+  workspacesCount = 0,
+  analysesCount = 0,
+  favoritesCount = 0,
+}: StatsOverviewProps) {
   return (
     <div
-      className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 animate-slideDown"
+      className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-slideDown"
       style={{ animationDelay: "0.2s", animationFillMode: "both" }}
     >
-      <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center">
-        <span className="text-3xl font-black text-white mb-1 tracking-tight">
-          128
+      <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center border border-white/5 hover:border-cyan-500/20 hover:bg-white/5 transition-all group">
+        <span className="text-3xl font-black text-white mb-1 tracking-tight group-hover:scale-105 transition-transform">
+          {promptsCount}
         </span>
-        <span className="text-xs text-slate-400 uppercase tracking-wider">
+        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
           Prompts Created
         </span>
       </div>
-      <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center">
-        <span className="text-3xl font-black text-[--color-primary] mb-1 tracking-tight">
-          86%
+      <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center border border-white/5 hover:border-[--color-primary]/20 hover:bg-white/5 transition-all group">
+        <span className="text-3xl font-black text-[--color-primary] mb-1 tracking-tight group-hover:scale-105 transition-transform">
+          {workspacesCount}
         </span>
-        <span className="text-xs text-slate-400 uppercase tracking-wider">
-          Optimization Rate
-        </span>
-      </div>
-      <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center">
-        <span className="text-3xl font-black text-cyan-400 mb-1 tracking-tight">
-          4.2s
-        </span>
-        <span className="text-xs text-slate-400 uppercase tracking-wider">
-          Avg Latency
+        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+          Active Workspaces
         </span>
       </div>
-      <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center">
-        <span className="text-3xl font-black text-purple-400 mb-1 tracking-tight">
-          12
+      <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center border border-white/5 hover:border-amber-500/20 hover:bg-white/5 transition-all group">
+        <span className="text-3xl font-black text-amber-400 mb-1 tracking-tight group-hover:scale-105 transition-transform">
+          {favoritesCount}
         </span>
-        <span className="text-xs text-slate-400 uppercase tracking-wider">
-          Active Projects
+        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+          Favorite Prompts
+        </span>
+      </div>
+      <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center border border-white/5 hover:border-purple-500/20 hover:bg-white/5 transition-all group">
+        <span className="text-3xl font-black text-purple-400 mb-1 tracking-tight group-hover:scale-105 transition-transform">
+          {analysesCount}
+        </span>
+        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+          Deep Intent Runs
         </span>
       </div>
     </div>
