@@ -15,6 +15,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useTokens } from "../../../hooks/useTokens";
+import { useRouter } from "next/navigation";
 
 interface SubscriptionPanelProps {
   plan: string;
@@ -89,16 +90,24 @@ export default function SubscriptionPanel({
   const { dailyLimit, used, percentage, isExhausted } = useTokens();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const isPro = plan === "pro" || plan === "enterprise";
+  const router = useRouter();
 
   const handleManageBilling = async () => {
+    if (!isPro) {
+      router.push("/settings/subscriptions/pricing");
+      return;
+    }
     setIsRedirecting(true);
     try {
       const resp = await fetch("/api/settings/billing-portal");
       const { url } = await resp.json();
       if (url && url !== "#") {
-        window.open(url, "_blank");
+        if (url.startsWith("/")) {
+          router.push(url);
+        } else {
+          window.open(url, "_blank");
+        }
       } else {
-        // Stub implementation fallback
         alert("Billing portal integration coming soon!");
       }
     } catch (err) {
@@ -154,14 +163,14 @@ export default function SubscriptionPanel({
           <button
             onClick={handleManageBilling}
             disabled={isRedirecting}
-            className="shrink-0 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium px-5 py-2.5 rounded-xl transition-colors disabled:opacity-50 min-w-[160px]"
+            className="shrink-0 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium px-5 py-2.5 rounded-xl transition-colors disabled:opacity-50 min-w-[160px] cursor-pointer"
           >
             {isRedirecting ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
               <ExternalLink className="size-4" />
             )}
-            Manage Billing
+            {isPro ? "Manage Billing" : "Upgrade Plan"}
           </button>
         </div>
 
