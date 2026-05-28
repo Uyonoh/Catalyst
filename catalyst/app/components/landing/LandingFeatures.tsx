@@ -27,10 +27,10 @@ const features = [
 
 export default function LandingFeatures() {
   return (
-    <section className="py-32 relative z-10 border-t border-white/[0.05]">
+    <section className="pt-24 pb-12 relative z-10 border-t border-white/[0.05]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div className="text-center mb-24">
+        <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">
             Designed for <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">clarity.</span>
           </h2>
@@ -39,7 +39,7 @@ export default function LandingFeatures() {
           </p>
         </div>
 
-        <div className="space-y-32">
+        <div className="space-y-20">
           {features.map((feature, index) => (
             <div 
               key={index} 
