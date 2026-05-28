@@ -35,6 +35,7 @@ export default function InteractiveActionHub() {
 
     // Hydrate to Studio page state
     localStorage.setItem("catalyst_guest_input", cleanText);
+    localStorage.setItem("catalyst_guest_model", selectedModelSlug);
     router.push("/studio");
   };
 

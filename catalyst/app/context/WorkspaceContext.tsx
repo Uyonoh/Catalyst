@@ -99,6 +99,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         setInput(guestInput);
         localStorage.removeItem("catalyst_guest_input");
       }
+      const guestModel = localStorage.getItem("catalyst_guest_model");
+      if (guestModel) {
+        setSelectedModel(guestModel);
+        localStorage.removeItem("catalyst_guest_model");
+      }
     }
   }, []);
 

@@ -14,20 +14,18 @@ export default function Loading() {
             <Skeleton className="h-12 md:h-16 w-3/4 mb-2" />
             <Skeleton className="h-4 w-1/2" />
           </div>
-          <Skeleton className="h-10 w-32 rounded-xl" />
         </section>
 
         <div className="flex flex-col lg:flex-row gap-6">
-          <div className="flex-1">
-            <Skeleton className="h-[400px] w-full rounded-2xl glass-panel" />
-          </div>
-          <div className="hidden lg:block lg:w-[50%]">
+          <div className="flex-1 min-w-0 w-full">
             <Skeleton className="h-[400px] w-full rounded-2xl glass-panel" />
           </div>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <Skeleton className="h-[200px] w-full rounded-2xl glass-panel" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-12 flex flex-col gap-4">
+            <Skeleton className="h-[200px] w-full rounded-2xl glass-panel" />
+          </div>
         </div>
       </main>
     </>

@@ -9,21 +9,30 @@ export default function Loading() {
       </div>
 
       <div className="relative z-10 min-h-screen flex flex-col">
-        <main className="flex-1 w-full max-w-[1200px] mx-auto pt-24 pb-12 px-4 md:px-8">
-          <div className="flex justify-between items-center mb-8">
-            <div className="flex flex-col gap-2 w-1/2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-            <div className="flex gap-3">
-              <Skeleton className="h-10 w-24 rounded-xl" />
-              <Skeleton className="h-10 w-24 rounded-xl" />
+        <main className="flex-1 w-full max-w-[1000px] mx-auto pt-24 pb-12 px-4 sm:px-6 flex flex-col gap-6 md:gap-8">
+          <div className="flex items-center gap-4 mb-2">
+            <Skeleton className="h-10 w-10 rounded-xl" />
+            <div className="flex flex-col gap-1 w-1/2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-64" />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Skeleton className="h-[500px] w-full rounded-2xl glass-panel" />
-            <Skeleton className="h-[500px] w-full rounded-2xl glass-panel" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Main Editor Skeleton */}
+            <div className="lg:col-span-8 flex flex-col gap-6">
+              <Skeleton className="h-[480px] w-full rounded-2xl glass-panel" />
+              <div className="flex flex-col sm:flex-row items-center gap-4 justify-end">
+                <Skeleton className="h-12 w-32 rounded-xl" />
+                <Skeleton className="h-12 w-36 rounded-xl" />
+              </div>
+            </div>
+
+            {/* Sidebar Skeleton */}
+            <div className="lg:col-span-4 flex flex-col gap-6">
+              <Skeleton className="h-[180px] w-full rounded-2xl glass-panel" />
+              <Skeleton className="h-[240px] w-full rounded-2xl glass-panel" />
+            </div>
           </div>
         </main>
       </div>
