@@ -5,7 +5,9 @@ interface HeroSectionProps {
   userName?: string;
 }
 
-export default function HeroSection({ userName = "Architect" }: HeroSectionProps) {
+export default function HeroSection({
+  userName = "Architect",
+}: HeroSectionProps) {
   // Format user name (capitalize first letter)
   const formattedName = userName.trim()
     ? userName.charAt(0).toUpperCase() + userName.slice(1)
@@ -25,7 +27,7 @@ export default function HeroSection({ userName = "Architect" }: HeroSectionProps
             </span>
           </h1>
           <p className="text-slate-400 mt-2 text-base">
-            Your neural networks are primed and ready for prompt synthesis.
+            Get an overview of your prompts, workspaces and usage.
           </p>
         </div>
         {/* CTA Button with Blue-to-Cyan Gradient */}

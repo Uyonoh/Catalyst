@@ -162,7 +162,7 @@ export default function TokenAnalyticsCard({
       <div className="absolute top-[-20%] right-[-20%] w-[50%] h-[50%] rounded-full bg-cyan-500/5 blur-[80px] pointer-events-none z-0"></div>
 
       {/* Top Header */}
-      <div className="flex items-center justify-between mb-6 z-10">
+      <div className="flex items-center justify-between mb-6 z-20">
         <div>
           <h3 className="text-white font-bold text-lg flex items-center gap-2">
             <TrendingUp className="size-5 text-cyan-400" />
@@ -181,7 +181,7 @@ export default function TokenAnalyticsCard({
             <HelpCircle className="size-4" />
           </button>
           {showTooltip && (
-            <div className="absolute right-0 bottom-7 w-64 p-3 bg-slate-950/95 border border-white/10 rounded-lg text-[11px] text-slate-300 leading-relaxed shadow-xl backdrop-blur-md z-30 transition-all">
+            <div className="absolute right-0 top-full mt-1.5 w-64 p-3 bg-slate-950/95 border border-white/10 rounded-lg text-[11px] text-slate-300 leading-relaxed shadow-xl backdrop-blur-md z-30 transition-all">
               Optimizing prompts consumes daily tokens based on model
               intelligence and modalities. Free tier grants 50 tokens daily. Pro
               Tier expands quota to 200 tokens. Quota resets at 00:00 UTC.

@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Folder, FolderPlus, Loader2, ArrowUpRight, Search, PlusCircle } from "lucide-react";
+import {
+  Folder,
+  FolderPlus,
+  Loader2,
+  ArrowUpRight,
+  Search,
+  PlusCircle,
+} from "lucide-react";
 import { useUser } from "../../context/AuthContext";
 import { supabaseBrowser } from "../../lib/supabase-browser";
 
@@ -22,7 +29,8 @@ export default function WorkspacesOverview({
   promptsCount = 0,
 }: WorkspacesOverviewProps) {
   const { user } = useUser();
-  const [workspaces, setWorkspaces] = useState<WorkspaceItem[]>(initialWorkspaces);
+  const [workspaces, setWorkspaces] =
+    useState<WorkspaceItem[]>(initialWorkspaces);
   const [isCreating, setIsCreating] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [newFolderDesc, setNewFolderDesc] = useState("");
@@ -76,17 +84,24 @@ export default function WorkspacesOverview({
           onClick={() => setIsCreating(!isCreating)}
           className="text-xs font-bold text-cyan-400 hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
         >
-          <FolderPlus className="size-3.5" />
-          {isCreating ? "Cancel" : "New Folder"}
+          <FolderPlus className="size-5 sm:size-3.5" />
+          <span className="hidden sm:inline">
+            {isCreating ? "Cancel" : "New Folder"}
+          </span>
         </button>
       </div>
 
       {/* Creation form */}
       {isCreating && (
-        <form onSubmit={handleCreateWorkspace} className="p-4 rounded-xl bg-white/5 border border-white/5 mb-4 animate-slideDown">
+        <form
+          onSubmit={handleCreateWorkspace}
+          className="p-4 rounded-xl bg-white/5 border border-white/5 mb-4 animate-slideDown"
+        >
           <div className="flex flex-col gap-3">
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Folder Name *</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                Folder Name *
+              </label>
               <input
                 type="text"
                 required
@@ -98,7 +113,9 @@ export default function WorkspacesOverview({
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Description (Optional)</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                Description (Optional)
+              </label>
               <input
                 type="text"
                 value={newFolderDesc}
@@ -109,7 +126,9 @@ export default function WorkspacesOverview({
               />
             </div>
             {errorMsg && (
-              <span className="text-[10px] text-rose-400 font-medium">{errorMsg}</span>
+              <span className="text-[10px] text-rose-400 font-medium">
+                {errorMsg}
+              </span>
             )}
             <button
               type="submit"
@@ -133,7 +152,10 @@ export default function WorkspacesOverview({
       {workspaces.length === 0 ? (
         <div className="py-8 text-center border border-dashed border-white/5 rounded-xl">
           <Folder className="size-8 text-slate-600 mx-auto mb-2 opacity-50" />
-          <span className="text-slate-500 text-xs font-medium">No custom workspaces found. Group prompts into folders to optimize workflow.</span>
+          <span className="text-slate-500 text-xs font-medium">
+            No custom workspaces found. Group prompts into folders to optimize
+            workflow.
+          </span>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[220px] overflow-y-auto pr-1 dropdown-scroll">
