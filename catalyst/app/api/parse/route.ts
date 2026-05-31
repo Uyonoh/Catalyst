@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
 
     const prompt = buildPrompt({ text, model: modelId, controls, mode });
     
+    const format = controls?.outputFormat || "text";
     let refinedText = "";
     try {
       refinedText = await generateRefinedPrompt(prompt);
@@ -99,7 +100,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return NextResponse.json({ refinedPrompt: refinedText.trim(), tokenResult });
+    let cleanedText = refinedText.trim();
+    
+    // Clean up code block wraps if LLM wrapper them (e.g., ```json ... ``` or ``` ... ```)
+    const codeBlockRegex = /^```(?:[a-zA-Z0-9_\-+]+)?\n([\s\S]*?)\n```$/;
+    const match = cleanedText.match(codeBlockRegex);
+    if (match) {
+      cleanedText = match[1].trim();
+    } else {
+      // Also catch cases where the markdown backticks don't have leading/trailing newlines or are using single quotes (as user reported: '''markdown ...''')
+      cleanedText = cleanedText
+        .replace(/^```[a-zA-Z0-9_\-+]*\s*/g, "")
+        .replace(/\s*```$/g, "")
+        .replace(/^'''[a-zA-Z0-9_\-+]*\s*/g, "")
+        .replace(/\s*'''$/g, "");
+    }
+
+    return NextResponse.json({ 
+      refinedPrompt: cleanedText, 
+      format: format,
+      tokenResult 
+    });
   } catch (error: any) {
     console.error("LLM Parsing Router Error:", error);
     return NextResponse.json(

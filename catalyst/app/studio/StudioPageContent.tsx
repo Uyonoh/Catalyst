@@ -44,7 +44,7 @@ function StudioContent({
   isTransitioning: boolean;
   setIsTransitioning: (v: boolean) => void;
 }) {
-  const { parsedPrompt, input, selectedModel } = useWorkspace();
+  const { parsedPrompt, parsedFormat, input, selectedModel } = useWorkspace();
   const [showEditor, setShowEditor] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
@@ -74,6 +74,7 @@ function StudioContent({
               is_public: isPublic,
               icon: "chat", // Default category
               tag: "",
+              format: parsedFormat || "text",
             })
             .select()
             .single();
@@ -107,7 +108,7 @@ function StudioContent({
     if (parsedPrompt) {
       autoSave();
     }
-  }, [parsedPrompt, user, input, selectedModel, isPublic, router]);
+  }, [parsedPrompt, parsedFormat, user, input, selectedModel, isPublic, router]);
 
   return (
     <>

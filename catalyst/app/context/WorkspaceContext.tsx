@@ -31,6 +31,7 @@ interface WorkspaceContextType {
   error: string | null;
   // LLM Parsing state
   parsedPrompt: string | null;
+  parsedFormat: string | null;
   isGenerating: boolean;
   parseIntent: ({
     text,
@@ -120,6 +121,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   // LLM Parsing state
   const [parsedPrompt, setParsedPrompt] = useState<string | null>(null);
+  const [parsedFormat, setParsedFormat] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
@@ -144,6 +146,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
     setIsGenerating(true);
     setParsedPrompt(null);
+    setParsedFormat(null);
     setGenerationError(null);
     setRetryCount(0);
 
@@ -179,6 +182,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
         const data = await response.json();
         setParsedPrompt(data.refinedPrompt);
+        setParsedFormat(data.format || null);
         if (refreshProfile) refreshProfile();
         return true;
       } catch (err: any) {
@@ -220,6 +224,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         isLoading,
         error,
         parsedPrompt,
+        parsedFormat,
         isGenerating,
         parseIntent,
         generationError,

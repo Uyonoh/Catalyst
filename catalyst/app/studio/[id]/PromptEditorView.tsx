@@ -19,6 +19,7 @@ interface PromptEditorViewProps {
     is_public: boolean;
     icon?: string;
     tag?: string;
+    format?: string;
   };
 }
 
@@ -270,13 +271,27 @@ export default function PromptEditorView({
     }
   };
 
-  const handleDownload = (text: string, title: string) => {
+  const handleDownload = (text: string, title: string, formatParam?: string) => {
     if (userPlan === "free") {
       setShowUpgradeModal(true);
       return;
     }
 
-    const { ext, mime } = detectDownloadFormat(text);
+    const downloadFormat = (formatParam || initialData.format || "text").toLowerCase();
+    let ext = "txt";
+    let mime = "text/plain";
+
+    if (downloadFormat === "json") {
+      ext = "json";
+      mime = "application/json";
+    } else if (downloadFormat === "yaml" || downloadFormat === "yml") {
+      ext = "yaml";
+      mime = "text/yaml";
+    } else if (downloadFormat === "markdown" || downloadFormat === "md") {
+      ext = "md";
+      mime = "text/markdown";
+    }
+
     const filename = `${slugify(title) || "prompt"}.${ext}`;
 
     const blob = new Blob([text], { type: `${mime};charset=utf-8` });
@@ -304,7 +319,7 @@ export default function PromptEditorView({
         onDiscard={handleDiscard}
         onSave={handleSave}
         onVisibilityChange={handleVisibilityChange}
-        onDownload={handleDownload}
+        onDownload={(text, title) => handleDownload(text, title, initialData.format)}
         userPlan={userPlan}
         isLoading={isSaving}
         className="pt-0 pb-0 px-0 sm:px-0"

@@ -90,6 +90,7 @@ export default async function PromptViewEditPage({ params, searchParams }: PageP
     is_public: promptData.is_public ?? (isPrivate ? false : true),
     icon: promptData.icon,
     tag: promptData.tag || "",
+    format: promptData.format || "text",
   };
 
   return (
