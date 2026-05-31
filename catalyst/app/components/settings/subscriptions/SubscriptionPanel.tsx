@@ -346,7 +346,7 @@ export default function SubscriptionPanel({
               No token activity recorded this week.
             </div>
           ) : (
-            <div className="h-28 flex items-end justify-between px-2 pt-4 bg-white/[0.02] border border-white/5 rounded-xl">
+            <div className="h-35 flex items-end justify-between px-2 pt-4 bg-white/[0.02] border border-white/5 rounded-xl">
               {weeklyChartData.map((day, idx) => {
                 const barHeightPercent = Math.max(
                   1,
