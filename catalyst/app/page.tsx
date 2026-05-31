@@ -6,7 +6,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Catalyst | Professional Prompt Optimization",
+  title: "Catalyst Prompt Studio | Professional Prompt Optimization",
   description:
     "Transform your raw ideas into high-performance AI prompts with our Studio and professional library.",
 };
@@ -30,8 +30,8 @@ export default async function LandingPage() {
               Ready to elevate your AI workflow?
             </h2>
             <p className="text-slate-400 text-lg mb-8 max-w-xl mx-auto">
-              Join professionals using Catalyst to build the future of AI
-              communication.
+              Join professionals using Catalyst Prompt Studio to build the
+              future of AI communication.
             </p>
             <div className="flex justify-center">
               <Link

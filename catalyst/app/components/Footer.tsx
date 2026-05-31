@@ -20,19 +20,25 @@ const Footer = () => {
               <div className="size-8 flex items-center justify-center text-cyan-400">
                 <LayoutGrid className="size-7" />
               </div>
-              <h2 className="text-white text-xl font-black tracking-tight">
-                Catalyst
+              <h2 className="text-white text-xl font-black tracking-tight flex items-center gap-1">
+                <span>Catalyst</span>
+                <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                  Prompt Studio
+                </span>
               </h2>
             </div>
             <p className="text-slate-400 text-sm md:text-[15px] leading-relaxed">
               Empowering creatives and professionals with precision prompt
               engineering. Optimize, analyze, and refine your AI interactions in
-              the Catalyst Studio.
+              the Catalyst AI Studio.
             </p>
             <div className="flex items-center gap-4 mt-2">
               <SocialIcon icon={<Globe className="size-5" />} label="Website" />
               <SocialIcon icon={<Code className="size-5" />} label="GitHub" />
-              <SocialIcon icon={<Twitter className="size-5" />} label="Twitter" />
+              <SocialIcon
+                icon={<Twitter className="size-5" />}
+                label="Twitter"
+              />
             </div>
           </div>
 
@@ -65,7 +71,7 @@ const Footer = () => {
         <div className="mt-16 pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
             <p className="text-slate-500 text-sm">
-              © {currentYear} Catalyst Studio.
+              © {currentYear} Catalyst Prompt Studio.
             </p>
             <span className="hidden sm:inline text-slate-700 font-bold">•</span>
             <p className="text-slate-500 text-sm">Crafted for excellence.</p>
@@ -123,14 +129,18 @@ const FooterLink = ({
   </li>
 );
 
-const SocialIcon = ({ icon, label }: { icon: React.ReactNode; label: string }) => (
+const SocialIcon = ({
+  icon,
+  label,
+}: {
+  icon: React.ReactNode;
+  label: string;
+}) => (
   <button
     className="size-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-cyan-400 hover:bg-white/10 hover:border-cyan-400/30 transition-all duration-300 group"
     aria-label={label}
   >
-    <div className="transition-transform group-hover:scale-110">
-      {icon}
-    </div>
+    <div className="transition-transform group-hover:scale-110">{icon}</div>
   </button>
 );
 

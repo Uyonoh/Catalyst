@@ -166,7 +166,7 @@ export default function TokenAnalyticsCard({
         <div>
           <h3 className="text-white font-bold text-lg flex items-center gap-2">
             <TrendingUp className="size-5 text-cyan-400" />
-            Neural Quota Analytics
+            Quota Analytics
           </h3>
           <p className="text-slate-400 text-xs mt-0.5">
             Real-time resource utilization & ledger

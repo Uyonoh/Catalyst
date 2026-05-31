@@ -12,16 +12,17 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "Catalyst | Professional Prompt Optimization",
-    template: "%s | Catalyst",
+    default: "Catalyst Prompt Studio | Professional Prompt Optimization",
+    template: "%s | Catalyst Prompt Studio",
   },
   description:
     "Transform your raw ideas into high-performance AI prompts with our Studio and professional library.",
   keywords: [
-    "Ai Propmt generator",
+    "Ai Prompt generator",
     "Free prompts",
-    "Best ChatGPT propmts",
-    "Best Claude propmts",
+    "Best ChatGPT prompts",
+    "Best Claude prompts",
+    "Catalyst AI Studio",
   ],
   verification: {
     // google: 'BW3giniw1EydeTftID8VS2n2elApCe7pjKByxwfwPiU' // Onomah
@@ -45,8 +46,8 @@ export default async function RootLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "Catalyst",
-    alternateName: ["Catalyst Studio", "Catalyst AI Studio"],
+    name: "Catalyst Prompt Studio",
+    alternateName: ["Catalyst AI Studio", "Catalyst Prompts"],
     url: "https://prompts.uyonoh.com",
     operatingSystem: "All",
     applicationCategory: "WebApplication",

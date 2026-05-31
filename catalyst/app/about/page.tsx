@@ -15,7 +15,7 @@ export default function AboutPage() {
           {/* Hero Section */}
           <div className="text-center space-y-4">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight">
-              About <span className="text-cyan-400">Catalyst</span>
+              About <span className="text-cyan-400">Catalyst Prompt Studio</span>
             </h1>
             <p className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
               We are on a mission to bridge the gap between human creativity and AI potential through precision engineering.

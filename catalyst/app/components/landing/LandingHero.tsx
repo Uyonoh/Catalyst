@@ -1,9 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Sparkles, ArrowRight, Zap, Target, Shield } from "lucide-react";
 
 export default function LandingHero() {
+  const [prompt, setPrompt] = useState("");
+  const [selectedModel, setSelectedModel] = useState("gpt");
+  const router = useRouter();
+
+  const handleOptimize = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!prompt.trim()) return;
+    localStorage.setItem("catalyst_guest_input", prompt.trim());
+    localStorage.setItem("catalyst_guest_model", selectedModel);
+    router.push("/studio");
+  };
+
   return (
     <section className="relative pt-10 pb-24 md:pt-20 md:pb-40 overflow-hidden">
       {/* Background Ambient Glows */}
@@ -19,36 +33,100 @@ export default function LandingHero() {
           </div>
 
           {/* Main Title */}
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.1] mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/50">
-            Catalyst
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-[1.1] mb-6">
+            Catalyst{" "}
+            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+              Prompt Studio
+            </span>
           </h1>
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight leading-[1.1] mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/50">
-            Your Free AI Prompt Generator and Library
-            {/*Design Prompts <br />
-            <span className="text-cyan-400">With Purpose.</span>*/}
+
+          {/* Subtitle */}
+          <h2 className="text-base sm:text-xl font-medium text-slate-300 tracking-tight leading-relaxed mb-10 max-w-2xl mx-auto">
+            The professional studio for crafting, testing, and managing
+            high-performance AI prompts. Optimize raw ideas into consistent
+            results instantly.
           </h2>
 
-          {/* Description */}
-          <p className="max-w-2xl mx-auto text-lg md:text-xl text-slate-400 leading-relaxed mb-12">
-            The professional studio for crafting, testing, and managing
-            high-performance AI prompts. Transform raw ideas into consistent
-            results.
-          </p>
+          {/* Quick Start Input Box */}
+          <div className="max-w-2xl mx-auto mb-16 px-1">
+            <form
+              onSubmit={handleOptimize}
+              className="glass-panel border border-white/10 p-4 sm:p-5 rounded-3xl shadow-2xl relative group hover:border-cyan-500/20 transition-all duration-300 text-left"
+            >
+              {/* Outer neon border glow */}
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 -z-10 pointer-events-none" />
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+              <div className="flex flex-col gap-4">
+                <textarea
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder="Paste your raw prompt idea here to optimize it..."
+                  className="w-full min-h-[90px] sm:min-h-[110px] bg-transparent text-white placeholder-slate-500 focus:outline-none text-base resize-none border-b border-white/5 pb-2"
+                />
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  {/* Model Selector Label/Pills */}
+                  <div className="flex flex-col gap-2 items-start w-full sm:w-auto">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                      Target Model
+                    </span>
+                    {/* Horizontal scrollable pills on mobile */}
+                    <div className="flex gap-1.5 overflow-x-auto pb-1 max-w-full scrollbar-none w-full sm:w-auto">
+                      {[
+                        { slug: "gpt", name: "GPT-5" },
+                        { slug: "claude", name: "Claude 4" },
+                        { slug: "gemini", name: "Gemini 3" },
+                        { slug: "llama", name: "Llama 3" },
+                        { slug: "midjourney", name: "Midjourney" },
+                      ].map((m) => (
+                        <button
+                          key={m.slug}
+                          type="button"
+                          onClick={() => setSelectedModel(m.slug)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all shrink-0 cursor-pointer ${
+                            selectedModel === m.slug
+                              ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400"
+                              : "bg-white/[0.02] border-white/5 text-slate-400 hover:text-slate-200"
+                          }`}
+                        >
+                          {m.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={!prompt.trim()}
+                    className={`flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl font-black text-sm transition-all duration-300 w-full sm:w-auto ${
+                      prompt.trim()
+                        ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer animate-pulse-glow"
+                        : "bg-white/5 text-slate-500 border border-white/5 cursor-not-allowed"
+                    }`}
+                  >
+                    <span>Optimize in Studio</span>
+                    <ArrowRight className="size-4" />
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          {/* Alternative standard account links */}
+          <div className="flex flex-row items-center justify-center gap-6 mb-20 text-sm">
             <Link
               href="/studio"
-              className="group relative flex items-center gap-2 bg-white text-slate-950 px-8 py-4 rounded-2xl font-black text-lg hover:bg-cyan-400 hover:text-slate-950 transition-all duration-300 shadow-xl shadow-white/5"
+              className="text-slate-400 hover:text-cyan-400 transition-colors"
             >
-              Generate A Free Prompt
-              <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />
+              Open Studio directly
             </Link>
+            <span className="text-slate-700 font-bold">•</span>
             <Link
               href="/login?next=/settings"
-              className="px-8 py-4 rounded-2xl font-bold text-lg text-white bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300"
+              className="text-slate-400 hover:text-cyan-400 transition-colors"
             >
-              Manage Your Account
+              Manage account
             </Link>
           </div>
 

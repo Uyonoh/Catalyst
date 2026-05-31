@@ -50,15 +50,20 @@ export default function Header() {
   };
 
   return (
-    <header className={`sticky top-0 z-50 w-full border-b border-white/10 glass-panel-dark transition-colors duration-300 ${isMobileMenuOpen ? '!bg-[#101922]' : ''}`}>
+    <header
+      className={`sticky top-0 z-50 w-full border-b border-white/10 glass-panel-dark transition-colors duration-300 ${isMobileMenuOpen ? "!bg-[#101922]" : ""}`}
+    >
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
           <div className="size-8 flex items-center justify-center text-cyan-400">
             <LayoutGrid className="size-7 sm:size-8" />
           </div>
-          <h2 className="text-white text-lg sm:text-xl font-black tracking-tight">
-            Catalyst
+          <h2 className="text-white text-base sm:text-xl font-black tracking-tight flex items-center gap-1">
+            <span>Catalyst</span>
+            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+              Prompt Studio
+            </span>
           </h2>
         </Link>
 
@@ -167,7 +172,7 @@ export default function Header() {
         {/* Mobile Menu */}
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <nav 
+          <nav
             ref={menuRef}
             className="absolute top-16 left-0 right-0 bg-[#101922] border-t border-white/10 md:hidden animate-slideDown overflow-hidden"
           >
