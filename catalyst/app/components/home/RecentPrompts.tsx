@@ -2,9 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import {
-  formatUpdated,
-} from "@/app/components/library/LibraryCard";
+import { formatUpdated } from "@/app/components/library/LibraryCard";
 import {
   LayoutGrid,
   List,
@@ -14,7 +12,7 @@ import {
   ArrowRight,
   Plus,
   Search,
-  Filter
+  Filter,
 } from "lucide-react";
 import { ICON_MAP } from "@/app/components/studio/ModelSelector";
 import {
@@ -74,7 +72,7 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
   // Filter prompts based on search term & selected tag
   const filteredPrompts = useMemo(() => {
     return prompts.filter((p) => {
-      const matchesSearch = 
+      const matchesSearch =
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.snippet.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (p.tag && p.tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -97,9 +95,11 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
           <h2 className="text-2xl font-black text-white tracking-tight">
             Recent Prompts
           </h2>
-          <p className="text-slate-400 text-xs mt-0.5">Manage and organize your custom intelligence catalog</p>
+          <p className="text-slate-400 text-xs mt-0.5">
+            Manage and organize your custom intelligence catalog
+          </p>
         </div>
-        
+
         {/* Layout controls & Search bar */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px] md:w-64">
@@ -168,8 +168,14 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
         <div className="flex flex-col items-center justify-center p-12 border border-dashed border-white/10 rounded-2xl bg-white/[0.01] text-center">
           <Bot className="size-12 text-slate-600 mb-3 opacity-50" />
           <h3 className="text-white font-bold text-sm">No Matching Prompts</h3>
-          <p className="text-slate-500 text-xs mt-1 max-w-sm">No items match your active search terms or category selectors. Create a new prompt in the Studio to expand catalog.</p>
-          <Link href="/studio" className="mt-4 flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-[--color-primary] to-cyan-500 text-white text-xs font-bold rounded-lg hover:shadow-lg transition-all duration-300">
+          <p className="text-slate-500 text-xs mt-1 max-w-sm">
+            No items match your active search terms or category selectors.
+            Create a new prompt in the Studio to expand catalog.
+          </p>
+          <Link
+            href="/studio"
+            className="mt-4 flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-[--color-primary] to-cyan-500 text-white text-xs font-bold rounded-lg hover:shadow-lg transition-all duration-300"
+          >
             <Plus className="size-4" /> New Prompt
           </Link>
         </div>
@@ -196,8 +202,8 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                   {formatUpdated(prompt.updated_at)}
                 </span>
               </div>
-              
-              <div className="flex items-start gap-4 mb-4">
+
+              <div className="flex items-center gap-4 mb-4">
                 {(() => {
                   const token =
                     PROMPT_TYPE_TOKENS[prompt.icon] || PROMPT_TYPE_FALLBACK;
@@ -214,10 +220,13 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                   <h3 className="text-lg font-bold text-white mb-1 group-hover:text-cyan-400 transition-colors truncate">
                     {prompt.title}
                   </h3>
-                  <p className="text-slate-400 text-sm line-clamp-2">
-                    {prompt.snippet}
-                  </p>
                 </div>
+              </div>
+
+              <div className="mb-2">
+                <p className="text-slate-400 text-sm line-clamp-2">
+                  {prompt.snippet}
+                </p>
               </div>
 
               <div className="flex items-center gap-2 mb-4">
@@ -226,9 +235,6 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                     {prompt.tag}
                   </span>
                 )}
-                <span className="px-2 py-1 rounded bg-white/5 text-[10px] text-slate-300 border border-white/5">
-                  AI Generated
-                </span>
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t border-white/5">
@@ -261,7 +267,9 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                       handleCopy(prompt.id, prompt.content || prompt.snippet);
                     }}
                     className={`p-1.5 hover:bg-white/10 rounded-md transition-colors ${copiedId === prompt.id ? "text-emerald-400" : "text-slate-400 hover:text-cyan-400"}`}
-                    title={copiedId === prompt.id ? "Copied!" : "Copy Full Prompt"}
+                    title={
+                      copiedId === prompt.id ? "Copied!" : "Copy Full Prompt"
+                    }
                   >
                     {copiedId === prompt.id ? (
                       <Check className="size-5" />
@@ -325,7 +333,9 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                         {prompt.tag}
                       </span>
                     )}
-                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${prompt.is_public ? "bg-emerald-500/10 text-emerald-400" : "bg-white/5 text-slate-500"}`}>
+                    <span
+                      className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${prompt.is_public ? "bg-emerald-500/10 text-emerald-400" : "bg-white/5 text-slate-500"}`}
+                    >
                       {prompt.is_public ? "Public" : "Private"}
                     </span>
                   </div>
@@ -369,7 +379,9 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                       handleCopy(prompt.id, prompt.content || prompt.snippet);
                     }}
                     className={`p-1.5 hover:bg-white/10 rounded-md transition-colors ${copiedId === prompt.id ? "text-emerald-400" : "text-slate-400 hover:text-cyan-400"}`}
-                    title={copiedId === prompt.id ? "Copied!" : "Copy Full Prompt"}
+                    title={
+                      copiedId === prompt.id ? "Copied!" : "Copy Full Prompt"
+                    }
                   >
                     {copiedId === prompt.id ? (
                       <Check className="size-4.5" />

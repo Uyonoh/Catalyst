@@ -1,11 +1,11 @@
 "use client";
 
-import { 
-  Zap, 
-  MessageSquare, 
-  Sparkles, 
-  Palette, 
-  Terminal, 
+import {
+  Zap,
+  MessageSquare,
+  Sparkles,
+  Palette,
+  Terminal,
   Image as ImageIcon,
   Video,
 } from "lucide-react";
@@ -45,15 +45,15 @@ export default function QuickAccessModels() {
           <Zap className="size-5 text-cyan-400" />
           Quick Access Models
         </h3>
-        <a className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer">
+        {/*<a className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer">
           Manage Models
-        </a>
+        </a>*/}
       </div>
       <div className="flex gap-4 overflow-x-auto pb-2 dropdown-scroll">
         {models.map((model) => (
           <div
             key={model.slug}
-            className="flex h-12 min-w-[140px] cursor-pointer hover:bg-white/5 transition-colors items-center gap-x-3 rounded-xl bg-white/5 border border-white/5 pl-3 pr-5 group"
+            className="flex h-12 min-w-[150px] cursor-pointer hover:bg-white/5 transition-colors items-center gap-x-3 rounded-xl bg-white/5 border border-white/5 pl-3 pr-5 group"
           >
             <div
               className={`size-8 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform ${colorMap[model.color] || "bg-slate-500/20 text-slate-400"}`}
@@ -67,9 +67,9 @@ export default function QuickAccessModels() {
               <span className="text-white text-sm font-bold">
                 {model.brief}
               </span>
-              <span className="text-slate-400 text-[10px] uppercase tracking-wider">
+              {/*<span className="text-slate-400 text-[10px] uppercase tracking-wider">
                 {model.provider || "AI Model"}
-              </span>
+              </span>*/}
             </div>
           </div>
         ))}

@@ -78,7 +78,7 @@ export default function WorkspacesOverview({
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-white font-bold text-base flex items-center gap-2">
           <Folder className="size-4.5 text-cyan-400" />
-          Active Workspaces & Folders
+          Workspaces & Folders
         </h3>
         <button
           onClick={() => setIsCreating(!isCreating)}
