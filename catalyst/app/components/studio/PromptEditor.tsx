@@ -17,7 +17,8 @@ import {
   Terminal,
   Image as ImageIcon,
   Box,
-  Palette
+  Palette,
+  Download
 } from "lucide-react";
 
 const ICON_MAP: Record<string, any> = {
@@ -41,6 +42,8 @@ interface PromptEditorProps {
   onDiscard?: () => void;
   onSave?: (title: string, text: string, category: string, tags: string) => void;
   onVisibilityChange?: (isPublic: boolean) => void;
+  onDownload?: (text: string, title: string) => void;
+  userPlan?: 'free' | 'pro' | 'enterprise';
   isLoading?: boolean;
   className?: string;
 }
@@ -57,9 +60,12 @@ export default function PromptEditor({
   onDiscard,
   onSave,
   onVisibilityChange,
+  onDownload,
+  userPlan = 'free',
   isLoading = false,
   className
 }: PromptEditorProps) {
+  const canDownload = userPlan === 'pro' || userPlan === 'enterprise';
   const router = useRouter();
   const { models, categories } = useCatalog();
   const [editedText, setEditedText] = useState(initialEditedText);
@@ -173,6 +179,27 @@ export default function PromptEditor({
             >
               Discard Changes
             </button>
+
+            {/* Download Button — visible to all, gated for free plan */}
+            <button
+              onClick={() => onDownload?.(editedText, editedTitle)}
+              disabled={isLoading}
+              title={canDownload ? "Download prompt" : "Upgrade to Pro or Enterprise to download"}
+              className={`relative w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center justify-center gap-2 ${
+                canDownload
+                  ? "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white"
+                  : "bg-white/5 border border-white/10 text-slate-500 cursor-pointer hover:border-amber-500/30 hover:text-amber-400/80"
+              }`}
+            >
+              <Download className="size-4" />
+              Download
+              {!canDownload && (
+                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center size-4 rounded-full bg-amber-500 border border-black">
+                  <Lock className="size-2.5 text-black" />
+                </span>
+              )}
+            </button>
+
             <button
               onClick={handleApply}
               className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-primary text-white font-bold text-sm shadow-neon hover:shadow-neon-strong transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2"
