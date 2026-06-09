@@ -31,6 +31,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://prompts.uyonoh.com",
   },
+  openGraph: {
+    siteName: "Catalyst Prompt Studio",
+    title: "Catalyst Prompt Studio",
+    url: "https://prompts.uyonoh.com",
+  },
 };
 
 export default async function RootLayout({
@@ -43,22 +48,30 @@ export default async function RootLayout({
     getModels(),
   ]);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: "Catalyst Prompt Studio",
-    alternateName: ["Catalyst AI Studio", "Catalyst Prompts"],
-    url: "https://prompts.uyonoh.com",
-    operatingSystem: "All",
-    applicationCategory: "WebApplication",
-    description:
-      "Transform your raw ideas into high-performance AI prompts with our Studio and professional library.",
-    offers: {
-      "@type": "Offer",
-      price: "0.00",
-      priceCurrency: "USD",
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "Catalyst Prompt Studio",
+      url: "https://prompts.uyonoh.com",
     },
-  };
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: "Catalyst Prompt Studio",
+      alternateName: ["Catalyst AI Studio", "Catalyst Prompts"],
+      url: "https://prompts.uyonoh.com",
+      operatingSystem: "All",
+      applicationCategory: "WebApplication",
+      description:
+        "Transform your raw ideas into high-performance AI prompts with our Studio and professional library.",
+      offers: {
+        "@type": "Offer",
+        price: "0.00",
+        priceCurrency: "USD",
+      },
+    },
+  ];
 
   return (
     <html lang="en" className="dark">
