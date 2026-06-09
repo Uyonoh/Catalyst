@@ -8,7 +8,11 @@ import { getCategories } from "./lib/categories";
 import { getModels } from "./lib/models";
 import { CatalogProvider } from "./context/CatalogContext";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "700", "900"],
+  variable: "--font-inter", // Optional: if you use CSS variables
+});
 
 export const metadata: Metadata = {
   title: {
@@ -75,19 +79,14 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className="dark">
-      <head>
+      <body
+        className={`${inter.className} bg-background-dark text-slate-900 dark:text-white font-display min-h-screen flex flex-col overflow-x-hidden selection:bg-cyan-500/30`}
+      >
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body
-        className={`${inter.className} bg-background-dark text-slate-900 dark:text-white font-display min-h-screen flex flex-col overflow-x-hidden selection:bg-cyan-500/30`}
-      >
+
         <CatalogProvider categories={categories} models={models}>
           <AuthProvider>
             <ClickFeedbackProvider>{children}</ClickFeedbackProvider>
