@@ -6,6 +6,7 @@ import LibraryFeatured from "../components/library/LibraryFeatured";
 import LibrarySearch from "../components/library/LibrarySearch";
 import LibraryTags from "../components/library/LibraryTags";
 import LibraryGrid from "../components/library/LibraryGrid";
+import Pagination from "../components/Pagination";
 import { LibraryItem } from "../components/library/LibraryCard";
 import { supabase } from "../lib/supabase";
 import { Metadata } from "next";
@@ -18,6 +19,8 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
+const PAGE_SIZE = 9;
+
 async function getLibraryItems(searchParams: {
   q?: string;
   tag?: string;
@@ -27,7 +30,8 @@ async function getLibraryItems(searchParams: {
   models?: string;
   modes?: string;
   sort?: string;
-}): Promise<LibraryItem[]> {
+  page?: number;
+}): Promise<{ items: LibraryItem[]; totalCount: number }> {
   let query = supabase
     .from("prompts_public")
     .select(
@@ -93,7 +97,7 @@ async function getLibraryItems(searchParams: {
 
   if (error) {
     console.warn("Failed to fetch library items:", error.message);
-    return [];
+    return { items: [], totalCount: 0 };
   }
 
   // Filter by modes if requested (since we map modes to types/models in memory for now)
@@ -103,7 +107,6 @@ async function getLibraryItems(searchParams: {
       .split(",")
       .map((m) => m.trim().toLowerCase());
     // This is a simple heuristic: if it's Midjourney/DALLE -> image, etc.
-    // In a real app we might join with a models table or have a 'type' on prompt.
     filteredData = filteredData.filter((item: any) => {
       const model = item.target_model.toLowerCase();
       if (
@@ -132,11 +135,20 @@ async function getLibraryItems(searchParams: {
     });
   }
 
-  // Map database target_model to model field
-  return filteredData.map((item: any) => ({
+  const mappedData = filteredData.map((item: any) => ({
     ...item,
     model: item.target_model,
   })) as LibraryItem[];
+
+  const totalCount = mappedData.length;
+  const page = searchParams.page || 1;
+  const start = (page - 1) * PAGE_SIZE;
+  const slicedData = mappedData.slice(start, start + PAGE_SIZE);
+
+  return {
+    items: slicedData,
+    totalCount,
+  };
 }
 
 export default async function LibraryPage({
@@ -145,6 +157,9 @@ export default async function LibraryPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const resolvedSearchParams = await searchParams;
+
+  const pageVal = typeof resolvedSearchParams.page === "string" ? parseInt(resolvedSearchParams.page, 10) : 1;
+  const currentPage = isNaN(pageVal) || pageVal < 1 ? 1 : pageVal;
 
   const params = {
     q:
@@ -179,9 +194,11 @@ export default async function LibraryPage({
       typeof resolvedSearchParams.sort === "string"
         ? resolvedSearchParams.sort
         : undefined,
+    page: currentPage,
   };
 
-  const items = await getLibraryItems(params);
+  const { items, totalCount } = await getLibraryItems(params);
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
     <>
@@ -196,6 +213,12 @@ export default async function LibraryPage({
           <LibrarySearch />
           <LibraryTags />
           <LibraryGrid items={items} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            pageSize={PAGE_SIZE}
+          />
         </main>
 
         <Footer />
@@ -203,3 +226,4 @@ export default async function LibraryPage({
     </>
   );
 }
+

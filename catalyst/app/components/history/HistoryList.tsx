@@ -4,43 +4,67 @@ import React, { useState, useEffect } from "react";
 import HistoryCard, { HistoryItem } from "./HistoryCard";
 import { HelpCircle } from "lucide-react";
 import HistorySearch from "./HistorySearch";
+import Pagination from "../Pagination";
 
 interface HistoryListProps {
   initialItems: HistoryItem[];
+  currentPage: number;
+  totalCount: number;
+  pageSize: number;
 }
 
-export default function HistoryList({ initialItems }: HistoryListProps) {
+export default function HistoryList({
+  initialItems,
+  currentPage,
+  totalCount: initialCount,
+  pageSize,
+}: HistoryListProps) {
   const [items, setItems] = useState<HistoryItem[]>(initialItems);
+  const [totalCount, setTotalCount] = useState<number>(initialCount);
 
-  // Still need to update items if initialItems changes (e.g. on filter change from parent)
+  // Sync with initialItems/totalCount changes from server (e.g. search/filter changes)
   useEffect(() => {
     setItems(initialItems);
-  }, [initialItems]);
+    setTotalCount(initialCount);
+  }, [initialItems, initialCount]);
 
   const handleDelete = (id: string) => {
     setItems((prev: HistoryItem[]) => prev.filter((item: HistoryItem) => item.id !== id));
+    setTotalCount((prev) => Math.max(0, prev - 1));
   };
 
   const handleClear = () => {
     setItems([]);
+    setTotalCount(0);
   };
+
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <div className="flex flex-col gap-8">
       <HistorySearch onClearHistory={handleClear} itemsCount={items.length} />
 
       {items.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[1fr] animate-slideUp">
-          {items.map((item, idx) => (
-            <div 
-              key={item.id} 
-              className="animate-in fade-in slide-in-from-bottom-4 duration-500" 
-              style={{ animationDelay: `${idx * 50}ms` }}
-            >
-              <HistoryCard item={item} onDelete={handleDelete} />
-            </div>
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[1fr] animate-slideUp">
+            {items.map((item, idx) => (
+              <div 
+                key={item.id} 
+                className="animate-in fade-in slide-in-from-bottom-4 duration-500" 
+                style={{ animationDelay: `${idx * 50}ms` }}
+              >
+                <HistoryCard item={item} onDelete={handleDelete} />
+              </div>
+            ))}
+          </div>
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            pageSize={pageSize}
+          />
+        </>
       ) : (
         <div className="glass-panel p-20 rounded-3xl flex flex-col items-center justify-center text-center animate-slideUp border border-dashed border-white/10">
           <div className="size-24 rounded-full bg-white/5 flex items-center justify-center mb-6 relative group">
@@ -64,4 +88,5 @@ export default function HistoryList({ initialItems }: HistoryListProps) {
     </div>
   );
 }
+
 

@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import HistoryList from "../components/history/HistoryList";
 import GlassPanel from "../components/GlassPanel";
 
+const PAGE_SIZE = 9;
 
 async function getHistoryItems(userId: string, searchParams: {
   q?: string;
@@ -15,6 +16,7 @@ async function getHistoryItems(userId: string, searchParams: {
   models?: string;
   modes?: string;
   sort?: string;
+  page?: number;
 }) {
   const supabase = await createClient();
   let query = supabase
@@ -76,7 +78,7 @@ async function getHistoryItems(userId: string, searchParams: {
 
   if (error) {
     console.error("Failed to fetch history:", error.message);
-    return [];
+    return { items: [], totalCount: 0, topModel: "None" };
   }
 
   let filteredData = data || [];
@@ -116,7 +118,34 @@ async function getHistoryItems(userId: string, searchParams: {
     });
   }
 
-  return filteredData;
+  // Determine top model from the entire matched set for the premium stats card
+  let topModel = "None";
+  if (filteredData.length > 0) {
+    const modelCounts: { [key: string]: number } = {};
+    filteredData.forEach((item) => {
+      if (item.target_model) {
+        modelCounts[item.target_model] = (modelCounts[item.target_model] || 0) + 1;
+      }
+    });
+    let maxCount = 0;
+    for (const [model, count] of Object.entries(modelCounts)) {
+      if (count > maxCount) {
+        maxCount = count;
+        topModel = model;
+      }
+    }
+  }
+
+  const totalCount = filteredData.length;
+  const page = searchParams.page || 1;
+  const start = (page - 1) * PAGE_SIZE;
+  const slicedData = filteredData.slice(start, start + PAGE_SIZE);
+
+  return {
+    items: slicedData,
+    totalCount,
+    topModel,
+  };
 }
 
 export default async function HistoryPage({
@@ -131,6 +160,9 @@ export default async function HistoryPage({
   }
 
   const resolvedSearchParams = await searchParams;
+  const pageVal = typeof resolvedSearchParams.page === "string" ? parseInt(resolvedSearchParams.page, 10) : 1;
+  const currentPage = isNaN(pageVal) || pageVal < 1 ? 1 : pageVal;
+
   const params = {
     q: typeof resolvedSearchParams.q === "string" ? resolvedSearchParams.q : undefined,
     tags: typeof resolvedSearchParams.tags === "string" ? resolvedSearchParams.tags : undefined,
@@ -138,9 +170,10 @@ export default async function HistoryPage({
     models: typeof resolvedSearchParams.models === "string" ? resolvedSearchParams.models : undefined,
     modes: typeof resolvedSearchParams.modes === "string" ? resolvedSearchParams.modes : undefined,
     sort: typeof resolvedSearchParams.sort === "string" ? resolvedSearchParams.sort : undefined,
+    page: currentPage,
   };
 
-  const items = await getHistoryItems(user.id, params);
+  const { items, totalCount, topModel } = await getHistoryItems(user.id, params);
 
   return (
     <>
@@ -173,7 +206,7 @@ export default async function HistoryPage({
                 <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">Total Prompts</span>
                 <div className="flex items-center gap-2">
                   <History className="size-4 text-cyan-400" />
-                  <span className="text-2xl font-black text-white">{items.length}</span>
+                  <span className="text-2xl font-black text-white">{totalCount}</span>
                 </div>
               </GlassPanel>
               <GlassPanel className="p-4 flex flex-col gap-1 min-w-[120px] bg-white/5 border-white/10">
@@ -181,14 +214,19 @@ export default async function HistoryPage({
                 <div className="flex items-center gap-2">
                   <BrainCircuit className="size-4 text-emerald-400" />
                   <span className="text-sm font-black text-white truncate max-w-[80px]">
-                    {items.length > 0 ? (items[0].target_model || "N/A") : "None"}
+                    {topModel}
                   </span>
                 </div>
               </GlassPanel>
             </div>
           </div>
           
-          <HistoryList initialItems={items} />
+          <HistoryList 
+            initialItems={items} 
+            currentPage={currentPage}
+            totalCount={totalCount}
+            pageSize={PAGE_SIZE}
+          />
         </main>
         
         <Footer />
@@ -196,4 +234,5 @@ export default async function HistoryPage({
     </>
   );
 }
+
 
