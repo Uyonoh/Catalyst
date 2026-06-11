@@ -92,7 +92,7 @@ export default function WorkspacesOverview({
         `,
         )
         .in("visibility", ["community", "public"])
-        // .neq("user_id", user?.id)
+        .neq("user_id", user?.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
