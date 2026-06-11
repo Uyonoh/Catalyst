@@ -3,14 +3,14 @@
 interface StatsOverviewProps {
   promptsCount: number;
   workspacesCount: number;
-  analysesCount: number;
+  publicPromptsCount: number;
   favoritesCount: number;
 }
 
 export default function StatsOverview({
   promptsCount = 0,
   workspacesCount = 0,
-  analysesCount = 0,
+  publicPromptsCount = 0,
   favoritesCount = 0,
 }: StatsOverviewProps) {
   return (
@@ -44,10 +44,10 @@ export default function StatsOverview({
       </div>
       <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center border border-white/5 hover:border-purple-500/20 hover:bg-white/5 transition-all group">
         <span className="text-3xl font-black text-purple-400 mb-1 tracking-tight group-hover:scale-105 transition-transform">
-          {analysesCount}
+          {publicPromptsCount}
         </span>
         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-          Deep Intent Runs
+          Public Prompts
         </span>
       </div>
     </div>

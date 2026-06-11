@@ -26,20 +26,54 @@ export default async function DashboardPage() {
     promptsCountRes,
     workspacesCountRes,
     favoritesCountRes,
-    analysesCountRes,
+    publicPromptsCountRes,
     workspacesListRes,
     usageLogsRes,
-    weeklyLogsRes
+    weeklyLogsRes,
   ] = await Promise.all([
     getRecentPrompts(user.id),
-    supabase.from("profiles").select("plan, daily_tokens_used, tokens_reset_at, full_name").eq("id", user.id).single(),
-    supabase.from("prompts").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-    supabase.from("workspaces").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-    supabase.from("prompts").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("is_favorite", true),
-    supabase.from("prompt_analyses").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-    supabase.from("workspaces").select("id, name, description, visibility, user_id, created_at").eq("user_id", user.id).order("created_at", { ascending: false }),
-    supabase.from("token_usage_log").select("id, model_slug, mode, cost, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
-    supabase.from("token_usage_log").select("cost, created_at").eq("user_id", user.id).gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+    supabase
+      .from("profiles")
+      .select("plan, daily_tokens_used, tokens_reset_at, full_name")
+      .eq("id", user.id)
+      .single(),
+    supabase
+      .from("prompts")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("workspaces")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("prompts")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("is_favorite", true),
+    supabase
+      .from("prompts")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("is_public", true),
+    supabase
+      .from("workspaces")
+      .select("id, name, description, visibility, user_id, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("token_usage_log")
+      .select("id, model_slug, mode, cost, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(6),
+    supabase
+      .from("token_usage_log")
+      .select("cost, created_at")
+      .eq("user_id", user.id)
+      .gte(
+        "created_at",
+        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      ),
   ]);
 
   // Handle profile response
@@ -53,7 +87,7 @@ export default async function DashboardPage() {
   const promptsCount = promptsCountRes.count || 0;
   const workspacesCount = workspacesCountRes.count || 0;
   const favoritesCount = favoritesCountRes.count || 0;
-  const analysesCount = analysesCountRes.count || 0;
+  const publicPromptsCount = publicPromptsCountRes.count || 0;
 
   // Compile list data
   const workspacesList = (workspacesListRes.data || []).map((w: any) => ({
@@ -94,7 +128,8 @@ export default async function DashboardPage() {
   });
 
   // Dynamically resolve full name or split email
-  const displayUserName = profile.full_name || user.email?.split("@")[0] || "Architect";
+  const displayUserName =
+    profile.full_name || user.email?.split("@")[0] || "Architect";
 
   return (
     <>
@@ -106,32 +141,30 @@ export default async function DashboardPage() {
 
       {/* Main Content Area - Grid Layout Cockpit */}
       <main className="flex-1 w-full max-w-[1200px] mx-auto pt-24 pb-12 px-4 md:px-8 relative z-10">
-        
         {/* Welcome Section */}
         <HeroSection userName={displayUserName} />
-        
+
         {/* Real-time Dynamic Stats Cards */}
-        <StatsOverview 
-          promptsCount={promptsCount} 
-          workspacesCount={workspacesCount} 
-          analysesCount={analysesCount} 
-          favoritesCount={favoritesCount} 
+        <StatsOverview
+          promptsCount={promptsCount}
+          workspacesCount={workspacesCount}
+          publicPromptsCount={publicPromptsCount}
+          favoritesCount={favoritesCount}
         />
 
         {/* 2-Column Responsive Dashboard Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
           {/* Left Column: Workspaces, Sandboxing, & Saved Prompts Library (Takes 8/12 cols) */}
           <div className="lg:col-span-8 flex flex-col">
             {/* Quick Action Sandbox area */}
             <InteractiveActionHub />
-            
+
             {/* Workspaces & Folders creator widget */}
-            <WorkspacesOverview 
-              initialWorkspaces={workspacesList} 
-              promptsCount={promptsCount} 
+            <WorkspacesOverview
+              initialWorkspaces={workspacesList}
+              promptsCount={promptsCount}
             />
-            
+
             {/* Searchable Recent Prompts Grid */}
             <RecentPrompts prompts={recentPrompts} />
           </div>
@@ -139,17 +172,16 @@ export default async function DashboardPage() {
           {/* Right Column: Quota Analytics & Models Catalog (Takes 4/12 cols) */}
           <div className="lg:col-span-4 flex flex-col gap-6">
             {/* Real-time resource Quota ring, weekly trend bar chart & usage logs ledger */}
-            <TokenAnalyticsCard 
-              plan={profile.plan as any} 
-              dailyTokensUsed={profile.daily_tokens_used} 
-              recentLogs={recentLogs} 
+            <TokenAnalyticsCard
+              plan={profile.plan as any}
+              dailyTokensUsed={profile.daily_tokens_used}
+              recentLogs={recentLogs}
               weeklyChartData={weeklyChartData}
             />
 
             {/* Models list */}
             <QuickAccessModels />
           </div>
-
         </div>
       </main>
 
