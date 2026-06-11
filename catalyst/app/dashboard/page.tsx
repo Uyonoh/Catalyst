@@ -37,7 +37,7 @@ export default async function DashboardPage() {
     supabase.from("workspaces").select("*", { count: "exact", head: true }).eq("user_id", user.id),
     supabase.from("prompts").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("is_favorite", true),
     supabase.from("prompt_analyses").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-    supabase.from("workspaces").select("id, name, description, created_at").eq("user_id", user.id).order("created_at", { ascending: false }),
+    supabase.from("workspaces").select("id, name, description, visibility, user_id, created_at").eq("user_id", user.id).order("created_at", { ascending: false }),
     supabase.from("token_usage_log").select("id, model_slug, mode, cost, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
     supabase.from("token_usage_log").select("cost, created_at").eq("user_id", user.id).gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
   ]);
@@ -60,6 +60,8 @@ export default async function DashboardPage() {
     id: w.id,
     name: w.name,
     description: w.description,
+    visibility: w.visibility || "private",
+    user_id: w.user_id,
     created_at: w.created_at,
   }));
 

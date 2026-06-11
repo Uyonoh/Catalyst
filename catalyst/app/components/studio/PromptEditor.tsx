@@ -39,8 +39,10 @@ interface PromptEditorProps {
   selectedModelId?: string;
   initialCategory?: string;
   initialTags?: string;
+  initialWorkspaceId?: string | null;
+  availableWorkspaces?: { id: string; name: string; visibility: string; user_id: string }[];
   onDiscard?: () => void;
-  onSave?: (title: string, text: string, category: string, tags: string) => void;
+  onSave?: (title: string, text: string, category: string, tags: string, workspaceId: string | null) => void;
   onVisibilityChange?: (isPublic: boolean) => void;
   onDownload?: (text: string, title: string) => void;
   userPlan?: 'free' | 'pro' | 'enterprise';
@@ -57,6 +59,8 @@ export default function PromptEditor({
   selectedModelId,
   initialCategory = "chat",
   initialTags = "",
+  initialWorkspaceId = null,
+  availableWorkspaces = [],
   onDiscard,
   onSave,
   onVisibilityChange,
@@ -72,6 +76,7 @@ export default function PromptEditor({
   const [selectedCategory, setSelectedCategory] = useState(initialCategory || "");
   const [editedTitle, setEditedTitle] = useState(title);
   const [editedTags, setEditedTags] = useState(initialTags);
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>(initialWorkspaceId || "");
   const [copied, setCopied] = useState(false);
   const selectedModel = models.find(m => m.slug === selectedModelId || m.name === selectedModelId) || models[0] || { name: "Unknown", icon: "chat" };
 
@@ -79,7 +84,8 @@ export default function PromptEditor({
     setEditedText(initialEditedText);
     setEditedTitle(title);
     setEditedTags(initialTags);
-  }, [initialEditedText, title, initialTags]);
+    setSelectedWorkspaceId(initialWorkspaceId || "");
+  }, [initialEditedText, title, initialTags, initialWorkspaceId]);
 
   const handleCopy = async () => {
     try {
@@ -92,7 +98,7 @@ export default function PromptEditor({
   };
 
   const handleApply = () => {
-    if (onSave) onSave(editedTitle, editedText, selectedCategory, editedTags);
+    if (onSave) onSave(editedTitle, editedText, selectedCategory, editedTags, selectedWorkspaceId || null);
   };
 
   const handleDiscard = () => {
@@ -260,6 +266,23 @@ export default function PromptEditor({
                   {categories.map((cat) => (
                     <option key={cat.slug} value={cat.slug}>
                       {cat.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex justify-between items-center py-2 border-b border-white/5">
+                <span className="text-slate-400 text-sm">Workspace</span>
+                <select
+                  value={selectedWorkspaceId}
+                  onChange={(e) => setSelectedWorkspaceId(e.target.value)}
+                  disabled={isLoading}
+                  className="text-xs bg-[#101922] text-slate-300 px-2.5 py-1 rounded-lg border border-white/10 focus:outline-none focus:border-cyan-500/50 cursor-pointer max-w-[150px]"
+                >
+                  <option value="">None (Personal)</option>
+                  {(availableWorkspaces || []).map((w) => (
+                    <option key={w.id} value={w.id}>
+                      {w.name} {w.visibility === 'community' ? '(Community)' : ''}
                     </option>
                   ))}
                 </select>

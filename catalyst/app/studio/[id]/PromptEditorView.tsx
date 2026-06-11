@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import PromptEditor from "../../components/studio/PromptEditor";
@@ -20,6 +20,7 @@ interface PromptEditorViewProps {
     icon?: string;
     tag?: string;
     format?: string;
+    workspace_id?: string | null;
   };
 }
 
@@ -175,11 +176,31 @@ export default function PromptEditorView({
   const [isPublic, setIsPublic] = useState(initialData.is_public);
   const [notification, setNotification] = useState<{ message: string; type: NotificationType } | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [workspaces, setWorkspaces] = useState<any[]>([]);
 
   const isAuthor = !!currentUserId && currentUserId === initialData.user_id;
   const userPlan = profile?.plan ?? "free";
 
-  const handleSave = async (title: string, text: string, categorySlug: string, tags: string) => {
+  useEffect(() => {
+    const fetchWorkspaces = async () => {
+      if (!currentUserId) return;
+      try {
+        const { data, error } = await supabase
+          .from("workspaces")
+          .select("id, name, visibility, user_id")
+          .or(`user_id.eq.${currentUserId},visibility.eq.community`);
+        
+        if (!error && data) {
+          setWorkspaces(data);
+        }
+      } catch (err) {
+        console.error("Error fetching workspaces:", err);
+      }
+    };
+    fetchWorkspaces();
+  }, [currentUserId]);
+
+  const handleSave = async (title: string, text: string, categorySlug: string, tags: string, workspaceId: string | null) => {
     try {
       setIsSaving(true);
 
@@ -193,6 +214,7 @@ export default function PromptEditorView({
             snippet: text.substring(0, 150) + (text.length > 150 ? "..." : ""),
             icon: categorySlug,
             tag: tags,
+            workspace_id: workspaceId || null,
           })
           .eq("id", id);
 
@@ -213,6 +235,7 @@ export default function PromptEditorView({
             is_public: isPublic,
             icon: categorySlug,
             tag: tags,
+            workspace_id: workspaceId || null,
           });
 
         if (error) {
@@ -223,7 +246,11 @@ export default function PromptEditorView({
       console.error("Error saving prompt:", err);
     } finally {
       setIsSaving(false);
-      router.push("/history");
+      if (workspaceId) {
+        router.push(`/workspace/${workspaceId}`);
+      } else {
+        router.push("/history");
+      }
     }
   };
 
@@ -316,6 +343,8 @@ export default function PromptEditorView({
         selectedModelId={initialData.target_model}
         initialCategory={initialData.icon}
         initialTags={initialData.tag || ""}
+        initialWorkspaceId={initialData.workspace_id}
+        availableWorkspaces={workspaces}
         onDiscard={handleDiscard}
         onSave={handleSave}
         onVisibilityChange={handleVisibilityChange}

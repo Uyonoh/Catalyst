@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import RawIntentPanel from "../components/studio/RawIntentPanel";
 import LiveAnalysisPanel from "../components/studio/LiveAnalysisPanel";
 import OptimizationSettings from "../components/studio/OptimizationSettings";
@@ -10,7 +10,7 @@ import { useUser } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
 import PromptEditor from "../components/studio/PromptEditor";
 import Notification, { NotificationType } from "../components/Notification";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function StudioPageContent() {
   const [showAnalysis, setShowAnalysis] = useState(false);
@@ -23,12 +23,18 @@ export default function StudioPageContent() {
 
   return (
     <WorkspaceProvider>
-      <StudioContent
-        showAnalysis={showAnalysis}
-        handleToggle={handleToggle}
-        isTransitioning={isTransitioning}
-        setIsTransitioning={setIsTransitioning}
-      />
+      <Suspense fallback={
+        <div className="flex-grow flex items-center justify-center py-20">
+          <Loader2 className="size-8 animate-spin text-cyan-400" />
+        </div>
+      }>
+        <StudioContent
+          showAnalysis={showAnalysis}
+          handleToggle={handleToggle}
+          isTransitioning={isTransitioning}
+          setIsTransitioning={setIsTransitioning}
+        />
+      </Suspense>
     </WorkspaceProvider>
   );
 }
@@ -54,6 +60,8 @@ function StudioContent({
   } | null>(null);
   const { user } = useUser();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const workspaceId = searchParams.get("workspace") || null;
 
   useEffect(() => {
     const autoSave = async () => {
@@ -64,6 +72,7 @@ function StudioContent({
             .from("prompts")
             .insert({
               user_id: user.id,
+              workspace_id: workspaceId,
               title: "Untitled Generated Prompt",
               content: parsedPrompt,
               snippet:
@@ -108,7 +117,7 @@ function StudioContent({
     if (parsedPrompt) {
       autoSave();
     }
-  }, [parsedPrompt, parsedFormat, user, input, selectedModel, isPublic, router]);
+  }, [parsedPrompt, parsedFormat, user, input, selectedModel, isPublic, router, workspaceId]);
 
   return (
     <>
