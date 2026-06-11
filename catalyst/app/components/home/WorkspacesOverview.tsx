@@ -40,23 +40,29 @@ export default function WorkspacesOverview({
   promptsCount = 0,
 }: WorkspacesOverviewProps) {
   const { user } = useUser();
-  
+
   // State variables
   const [activeTab, setActiveTab] = useState<"mine" | "community">("mine");
-  const [myWorkspaces, setMyWorkspaces] = useState<WorkspaceItem[]>(initialWorkspaces);
-  const [communityWorkspaces, setCommunityWorkspaces] = useState<WorkspaceItem[]>([]);
+  const [myWorkspaces, setMyWorkspaces] =
+    useState<WorkspaceItem[]>(initialWorkspaces);
+  const [communityWorkspaces, setCommunityWorkspaces] = useState<
+    WorkspaceItem[]
+  >([]);
   const [isCreating, setIsCreating] = useState(false);
-  
+
   // Form fields
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
   const [newWorkspaceDesc, setNewWorkspaceDesc] = useState("");
-  const [newWorkspaceVisibility, setNewWorkspaceVisibility] = useState<"private" | "public" | "community">("private");
-  
+  const [newWorkspaceVisibility, setNewWorkspaceVisibility] = useState<
+    "private" | "public" | "community"
+  >("private");
+
   // Loading & error handling
   const [isLoading, setIsLoading] = useState(false);
   const [isCommunityLoading, setIsCommunityLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [workspaceToDelete, setWorkspaceToDelete] = useState<WorkspaceItem | null>(null);
+  const [workspaceToDelete, setWorkspaceToDelete] =
+    useState<WorkspaceItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch community workspaces when active tab changes
@@ -71,7 +77,8 @@ export default function WorkspacesOverview({
     try {
       const { data, error } = await supabaseBrowser
         .from("workspaces")
-        .select(`
+        .select(
+          `
           id,
           name,
           description,
@@ -82,9 +89,10 @@ export default function WorkspacesOverview({
             full_name,
             email
           )
-        `)
-        .eq("visibility", "community")
-        .neq("user_id", user?.id)
+        `,
+        )
+        .in("visibility", ["community", "public"])
+        // .neq("user_id", user?.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -145,7 +153,9 @@ export default function WorkspacesOverview({
 
       if (error) throw error;
 
-      setMyWorkspaces(myWorkspaces.filter((w) => w.id !== workspaceToDelete.id));
+      setMyWorkspaces(
+        myWorkspaces.filter((w) => w.id !== workspaceToDelete.id),
+      );
       setWorkspaceToDelete(null);
     } catch (err: any) {
       console.error("Failed to delete workspace:", err);
@@ -179,7 +189,6 @@ export default function WorkspacesOverview({
 
   return (
     <div className="glass-panel rounded-2xl p-6 mb-8 relative border border-white/5 shadow-xl animate-fadeIn z-10">
-      
       {/* Header section with tabs and creator trigger */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-5">
         <div className="flex items-center gap-6">
@@ -193,7 +202,9 @@ export default function WorkspacesOverview({
           >
             <Folder className="size-4.5 text-cyan-400" />
             My Workspaces
-            <span className="text-xs font-normal opacity-60">({myWorkspaces.length})</span>
+            <span className="text-xs font-normal opacity-60">
+              ({myWorkspaces.length})
+            </span>
           </button>
           <button
             onClick={() => setActiveTab("community")}
@@ -249,7 +260,9 @@ export default function WorkspacesOverview({
               >
                 <option value="private">Private (Only me)</option>
                 <option value="public">Public (Read-only for others)</option>
-                <option value="community">Community (Read-write for others)</option>
+                <option value="community">
+                  Community (Read-write for others)
+                </option>
               </select>
             </div>
           </div>
@@ -291,17 +304,26 @@ export default function WorkspacesOverview({
       {/* Delete Confirmation Modal */}
       {workspaceToDelete && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setWorkspaceToDelete(null)} />
+          <div
+            className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+            onClick={() => setWorkspaceToDelete(null)}
+          />
           <div className="relative z-10 w-full max-w-sm rounded-xl border border-rose-500/20 bg-[#0c1520] p-6 shadow-2xl animate-in fade-in zoom-in-95">
             <div className="flex items-start gap-4 mb-4">
               <div className="bg-rose-500/10 p-2.5 rounded-lg text-rose-400 border border-rose-500/20">
                 <AlertTriangle className="size-5" />
               </div>
               <div>
-                <h3 className="text-white font-bold text-sm">Delete Workspace</h3>
+                <h3 className="text-white font-bold text-sm">
+                  Delete Workspace
+                </h3>
                 <p className="text-slate-400 text-xs mt-1 leading-relaxed">
-                  Are you sure you want to delete <span className="text-white font-semibold">"{workspaceToDelete.name}"</span>? 
-                  Prompts inside this workspace will remain in your library but won't belong to any workspace.
+                  Are you sure you want to delete{" "}
+                  <span className="text-white font-semibold">
+                    "{workspaceToDelete.name}"
+                  </span>
+                  ? Prompts inside this workspace will remain in your library
+                  but won't belong to any workspace.
                 </p>
               </div>
             </div>
@@ -317,7 +339,11 @@ export default function WorkspacesOverview({
                 disabled={isDeleting}
                 className="px-4 py-2 text-xs font-bold text-white bg-rose-500 hover:bg-rose-600 rounded-lg shadow-lg shadow-rose-500/10 transition-all flex items-center gap-1 disabled:opacity-50 cursor-pointer"
               >
-                {isDeleting ? <Loader2 className="size-3 animate-spin" /> : <Trash2 className="size-3" />}
+                {isDeleting ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : (
+                  <Trash2 className="size-3" />
+                )}
                 Delete
               </button>
             </div>
@@ -373,7 +399,10 @@ export default function WorkspacesOverview({
                   >
                     <Trash2 className="size-3.5" />
                   </button>
-                  <Link href={`/workspace/${folder.id}`} className="p-1.5 rounded-lg text-slate-500 group-hover:text-cyan-400 transition-colors cursor-pointer">
+                  <Link
+                    href={`/workspace/${folder.id}`}
+                    className="p-1.5 rounded-lg text-slate-500 group-hover:text-cyan-400 transition-colors cursor-pointer"
+                  >
                     <ArrowUpRight className="size-3.5 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                   </Link>
                 </div>
@@ -381,54 +410,71 @@ export default function WorkspacesOverview({
             ))}
           </div>
         )
+      ) : isCommunityLoading ? (
+        <div className="py-8 text-center flex items-center justify-center gap-2">
+          <Loader2 className="size-5 animate-spin text-purple-400" />
+          <span className="text-slate-400 text-xs">
+            Exploring shared workspaces...
+          </span>
+        </div>
+      ) : communityWorkspaces.length === 0 ? (
+        <div className="py-8 text-center border border-dashed border-white/5 rounded-xl">
+          <Users className="size-8 text-slate-600 mx-auto mb-2 opacity-50" />
+          <span className="text-slate-500 text-xs font-medium block">
+            No community workspaces found. Make a workspace "Community" to share
+            it!
+          </span>
+        </div>
       ) : (
-        isCommunityLoading ? (
-          <div className="py-8 text-center flex items-center justify-center gap-2">
-            <Loader2 className="size-5 animate-spin text-purple-400" />
-            <span className="text-slate-400 text-xs">Exploring shared workspaces...</span>
-          </div>
-        ) : communityWorkspaces.length === 0 ? (
-          <div className="py-8 text-center border border-dashed border-white/5 rounded-xl">
-            <Users className="size-8 text-slate-600 mx-auto mb-2 opacity-50" />
-            <span className="text-slate-500 text-xs font-medium block">
-              No community workspaces found. Make a workspace "Community" to share it!
-            </span>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[260px] overflow-y-auto pr-1 dropdown-scroll">
-            {communityWorkspaces.map((folder) => {
-              const prof: any = Array.isArray(folder.profiles)
-                ? folder.profiles[0]
-                : folder.profiles;
-              const authorName = prof?.full_name || prof?.email?.split("@")[0] || "Architect";
-              return (
-                <Link
-                  key={folder.id}
-                  href={`/workspace/${folder.id}`}
-                  className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:border-purple-500/20 hover:bg-white/10 transition-all duration-300 group cursor-pointer"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="size-9 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-105 transition-transform flex-shrink-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[260px] overflow-y-auto pr-1 dropdown-scroll">
+          {communityWorkspaces.map((folder) => {
+            const prof: any = Array.isArray(folder.profiles)
+              ? folder.profiles[0]
+              : folder.profiles;
+            const authorName =
+              prof?.full_name || prof?.email?.split("@")[0] || "Architect";
+            const community = folder.visibility == "community";
+            const color = community ? "purple" : "green";
+            return (
+              <Link
+                key={folder.id}
+                href={`/workspace/${folder.id}`}
+                className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:border-purple-500/20 hover:bg-white/10 transition-all duration-300 group cursor-pointer"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className={`size-9 rounded-lg bg-${color}-500/10 flex items-center justify-center text-${color}-400 group-hover:scale-105 transition-transform flex-shrink-0`}
+                  >
+                    {community ? (
                       <Users className="size-4.5" />
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="text-white text-xs font-bold truncate group-hover:text-purple-400 transition-colors flex items-center gap-2">
-                        {folder.name}
-                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-400">
-                          Community
-                        </span>
-                      </h4>
-                      <p className="text-slate-400 text-[10px] truncate leading-normal mt-0.5">
-                        By {authorName} &bull; {folder.description || "Shared workspace"}
-                      </p>
-                    </div>
+                    ) : (
+                      <Globe className="size-4.5" />
+                    )}
                   </div>
-                  <ArrowUpRight className="size-3.5 text-slate-500 group-hover:text-purple-400 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all flex-shrink-0" />
-                </Link>
-              );
-            })}
-          </div>
-        )
+                  <div className="min-w-0">
+                    <h4
+                      className={`text-white text-xs font-bold truncate group-hover:text-${color}-400 transition-colors flex items-center gap-2`}
+                    >
+                      {folder.name}
+                      <span
+                        className={`text-[8px] font-bold px-1.5 py-0.5 rounded-md bg-${color}-500/10 border border-${color}-500/20 text-${color}-400`}
+                      >
+                        {community ? "Community" : "Public"}
+                      </span>
+                    </h4>
+                    <p className="text-slate-400 text-[10px] truncate leading-normal mt-0.5">
+                      By {authorName} &bull;{" "}
+                      {folder.description || "Shared workspace"}
+                    </p>
+                  </div>
+                </div>
+                <ArrowUpRight
+                  className={`size-3.5 text-slate-500 group-hover:text-${color}-400 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all flex-shrink-0`}
+                />
+              </Link>
+            );
+          })}
+        </div>
       )}
     </div>
   );
