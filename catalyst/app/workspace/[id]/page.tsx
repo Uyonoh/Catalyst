@@ -69,6 +69,7 @@ export default async function WorkspacePage({ params }: PageProps) {
       icon,
       created_at,
       user_id,
+      is_favorite,
       profiles (
         full_name,
         email
@@ -107,6 +108,7 @@ export default async function WorkspacePage({ params }: PageProps) {
       icon: p.icon || "chat",
       created_at: p.created_at,
       user_id: p.user_id,
+      is_favorite: p.is_favorite || false,
       authorName: pProfile?.full_name || pProfile?.email?.split("@")[0] || "Anonymous",
     };
   });

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import GlassPanel from "../GlassPanel";
 import { Star, Copy, Check, Edit } from "lucide-react";
 import {
@@ -9,6 +9,8 @@ import {
   MODEL_BADGE_TOKENS,
   MODEL_BADGE_FALLBACK,
 } from "../../lib/promptTokens";
+import { useUser } from "../../context/AuthContext";
+import { toggleFavoritePrompt, checkPromptFavoriteStatus } from "../../lib/prompts-client";
 
 export interface LibraryItem {
   id: string;
@@ -22,6 +24,8 @@ export interface LibraryItem {
   icon: string;
   icon_color: string;
   has_gradient: boolean;
+  user_id?: string;
+  is_favorite?: boolean;
 }
 
 interface LibraryCardProps {
@@ -44,6 +48,26 @@ export function formatUpdated(isoString: string): string {
 
 export default function LibraryCard({ item }: LibraryCardProps) {
   const [copied, setCopied] = useState(false);
+  const { user } = useUser();
+  const [isFavorited, setIsFavorited] = useState(false);
+
+  useEffect(() => {
+    if (user && item) {
+      checkPromptFavoriteStatus(user.id, item).then(setIsFavorited).catch(console.error);
+    }
+  }, [user, item]);
+
+  const handleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) return;
+    try {
+      const { action } = await toggleFavoritePrompt(user.id, item);
+      setIsFavorited(action === "favorited" || action === "duplicated");
+    } catch (err) {
+      console.error("Failed to toggle favorite:", err);
+    }
+  };
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -89,10 +113,11 @@ export default function LibraryCard({ item }: LibraryCardProps) {
         </div>
         {/* Add favourite button */}
         <button
-          className="text-slate-500 hover:text-yellow-400 transition-colors"
+          onClick={handleFavorite}
+          className={`transition-colors duration-200 ${isFavorited ? "text-yellow-400" : "text-slate-500 hover:text-yellow-400"}`}
           aria-label="Favourite"
         >
-          <Star className="size-5" />
+          <Star className={`size-5 ${isFavorited ? "fill-yellow-400" : ""}`} />
         </button>
       </div>
       <div className="h-[1px] w-full bg-white/5" />

@@ -20,10 +20,12 @@ import {
   Plus,
   Loader2,
   AlertTriangle,
+  Star,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "../../lib/supabase-browser";
 import Link from "next/link";
+import { toggleFavoritePrompt, checkPromptFavoriteStatus } from "../../lib/prompts-client";
 
 interface PromptItem {
   id: string;
@@ -36,6 +38,7 @@ interface PromptItem {
   created_at: string;
   user_id: string;
   authorName: string;
+  is_favorite?: boolean;
 }
 
 interface WorkspaceData {
@@ -97,6 +100,46 @@ export default function WorkspaceClientView({
       console.error("Failed to copy prompt content:", err);
     }
   };
+
+  const handleFavoritePrompt = async (e: React.MouseEvent, prompt: PromptItem) => {
+    e.stopPropagation();
+    if (!currentUserId) return;
+    try {
+      const { action } = await toggleFavoritePrompt(currentUserId, prompt);
+      const isFav = action === "favorited" || action === "duplicated";
+      setPrompts((prev) =>
+        prev.map((p) => (p.id === prompt.id ? { ...p, is_favorite: isFav } : p))
+      );
+    } catch (err) {
+      console.error("Failed to toggle favorite:", err);
+    }
+  };
+
+  // Sync favorites on load
+  React.useEffect(() => {
+    if (!currentUserId || !initialPrompts.length) return;
+    let active = true;
+    const checkStatuses = async () => {
+      const updatedPrompts = await Promise.all(
+        initialPrompts.map(async (p) => {
+          if (p.user_id === currentUserId) return { ...p, is_favorite: p.is_favorite || false };
+          try {
+            const isFav = await checkPromptFavoriteStatus(currentUserId, p);
+            return { ...p, is_favorite: isFav };
+          } catch {
+            return { ...p, is_favorite: false };
+          }
+        })
+      );
+      if (active) {
+        setPrompts(updatedPrompts);
+      }
+    };
+    checkStatuses();
+    return () => {
+      active = false;
+    };
+  }, [currentUserId, initialPrompts]);
 
   const handleUpdateSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -480,6 +523,18 @@ export default function WorkspaceClientView({
                     </span>
 
                     <div className="flex items-center gap-1">
+                      <button
+                        onClick={(e) => handleFavoritePrompt(e, prompt)}
+                        className={`p-2 rounded-lg transition-all cursor-pointer ${
+                          prompt.is_favorite
+                            ? "text-yellow-400 hover:text-yellow-350"
+                            : "text-slate-400 hover:text-yellow-400 hover:bg-white/5"
+                        }`}
+                        title={prompt.is_favorite ? "Unfavourite" : "Favourite"}
+                      >
+                        <Star className={`size-3.5 ${prompt.is_favorite ? "fill-yellow-400" : ""}`} />
+                      </button>
+
                       <button
                         onClick={(e) =>
                           handleCopy(e, prompt.id, prompt.content)

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import GlassPanel from "../GlassPanel";
-import { Clock, Copy, Check, Edit, Trash2 } from "lucide-react";
+import { Clock, Copy, Check, Edit, Trash2, Star } from "lucide-react";
 import { formatUpdated } from "../library/LibraryCard";
 import { supabase } from "../../lib/supabase";
 import {
@@ -13,6 +13,8 @@ import {
   MODEL_BADGE_FALLBACK,
 } from "../../lib/promptTokens";
 import { useCatalog } from "../../context/CatalogContext";
+import { useUser } from "../../context/AuthContext";
+import { toggleFavoritePrompt, checkPromptFavoriteStatus } from "../../lib/prompts-client";
 
 export interface HistoryItem {
   id: string;
@@ -26,6 +28,7 @@ export interface HistoryItem {
   is_public: boolean;
   icon?: string;
   tag?: string;
+  is_favorite?: boolean;
 }
 
 interface HistoryCardProps {
@@ -36,6 +39,26 @@ interface HistoryCardProps {
 export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
   const [copied, setCopied] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const { user } = useUser();
+  const [isFavorited, setIsFavorited] = useState(item.is_favorite || false);
+
+  useEffect(() => {
+    if (user && item) {
+      checkPromptFavoriteStatus(user.id, item).then(setIsFavorited).catch(console.error);
+    }
+  }, [user, item]);
+
+  const handleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) return;
+    try {
+      const { action } = await toggleFavoritePrompt(user.id, item);
+      setIsFavorited(action === "favorited" || action === "duplicated");
+    } catch (err) {
+      console.error("Failed to toggle favorite:", err);
+    }
+  };
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -107,6 +130,17 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
         </div>
 
         <div className="flex gap-1">
+          <button
+            onClick={handleFavorite}
+            className={`p-1.5 rounded-md transition-colors ${
+              isFavorited
+                ? "text-yellow-400 hover:text-yellow-300 bg-yellow-500/10 border border-yellow-500/10"
+                : "text-slate-500 hover:text-yellow-400 hover:bg-white/5"
+            }`}
+            title={isFavorited ? "Unfavourite" : "Favourite"}
+          >
+            <Star className={`size-4 ${isFavorited ? "fill-yellow-400" : ""}`} />
+          </button>
           <button
             onClick={handleDelete}
             className="p-1.5 hover:bg-red-500/10 rounded-md text-slate-500 hover:text-red-400 transition-colors"

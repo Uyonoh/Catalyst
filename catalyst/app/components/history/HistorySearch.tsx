@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, X, SlidersHorizontal, Trash2, Loader2 } from "lucide-react";
+import { Search, X, SlidersHorizontal, Trash2, Loader2, Star } from "lucide-react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import HistoryFilters from "./HistoryFilters";
 import { supabase } from "../../lib/supabase";
@@ -19,12 +19,26 @@ export default function HistorySearch({ onClearHistory, itemsCount }: HistorySea
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
 
+  const isFavoritesOnly = searchParams.get("favorites") === "true";
+
   const activeFilterCount = [
     searchParams.get("tags"),
     searchParams.get("icons"),
     searchParams.get("models"),
-    searchParams.get("sort") !== "newest" ? searchParams.get("sort") : null
+    searchParams.get("sort") !== "newest" ? searchParams.get("sort") : null,
+    isFavoritesOnly ? "favorites" : null
   ].filter(Boolean).length;
+
+  const toggleFavoritesOnly = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (isFavoritesOnly) {
+      params.delete("favorites");
+    } else {
+      params.set("favorites", "true");
+    }
+    params.delete("page");
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
   useEffect(() => {
     const currentQ = searchParams.get("q") || "";
@@ -93,6 +107,19 @@ export default function HistorySearch({ onClearHistory, itemsCount }: HistorySea
 
         {/* Filters & Actions */}
         <div className="flex gap-3 shrink-0">
+          <button
+            onClick={toggleFavoritesOnly}
+            className={`h-14 px-6 rounded-2xl bg-white/5 border flex items-center gap-3 transition-all active:scale-95 duration-200 ${
+              isFavoritesOnly
+                ? "border-yellow-500/50 bg-yellow-500/10 text-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.15)]"
+                : "border-white/10 text-white hover:bg-white/10"
+            }`}
+            title={isFavoritesOnly ? "Show All History" : "Show Favorites Only"}
+          >
+            <Star className={`size-5 ${isFavoritesOnly ? "text-yellow-400 fill-yellow-400" : "text-slate-400 hover:text-yellow-400"}`} />
+            <span className="text-sm font-bold uppercase tracking-wider hidden xs:inline">Favorites</span>
+          </button>
+
           <button
             onClick={() => setIsFiltersOpen(!isFiltersOpen)}
             className={`h-14 px-6 rounded-2xl bg-white/5 text-white hover:bg-white/10 border flex items-center gap-3 transition-all active:scale-95 ${

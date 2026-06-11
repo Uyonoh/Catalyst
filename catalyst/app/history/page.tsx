@@ -17,12 +17,18 @@ async function getHistoryItems(userId: string, searchParams: {
   modes?: string;
   sort?: string;
   page?: number;
+  favorites?: string;
 }) {
   const supabase = await createClient();
   let query = supabase
     .from("prompts")
-    .select("id, title, content, snippet, raw_input, target_model, created_at, updated_at, is_public, icon, tag")
+    .select("id, title, content, snippet, raw_input, target_model, created_at, updated_at, is_public, icon, tag, is_favorite")
     .eq("user_id", userId);
+
+  // Favorites filter
+  if (searchParams.favorites === "true") {
+    query = query.eq("is_favorite", true);
+  }
 
   // Search
   if (searchParams.q) {
@@ -170,6 +176,7 @@ export default async function HistoryPage({
     models: typeof resolvedSearchParams.models === "string" ? resolvedSearchParams.models : undefined,
     modes: typeof resolvedSearchParams.modes === "string" ? resolvedSearchParams.modes : undefined,
     sort: typeof resolvedSearchParams.sort === "string" ? resolvedSearchParams.sort : undefined,
+    favorites: typeof resolvedSearchParams.favorites === "string" ? resolvedSearchParams.favorites : undefined,
     page: currentPage,
   };
 
