@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, X, SlidersHorizontal, Trash2, Loader2, Star } from "lucide-react";
+import {
+  Search,
+  X,
+  SlidersHorizontal,
+  Trash2,
+  Loader2,
+  Star,
+} from "lucide-react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import HistoryFilters from "./HistoryFilters";
 import { supabase } from "../../lib/supabase";
@@ -11,7 +18,10 @@ interface HistorySearchProps {
   itemsCount: number;
 }
 
-export default function HistorySearch({ onClearHistory, itemsCount }: HistorySearchProps) {
+export default function HistorySearch({
+  onClearHistory,
+  itemsCount,
+}: HistorySearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -26,7 +36,7 @@ export default function HistorySearch({ onClearHistory, itemsCount }: HistorySea
     searchParams.get("icons"),
     searchParams.get("models"),
     searchParams.get("sort") !== "newest" ? searchParams.get("sort") : null,
-    isFavoritesOnly ? "favorites" : null
+    isFavoritesOnly ? "favorites" : null,
   ].filter(Boolean).length;
 
   const toggleFavoritesOnly = () => {
@@ -69,7 +79,11 @@ export default function HistorySearch({ onClearHistory, itemsCount }: HistorySea
   }, []);
 
   const clearHistory = async () => {
-    if (confirm("Are you sure you want to clear your entire history? This cannot be undone.")) {
+    if (
+      confirm(
+        "Are you sure you want to clear your entire history? This cannot be undone.",
+      )
+    ) {
       setIsDeletingAll(true);
       try {
         const { error } = await supabase.from("prompts").delete();
@@ -88,7 +102,7 @@ export default function HistorySearch({ onClearHistory, itemsCount }: HistorySea
     <>
       <div className="flex flex-col md:flex-row gap-4 mb-8">
         {/* Search */}
-        <div className="flex-1 group">
+        <div className="flex flex-1  group gap-2">
           <div className="flex w-full items-center rounded-2xl h-14 bg-white/5 border border-white/10 overflow-hidden px-5 transition-all duration-300 focus-within:border-cyan-500/50 focus-within:bg-white/10 focus-within:shadow-[0_0_20px_rgba(6,182,212,0.15)]">
             <Search className="size-5 text-cyan-400 mr-4" />
             <input
@@ -103,10 +117,7 @@ export default function HistorySearch({ onClearHistory, itemsCount }: HistorySea
               ⌘K
             </div>
           </div>
-        </div>
 
-        {/* Filters & Actions */}
-        <div className="flex gap-3 shrink-0">
           <button
             onClick={toggleFavoritesOnly}
             className={`h-14 px-6 rounded-2xl bg-white/5 border flex items-center gap-3 transition-all active:scale-95 duration-200 ${
@@ -116,18 +127,33 @@ export default function HistorySearch({ onClearHistory, itemsCount }: HistorySea
             }`}
             title={isFavoritesOnly ? "Show All History" : "Show Favorites Only"}
           >
-            <Star className={`size-5 ${isFavoritesOnly ? "text-yellow-400 fill-yellow-400" : "text-slate-400 hover:text-yellow-400"}`} />
-            <span className="text-sm font-bold uppercase tracking-wider hidden xs:inline">Favorites</span>
+            <Star
+              className={`size-5 ${isFavoritesOnly ? "text-yellow-400 fill-yellow-400" : "text-slate-400 hover:text-yellow-400"}`}
+            />
+            <span className="text-sm font-bold uppercase tracking-wider hidden xs:inline">
+              Favorites
+            </span>
           </button>
+        </div>
 
+        {/* Filters & Actions */}
+        <div className="flex gap-3 shrink-0">
           <button
             onClick={() => setIsFiltersOpen(!isFiltersOpen)}
             className={`h-14 px-6 rounded-2xl bg-white/5 text-white hover:bg-white/10 border flex items-center gap-3 transition-all active:scale-95 ${
-              isFiltersOpen ? "border-cyan-500/50 bg-cyan-500/10 shadow-[0_0_15px_rgba(6,182,212,0.1)]" : "border-white/10"
+              isFiltersOpen
+                ? "border-cyan-500/50 bg-cyan-500/10 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
+                : "border-white/10"
             }`}
           >
-            {isFiltersOpen ? <X className="size-5 text-cyan-400" /> : <SlidersHorizontal className="size-5 text-cyan-400" />}
-            <span className="text-sm font-bold uppercase tracking-wider">Filters</span>
+            {isFiltersOpen ? (
+              <X className="size-5 text-cyan-400" />
+            ) : (
+              <SlidersHorizontal className="size-5 text-cyan-400" />
+            )}
+            <span className="text-sm font-bold uppercase tracking-wider">
+              Filters
+            </span>
             {activeFilterCount > 0 && (
               <span className="ml-1 w-6 h-6 rounded-full bg-cyan-500 text-[#0a0f14] text-xs font-black flex items-center justify-center animate-pulse">
                 {activeFilterCount}
@@ -135,7 +161,7 @@ export default function HistorySearch({ onClearHistory, itemsCount }: HistorySea
             )}
           </button>
 
-          <button 
+          <button
             onClick={clearHistory}
             disabled={isDeletingAll || itemsCount === 0}
             className="h-14 px-6 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl hover:bg-red-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold text-sm flex items-center gap-2 group"
@@ -151,7 +177,10 @@ export default function HistorySearch({ onClearHistory, itemsCount }: HistorySea
         </div>
       </div>
 
-      <HistoryFilters isOpen={isFiltersOpen} onClose={() => setIsFiltersOpen(false)} />
+      <HistoryFilters
+        isOpen={isFiltersOpen}
+        onClose={() => setIsFiltersOpen(false)}
+      />
     </>
   );
 }
