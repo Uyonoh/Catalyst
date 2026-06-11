@@ -78,6 +78,10 @@ export default async function WorkspacePage({ params }: PageProps) {
     .order("created_at", { ascending: false });
 
   // Map workspace and prompt data
+  const wProfile: any = Array.isArray(workspace.profiles)
+    ? workspace.profiles[0]
+    : workspace.profiles;
+
   const workspaceData = {
     id: workspace.id,
     name: workspace.name,
@@ -85,21 +89,27 @@ export default async function WorkspacePage({ params }: PageProps) {
     visibility: workspace.visibility || "private",
     user_id: workspace.user_id,
     created_at: workspace.created_at,
-    creatorName: workspace.profiles?.full_name || workspace.profiles?.email?.split("@")[0] || "Architect",
+    creatorName: wProfile?.full_name || wProfile?.email?.split("@")[0] || "Architect",
   };
 
-  const promptsList = (prompts || []).map((p: any) => ({
-    id: p.id,
-    title: p.title || "Untitled Prompt",
-    content: p.content,
-    snippet: p.snippet || p.content.substring(0, 150),
-    target_model: p.target_model,
-    tag: p.tag,
-    icon: p.icon || "chat",
-    created_at: p.created_at,
-    user_id: p.user_id,
-    authorName: p.profiles?.full_name || p.profiles?.email?.split("@")[0] || "Anonymous",
-  }));
+  const promptsList = (prompts || []).map((p: any) => {
+    const pProfile: any = Array.isArray(p.profiles)
+      ? p.profiles[0]
+      : p.profiles;
+
+    return {
+      id: p.id,
+      title: p.title || "Untitled Prompt",
+      content: p.content,
+      snippet: p.snippet || p.content.substring(0, 150),
+      target_model: p.target_model,
+      tag: p.tag,
+      icon: p.icon || "chat",
+      created_at: p.created_at,
+      user_id: p.user_id,
+      authorName: pProfile?.full_name || pProfile?.email?.split("@")[0] || "Anonymous",
+    };
+  });
 
   return (
     <>

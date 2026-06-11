@@ -396,31 +396,37 @@ export default function WorkspacesOverview({
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[260px] overflow-y-auto pr-1 dropdown-scroll">
-            {communityWorkspaces.map((folder) => (
-              <Link
-                key={folder.id}
-                href={`/workspace/${folder.id}`}
-                className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:border-purple-500/20 hover:bg-white/10 transition-all duration-300 group cursor-pointer"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="size-9 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-105 transition-transform flex-shrink-0">
-                    <Users className="size-4.5" />
+            {communityWorkspaces.map((folder) => {
+              const prof: any = Array.isArray(folder.profiles)
+                ? folder.profiles[0]
+                : folder.profiles;
+              const authorName = prof?.full_name || prof?.email?.split("@")[0] || "Architect";
+              return (
+                <Link
+                  key={folder.id}
+                  href={`/workspace/${folder.id}`}
+                  className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:border-purple-500/20 hover:bg-white/10 transition-all duration-300 group cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="size-9 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-105 transition-transform flex-shrink-0">
+                      <Users className="size-4.5" />
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-white text-xs font-bold truncate group-hover:text-purple-400 transition-colors flex items-center gap-2">
+                        {folder.name}
+                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-400">
+                          Community
+                        </span>
+                      </h4>
+                      <p className="text-slate-400 text-[10px] truncate leading-normal mt-0.5">
+                        By {authorName} &bull; {folder.description || "Shared workspace"}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <h4 className="text-white text-xs font-bold truncate group-hover:text-purple-400 transition-colors flex items-center gap-2">
-                      {folder.name}
-                      <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-400">
-                        Community
-                      </span>
-                    </h4>
-                    <p className="text-slate-400 text-[10px] truncate leading-normal mt-0.5">
-                      By {folder.profiles?.full_name || folder.profiles?.email?.split("@")[0] || "Architect"} &bull; {folder.description || "Shared workspace"}
-                    </p>
-                  </div>
-                </div>
-                <ArrowUpRight className="size-3.5 text-slate-500 group-hover:text-purple-400 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all flex-shrink-0" />
-              </Link>
-            ))}
+                  <ArrowUpRight className="size-3.5 text-slate-500 group-hover:text-purple-400 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all flex-shrink-0" />
+                </Link>
+              );
+            })}
           </div>
         )
       )}
