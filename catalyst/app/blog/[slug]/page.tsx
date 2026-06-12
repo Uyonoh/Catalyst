@@ -1,5 +1,8 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+
+export const revalidate = 60;
+
 import Link from "next/link";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";

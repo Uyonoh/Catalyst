@@ -5,10 +5,12 @@ import Footer from "../components/Footer";
 import { getBlogPosts, BlogPost } from "../lib/blog";
 import { BookOpen, Clock, ArrowRight, Rss } from "lucide-react";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Blog | Catalyst Prompt Studio",
   description:
-    "Expert guides, techniques, and insights on prompt engineering, AI models, and the future of AI communication — from the Catalyst team.",
+    "Expert guides, techniques, and insights on prompt optimization and engineering, AI models, and the future of AI communication — from the Catalyst team.",
 };
 
 export default async function BlogPage() {
@@ -39,7 +41,7 @@ export default async function BlogPage() {
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.1] mb-5">
                 Insights on{" "}
                 <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                  Prompt Engineering
+                  Prompt Optimization
                 </span>
               </h1>
               <p className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
@@ -84,7 +86,7 @@ export default async function BlogPage() {
                         <span>
                           {new Date(featured.published_at).toLocaleDateString(
                             "en-US",
-                            { year: "numeric", month: "long", day: "numeric" }
+                            { year: "numeric", month: "long", day: "numeric" },
                           )}
                         </span>
                       </div>
