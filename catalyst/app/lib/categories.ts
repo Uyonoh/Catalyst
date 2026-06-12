@@ -1,4 +1,6 @@
-import { createClient } from "./supabase-server";
+import { createPublicClient } from "./supabase-server";
+
+const supabase = createPublicClient();
 
 export interface Category {
   id: string;
@@ -88,7 +90,6 @@ const FALLBACK_CATEGORIES: Category[] = [
 
 export async function getCategories(): Promise<Category[]> {
   try {
-    const supabase = await createClient();
     const { data, error } = await supabase
       .from("categories")
       .select("*")

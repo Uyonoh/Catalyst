@@ -1,11 +1,12 @@
-import { createClient } from "./supabase-server";
+import { createPublicClient } from "./supabase-server";
 import { FALLBACK_MODELS, Model } from "./models-shared";
 
 export * from "./models-shared";
 
+const supabase = createPublicClient();
+
 export async function getModels(): Promise<Model[]> {
   try {
-    const supabase = await createClient();
     const { data, error } = await supabase
       .from("models")
       .select("*")
