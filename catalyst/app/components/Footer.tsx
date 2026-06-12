@@ -52,6 +52,7 @@ const Footer = () => {
             </FooterGroup>
 
             <FooterGroup title="Resources">
+              <FooterLink href="/blog">Blog</FooterLink>
               <FooterLink href="#">Documentation</FooterLink>
               <FooterLink href="#">Prompt Guide</FooterLink>
               <FooterLink href="#">API Docs</FooterLink>
