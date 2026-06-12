@@ -1,4 +1,9 @@
-import { createClient } from "./supabase-server";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!
+);
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -17,10 +22,11 @@ export interface BlogPost {
   title: string;
   subtitle: string;
   excerpt: string;
+  content: BlogSection[];
+  category: string;
   cover_gradient: string;
   icon_bg: string;
   icon_color: string;
-  category: string;
   category_color: string;
   read_time: string;
   published_at: string;
@@ -29,7 +35,6 @@ export interface BlogPost {
   author_initials: string;
   author_color: string;
   tags: string[];
-  content: BlogSection[];
   is_published: boolean;
   sort_order: number;
 }
@@ -41,7 +46,6 @@ export interface BlogPost {
  */
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
-    const supabase = await createClient();
     const { data, error } = await supabase
       .from("blog_posts")
       .select("*")
@@ -63,7 +67,6 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
  */
 export async function getBlogPost(slug: string): Promise<BlogPost | null> {
   try {
-    const supabase = await createClient();
     const { data, error } = await supabase
       .from("blog_posts")
       .select("*")
@@ -84,7 +87,6 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
  */
 export async function getAllBlogSlugs(): Promise<string[]> {
   try {
-    const supabase = await createClient();
     const { data, error } = await supabase
       .from("blog_posts")
       .select("slug")
@@ -97,3 +99,4 @@ export async function getAllBlogSlugs(): Promise<string[]> {
     return [];
   }
 }
+
