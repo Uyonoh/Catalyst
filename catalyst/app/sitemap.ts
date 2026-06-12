@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next";
-import { blogPosts } from "./blog/data";
+import { getBlogPosts } from "./lib/blog";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://prompts.uyonoh.com";
@@ -13,7 +13,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  const blogPages = blogPosts.map((post) => ({
+  const posts = await getBlogPosts();
+  const blogPages = posts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
     lastModified: new Date(),
     changeFrequency: "monthly" as const,

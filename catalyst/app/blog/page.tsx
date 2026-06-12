@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { blogPosts } from "./data";
+import { getBlogPosts, BlogPost } from "../lib/blog";
 import { BookOpen, Clock, ArrowRight, Rss } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -11,9 +11,10 @@ export const metadata: Metadata = {
     "Expert guides, techniques, and insights on prompt engineering, AI models, and the future of AI communication — from the Catalyst team.",
 };
 
-export default function BlogPage() {
-  const featured = blogPosts[0];
-  const rest = blogPosts.slice(1);
+export default async function BlogPage() {
+  const posts = await getBlogPosts();
+  const featured = posts[0] ?? null;
+  const rest = posts.slice(1);
 
   return (
     <>
@@ -26,7 +27,6 @@ export default function BlogPage() {
       <main className="flex-1 relative z-10">
         {/* ── Hero ─────────────────────────────────────────────── */}
         <section className="relative pt-14 pb-20 overflow-hidden">
-          {/* top glow */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[70%] h-[50%] bg-cyan-500/5 blur-[120px] rounded-full pointer-events-none" />
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -49,101 +49,118 @@ export default function BlogPage() {
             </div>
 
             {/* ── Featured Post ─────────────────────────────────── */}
-            <Link href={`/blog/${featured.slug}`} className="group block">
-              <div className="relative glass-panel rounded-3xl border border-white/10 overflow-hidden hover:border-cyan-500/30 transition-all duration-500 hover:shadow-[0_0_40px_rgba(37,140,244,0.1)]">
-                {/* gradient bg strip */}
-                <div
-                  className={`absolute inset-0 bg-gradient-to-br ${featured.coverGradient} pointer-events-none`}
-                />
+            {featured && (
+              <Link href={`/blog/${featured.slug}`} className="group block">
+                <div className="relative glass-panel rounded-3xl border border-white/10 overflow-hidden hover:border-cyan-500/30 transition-all duration-500 hover:shadow-[0_0_40px_rgba(37,140,244,0.1)]">
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${featured.cover_gradient} pointer-events-none`}
+                  />
 
-                <div className="relative z-10 p-8 md:p-12 grid md:grid-cols-2 gap-10 items-center">
-                  {/* Left: text */}
-                  <div className="flex flex-col gap-5">
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${featured.categoryColor}`}
-                      >
-                        {featured.category}
-                      </span>
-                      <span className="text-slate-500 text-xs uppercase tracking-widest font-semibold">
-                        Featured
-                      </span>
-                    </div>
-
-                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white leading-tight group-hover:text-cyan-400 transition-colors duration-300">
-                      {featured.title}
-                    </h2>
-                    <p className="text-slate-400 leading-relaxed text-base md:text-lg line-clamp-3">
-                      {featured.excerpt}
-                    </p>
-
-                    <div className="flex items-center gap-5 text-xs text-slate-500 font-medium">
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="size-3.5" />
-                        <span>{featured.readTime}</span>
+                  <div className="relative z-10 p-8 md:p-12 grid md:grid-cols-2 gap-10 items-center">
+                    <div className="flex flex-col gap-5">
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${featured.category_color}`}
+                        >
+                          {featured.category}
+                        </span>
+                        <span className="text-slate-500 text-xs uppercase tracking-widest font-semibold">
+                          Featured
+                        </span>
                       </div>
-                      <span>{featured.publishedAt}</span>
+
+                      <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white leading-tight group-hover:text-cyan-400 transition-colors duration-300">
+                        {featured.title}
+                      </h2>
+                      <p className="text-slate-400 leading-relaxed text-base md:text-lg line-clamp-3">
+                        {featured.excerpt}
+                      </p>
+
+                      <div className="flex items-center gap-5 text-xs text-slate-500 font-medium">
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="size-3.5" />
+                          <span>{featured.read_time}</span>
+                        </div>
+                        <span>
+                          {new Date(featured.published_at).toLocaleDateString(
+                            "en-US",
+                            { year: "numeric", month: "long", day: "numeric" }
+                          )}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-cyan-400 font-bold text-sm mt-2 group-hover:gap-4 transition-all duration-300">
+                        <span>Read Article</span>
+                        <ArrowRight className="size-4" />
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-cyan-400 font-bold text-sm mt-2 group-hover:gap-4 transition-all duration-300">
-                      <span>Read Article</span>
-                      <ArrowRight className="size-4" />
-                    </div>
-                  </div>
-
-                  {/* Right: decorative card */}
-                  <div className="relative aspect-[4/3] rounded-2xl border border-white/10 bg-slate-900/60 overflow-hidden flex items-center justify-center">
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br ${featured.coverGradient} opacity-60`}
-                    />
-                    <div
-                      className={`size-20 rounded-3xl ${featured.iconBg} flex items-center justify-center ${featured.iconColor} relative z-10`}
-                    >
-                      <BookOpen className="size-10" />
-                    </div>
-                    {/* decorative grid lines */}
-                    <div className="absolute inset-0 opacity-10 pointer-events-none">
-                      {[...Array(6)].map((_, i) => (
-                        <div
-                          key={i}
-                          className="absolute left-0 right-0 border-t border-white/20"
-                          style={{ top: `${(i + 1) * 16.666}%` }}
-                        />
-                      ))}
-                      {[...Array(6)].map((_, i) => (
-                        <div
-                          key={i}
-                          className="absolute top-0 bottom-0 border-l border-white/20"
-                          style={{ left: `${(i + 1) * 16.666}%` }}
-                        />
-                      ))}
+                    {/* Right: decorative panel */}
+                    <div className="relative aspect-[4/3] rounded-2xl border border-white/10 bg-slate-900/60 overflow-hidden flex items-center justify-center">
+                      <div
+                        className={`absolute inset-0 bg-gradient-to-br ${featured.cover_gradient} opacity-60`}
+                      />
+                      <div
+                        className={`size-20 rounded-3xl ${featured.icon_bg} flex items-center justify-center ${featured.icon_color} relative z-10`}
+                      >
+                        <BookOpen className="size-10" />
+                      </div>
+                      {/* decorative grid lines */}
+                      <div className="absolute inset-0 opacity-10 pointer-events-none">
+                        {[...Array(6)].map((_, i) => (
+                          <div
+                            key={i}
+                            className="absolute left-0 right-0 border-t border-white/20"
+                            style={{ top: `${(i + 1) * 16.666}%` }}
+                          />
+                        ))}
+                        {[...Array(6)].map((_, i) => (
+                          <div
+                            key={i}
+                            className="absolute top-0 bottom-0 border-l border-white/20"
+                            style={{ left: `${(i + 1) * 16.666}%` }}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
+              </Link>
+            )}
+
+            {/* Empty state */}
+            {!featured && (
+              <div className="glass-panel rounded-3xl border border-white/10 p-16 text-center">
+                <BookOpen className="size-12 text-slate-600 mx-auto mb-4" />
+                <p className="text-slate-400 text-lg font-medium">
+                  No posts published yet. Check back soon.
+                </p>
               </div>
-            </Link>
+            )}
           </div>
         </section>
 
         {/* ── Post Grid ─────────────────────────────────────────── */}
-        <section className="pb-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-baseline justify-between mb-10">
-              <h2 className="text-xl font-black text-white tracking-tight">
-                All Articles
-                <span className="ml-3 text-sm font-medium text-slate-500">
-                  {blogPosts.length} posts
-                </span>
-              </h2>
-            </div>
+        {rest.length > 0 && (
+          <section className="pb-24">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-baseline justify-between mb-10">
+                <h2 className="text-xl font-black text-white tracking-tight">
+                  All Articles
+                  <span className="ml-3 text-sm font-medium text-slate-500">
+                    {posts.length} posts
+                  </span>
+                </h2>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {rest.map((post) => (
-                <BlogCard key={post.slug} post={post} />
-              ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {rest.map((post) => (
+                  <BlogCard key={post.slug} post={post} />
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* ── Newsletter CTA ─────────────────────────────────────── */}
         <section className="pb-24">
@@ -183,22 +200,19 @@ export default function BlogPage() {
 }
 
 /* ── Blog Card ─────────────────────────────────────────────────── */
-import { BlogPost } from "./data";
-
 function BlogCard({ post }: { post: BlogPost }) {
   return (
     <Link href={`/blog/${post.slug}`} className="group flex flex-col h-full">
       <div className="flex flex-col h-full glass-panel rounded-2xl border border-white/10 overflow-hidden hover:border-cyan-500/20 transition-all duration-500 hover:shadow-[0_0_30px_rgba(37,140,244,0.08)] hover:-translate-y-1">
         {/* Card header stripe */}
         <div
-          className={`relative h-36 bg-gradient-to-br ${post.coverGradient} border-b border-white/5 flex items-center justify-center overflow-hidden`}
+          className={`relative h-36 bg-gradient-to-br ${post.cover_gradient} border-b border-white/5 flex items-center justify-center overflow-hidden`}
         >
           <div
-            className={`size-14 rounded-2xl ${post.iconBg} flex items-center justify-center ${post.iconColor} group-hover:scale-110 transition-transform duration-300`}
+            className={`size-14 rounded-2xl ${post.icon_bg} flex items-center justify-center ${post.icon_color} group-hover:scale-110 transition-transform duration-300`}
           >
             <BookOpen className="size-7" />
           </div>
-          {/* decorative dots */}
           <div className="absolute bottom-3 right-4 flex gap-1.5 opacity-30">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="size-1.5 rounded-full bg-white" />
@@ -210,7 +224,7 @@ function BlogCard({ post }: { post: BlogPost }) {
         <div className="flex flex-col gap-3 p-6 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${post.categoryColor}`}
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${post.category_color}`}
             >
               {post.category}
             </span>
@@ -228,9 +242,15 @@ function BlogCard({ post }: { post: BlogPost }) {
             <div className="flex items-center gap-3 text-xs text-slate-500">
               <div className="flex items-center gap-1">
                 <Clock className="size-3" />
-                <span>{post.readTime}</span>
+                <span>{post.read_time}</span>
               </div>
-              <span>{post.publishedAt}</span>
+              <span>
+                {new Date(post.published_at).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </span>
             </div>
             <ArrowRight className="size-4 text-slate-600 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all duration-300" />
           </div>

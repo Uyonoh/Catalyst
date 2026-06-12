@@ -3,7 +3,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-import { getBlogPost, getAllSlugs, blogPosts, BlogSection } from "../data";
+import {
+  getBlogPost,
+  getBlogPosts,
+  getAllBlogSlugs,
+  BlogSection,
+  BlogPost,
+} from "../../lib/blog";
 import {
   ArrowLeft,
   Clock,
@@ -20,12 +26,13 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return getAllSlugs().map((slug) => ({ slug }));
+  const slugs = await getAllBlogSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = getBlogPost(slug);
+  const post = await getBlogPost(slug);
   if (!post) return {};
   return {
     title: `${post.title} | Catalyst Blog`,
@@ -35,11 +42,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = getBlogPost(slug);
+  const [post, allPosts] = await Promise.all([getBlogPost(slug), getBlogPosts()]);
+
   if (!post) notFound();
 
-  // Related posts (exclude current)
-  const related = blogPosts.filter((p) => p.slug !== slug).slice(0, 3);
+  // Related posts (exclude current, take up to 3)
+  const related = allPosts.filter((p) => p.slug !== slug).slice(0, 3);
 
   return (
     <>
@@ -53,7 +61,7 @@ export default async function BlogPostPage({ params }: Props) {
         {/* ── Article Header ──────────────────────────────────── */}
         <section className="relative pt-12 pb-10 overflow-hidden">
           <div
-            className={`absolute inset-0 bg-gradient-to-b ${post.coverGradient} opacity-40 pointer-events-none`}
+            className={`absolute inset-0 bg-gradient-to-b ${post.cover_gradient} opacity-40 pointer-events-none`}
           />
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[300px] bg-cyan-500/5 blur-[120px] rounded-full pointer-events-none" />
 
@@ -70,15 +78,21 @@ export default async function BlogPostPage({ params }: Props) {
             {/* Category & meta */}
             <div className="flex flex-wrap items-center gap-3 mb-6">
               <span
-                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${post.categoryColor}`}
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${post.category_color}`}
               >
                 {post.category}
               </span>
               <div className="flex items-center gap-1.5 text-slate-500 text-xs">
                 <Clock className="size-3.5" />
-                <span>{post.readTime}</span>
+                <span>{post.read_time}</span>
               </div>
-              <span className="text-slate-500 text-xs">{post.publishedAt}</span>
+              <span className="text-slate-500 text-xs">
+                {new Date(post.published_at).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
             </div>
 
             {/* Title */}
@@ -93,15 +107,13 @@ export default async function BlogPostPage({ params }: Props) {
             {/* Author chip */}
             <div className="flex items-center gap-3 py-4 border-t border-b border-white/10">
               <div
-                className={`size-10 rounded-full bg-gradient-to-br ${post.author.color} flex items-center justify-center text-white text-sm font-black`}
+                className={`size-10 rounded-full bg-gradient-to-br ${post.author_color} flex items-center justify-center text-white text-sm font-black`}
               >
-                {post.author.initials}
+                {post.author_initials}
               </div>
               <div>
-                <p className="text-white text-sm font-bold">
-                  {post.author.name}
-                </p>
-                <p className="text-slate-500 text-xs">{post.author.role}</p>
+                <p className="text-white text-sm font-bold">{post.author_name}</p>
+                <p className="text-slate-500 text-xs">{post.author_role}</p>
               </div>
             </div>
           </div>
@@ -117,62 +129,70 @@ export default async function BlogPostPage({ params }: Props) {
             </div>
 
             {/* Tags */}
-            <div className="mt-12 pt-8 border-t border-white/10 flex flex-wrap items-center gap-3">
-              <Tag className="size-4 text-slate-500" />
-              {post.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-xs font-medium hover:border-cyan-500/20 hover:text-cyan-400 transition-colors cursor-default"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+            {post.tags.length > 0 && (
+              <div className="mt-12 pt-8 border-t border-white/10 flex flex-wrap items-center gap-3">
+                <Tag className="size-4 text-slate-500" />
+                {post.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-xs font-medium hover:border-cyan-500/20 hover:text-cyan-400 transition-colors cursor-default"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
         {/* ── Related Posts ─────────────────────────────────────── */}
-        <section className="pb-24 border-t border-white/5">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
-            <h2 className="text-xl font-black text-white mb-10 tracking-tight">
-              More Articles
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {related.map((p) => (
-                <Link
-                  key={p.slug}
-                  href={`/blog/${p.slug}`}
-                  className="group flex flex-col glass-panel rounded-2xl border border-white/10 p-6 hover:border-cyan-500/20 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(37,140,244,0.08)]"
-                >
-                  <div
-                    className={`size-12 rounded-2xl ${p.iconBg} flex items-center justify-center ${p.iconColor} mb-4 group-hover:scale-110 transition-transform`}
-                  >
-                    <BookOpen className="size-5" />
-                  </div>
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${p.categoryColor} mb-3 w-fit`}
-                  >
-                    {p.category}
-                  </span>
-                  <h3 className="text-white font-bold leading-tight text-base group-hover:text-cyan-400 transition-colors mb-2 line-clamp-2">
-                    {p.title}
-                  </h3>
-                  <p className="text-slate-400 text-sm line-clamp-2 flex-1">
-                    {p.excerpt}
-                  </p>
-                  <div className="flex items-center gap-2 text-cyan-500 text-xs font-bold mt-4 group-hover:gap-3 transition-all duration-200">
-                    <span>Read</span>
-                    <ArrowRight className="size-3" />
-                  </div>
-                </Link>
-              ))}
+        {related.length > 0 && (
+          <section className="pb-24 border-t border-white/5">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
+              <h2 className="text-xl font-black text-white mb-10 tracking-tight">
+                More Articles
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {related.map((p) => (
+                  <RelatedCard key={p.slug} post={p} />
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
       </main>
 
       <Footer />
     </>
+  );
+}
+
+/* ── Related Card ──────────────────────────────────────────────── */
+function RelatedCard({ post }: { post: BlogPost }) {
+  return (
+    <Link
+      href={`/blog/${post.slug}`}
+      className="group flex flex-col glass-panel rounded-2xl border border-white/10 p-6 hover:border-cyan-500/20 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(37,140,244,0.08)]"
+    >
+      <div
+        className={`size-12 rounded-2xl ${post.icon_bg} flex items-center justify-center ${post.icon_color} mb-4 group-hover:scale-110 transition-transform`}
+      >
+        <BookOpen className="size-5" />
+      </div>
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${post.category_color} mb-3 w-fit`}
+      >
+        {post.category}
+      </span>
+      <h3 className="text-white font-bold leading-tight text-base group-hover:text-cyan-400 transition-colors mb-2 line-clamp-2">
+        {post.title}
+      </h3>
+      <p className="text-slate-400 text-sm line-clamp-2 flex-1">{post.excerpt}</p>
+      <div className="flex items-center gap-2 text-cyan-500 text-xs font-bold mt-4 group-hover:gap-3 transition-all duration-200">
+        <span>Read</span>
+        <ArrowRight className="size-3" />
+      </div>
+    </Link>
   );
 }
 
@@ -212,7 +232,7 @@ function ContentBlock({ section }: { section: BlogSection }) {
         </ul>
       );
 
-    case "callout":
+    case "callout": {
       const calloutStyles = {
         tip: {
           border: "border-emerald-500/30",
@@ -255,6 +275,7 @@ function ContentBlock({ section }: { section: BlogSection }) {
           </div>
         </div>
       );
+    }
 
     case "code":
       return (
@@ -289,5 +310,8 @@ function ContentBlock({ section }: { section: BlogSection }) {
 
 /** Converts **bold** markdown to <strong> tags */
 function renderInline(text: string): string {
-  return text.replace(/\*\*(.+?)\*\*/g, "<strong class=\"text-white font-semibold\">$1</strong>");
+  return text.replace(
+    /\*\*(.+?)\*\*/g,
+    '<strong class="text-white font-semibold">$1</strong>'
+  );
 }
