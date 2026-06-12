@@ -56,7 +56,10 @@ export default function LibraryViewToggle() {
           <Sparkles
             className={`size-4 transition-transform duration-300 ${currentView === "prompts" ? "scale-110 rotate-12 text-cyan-400" : "text-slate-400"}`}
           />
-          <span>Optimized Prompts</span>
+          <span className="inline-flex items-center">
+            <span className="hidden sm:inline-block mr-1">{"Optimized "}</span>
+            Prompts
+          </span>
         </button>
 
         {/* Workspaces Tab */}
@@ -71,7 +74,10 @@ export default function LibraryViewToggle() {
           <Folder
             className={`size-4 transition-transform duration-300 ${currentView === "workspaces" ? "scale-110 text-cyan-400" : "text-slate-400"}`}
           />
-          <span>Workspaces</span>
+          <span className="inline-flex items-center">
+            <span className="hidden sm:inline-block mr-1">{"Community "}</span>
+            Workspaces
+          </span>
         </button>
       </div>
     </div>
