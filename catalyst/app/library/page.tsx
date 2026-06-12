@@ -10,6 +10,7 @@ import Pagination from "../components/Pagination";
 import { LibraryItem } from "../components/library/LibraryCard";
 import { supabase } from "../lib/supabase";
 import { Metadata } from "next";
+import LibraryViewToggle from "../components/library/LibraryViewToggle";
 
 export const metadata: Metadata = {
   title: "Library",
@@ -20,6 +21,89 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 const PAGE_SIZE = 9;
+
+async function getLibraryWorkspaces(searchParams: {
+  q?: string;
+  sort?: string;
+  page?: number;
+}): Promise<{ items: LibraryItem[]; totalCount: number }> {
+  let query = supabase
+    .from("workspaces")
+    .select(
+      `
+      id,
+      name,
+      description,
+      visibility,
+      user_id,
+      created_at,
+      profiles (
+        full_name,
+        email
+      )
+      `
+    )
+    .in("visibility", ["community", "public"]);
+
+  if (searchParams.q) {
+    query = query.or(
+      `name.ilike.%${searchParams.q}%,description.ilike.%${searchParams.q}%`
+    );
+  }
+
+  // Sorting
+  const sort = searchParams.sort || "newest";
+  if (sort === "oldest") {
+    query = query.order("created_at", { ascending: true });
+  } else if (sort === "title") {
+    query = query.order("name", { ascending: true });
+  } else {
+    // Default: newest
+    query = query.order("created_at", { ascending: false });
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.warn("Failed to fetch library workspaces:", error.message);
+    return { items: [], totalCount: 0 };
+  }
+
+  const mappedData: LibraryItem[] = (data || []).map((item: any) => {
+    const prof: any = Array.isArray(item.profiles)
+      ? item.profiles[0]
+      : item.profiles;
+    const authorName =
+      prof?.full_name || prof?.email?.split("@")[0] || "Architect";
+    const community = item.visibility === "community";
+    
+    return {
+      id: item.id,
+      title: item.name,
+      updated_at: item.created_at,
+      snippet: item.description || "Active engineering workspace",
+      content: "",
+      model: community ? "Community" : "Public",
+      model_color: community ? "purple" : "green",
+      tag: `By ${authorName}`,
+      icon: community ? "users" : "globe",
+      icon_color: community ? "cyan" : "emerald",
+      has_gradient: true,
+      user_id: item.user_id,
+      isWorkspace: true,
+    };
+  });
+
+  const totalCount = mappedData.length;
+  const page = searchParams.page || 1;
+  const start = (page - 1) * PAGE_SIZE;
+  const slicedData = mappedData.slice(start, start + PAGE_SIZE);
+
+  return {
+    items: slicedData,
+    totalCount,
+  };
+}
 
 async function getLibraryItems(searchParams: {
   q?: string;
@@ -161,6 +245,8 @@ export default async function LibraryPage({
   const pageVal = typeof resolvedSearchParams.page === "string" ? parseInt(resolvedSearchParams.page, 10) : 1;
   const currentPage = isNaN(pageVal) || pageVal < 1 ? 1 : pageVal;
 
+  const view = typeof resolvedSearchParams.view === "string" ? resolvedSearchParams.view : "prompts";
+
   const params = {
     q:
       typeof resolvedSearchParams.q === "string"
@@ -197,7 +283,11 @@ export default async function LibraryPage({
     page: currentPage,
   };
 
-  const { items, totalCount } = await getLibraryItems(params);
+  const { items, totalCount } =
+    view === "workspaces"
+      ? await getLibraryWorkspaces({ q: params.q, sort: params.sort, page: params.page })
+      : await getLibraryItems(params);
+
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
@@ -209,9 +299,10 @@ export default async function LibraryPage({
 
         <main className="flex-1 w-full max-w-[1200px] mx-auto pt-16 pb-12 px-4 md:px-8 relative z-10">
           <LibraryHero />
-          <LibraryFeatured />
+          <LibraryViewToggle />
+          {view !== "workspaces" && <LibraryFeatured />}
           <LibrarySearch />
-          <LibraryTags />
+          {view !== "workspaces" && <LibraryTags />}
           <LibraryGrid items={items} />
           <Pagination
             currentPage={currentPage}

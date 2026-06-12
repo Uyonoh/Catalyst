@@ -9,7 +9,7 @@ import { WorkspaceProvider, useWorkspace } from "../context/WorkspaceContext";
 import { useUser } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
 import PromptEditor from "../components/studio/PromptEditor";
-import Notification, { NotificationType } from "../components/Notification";
+import Notification, { NotificationType } from "../components/history/Notification";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function StudioPageContent() {

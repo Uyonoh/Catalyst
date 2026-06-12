@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import PromptEditor from "../../components/studio/PromptEditor";
-import Notification, { NotificationType } from "../../components/Notification";
+import Notification, { NotificationType } from "../../components/history/Notification";
 import { useUser } from "../../context/AuthContext";
 import { Sparkles, X, ArrowRight } from "lucide-react";
 

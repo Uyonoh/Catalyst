@@ -93,6 +93,7 @@ export default function WorkspacesOverview({
         )
         .in("visibility", ["community", "public"])
         .neq("user_id", user?.id)
+        .limit(6)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -426,54 +427,67 @@ export default function WorkspacesOverview({
           </span>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[260px] overflow-y-auto pr-1 dropdown-scroll">
-          {communityWorkspaces.map((folder) => {
-            const prof: any = Array.isArray(folder.profiles)
-              ? folder.profiles[0]
-              : folder.profiles;
-            const authorName =
-              prof?.full_name || prof?.email?.split("@")[0] || "Architect";
-            const community = folder.visibility == "community";
-            const color = community ? "purple" : "green";
-            return (
-              <Link
-                key={folder.id}
-                href={`/workspace/${folder.id}`}
-                className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:border-purple-500/20 hover:bg-white/10 transition-all duration-300 group cursor-pointer"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className={`size-9 rounded-lg bg-${color}-500/10 flex items-center justify-center text-${color}-400 group-hover:scale-105 transition-transform flex-shrink-0`}
-                  >
-                    {community ? (
-                      <Users className="size-4.5" />
-                    ) : (
-                      <Globe className="size-4.5" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <h4
-                      className={`text-white text-xs font-bold truncate group-hover:text-${color}-400 transition-colors flex items-center gap-2`}
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[260px] overflow-y-auto pr-1 dropdown-scroll">
+            {communityWorkspaces.slice(0, 5).map((folder) => {
+              const prof: any = Array.isArray(folder.profiles)
+                ? folder.profiles[0]
+                : folder.profiles;
+              const authorName =
+                prof?.full_name || prof?.email?.split("@")[0] || "Architect";
+              const community = folder.visibility == "community";
+              const color = community ? "purple" : "green";
+              return (
+                <Link
+                  key={folder.id}
+                  href={`/workspace/${folder.id}`}
+                  className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:border-purple-500/20 hover:bg-white/10 transition-all duration-300 group cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={`size-9 rounded-lg bg-${color}-500/10 flex items-center justify-center text-${color}-400 group-hover:scale-105 transition-transform flex-shrink-0`}
                     >
-                      {folder.name}
-                      <span
-                        className={`text-[8px] font-bold px-1.5 py-0.5 rounded-md bg-${color}-500/10 border border-${color}-500/20 text-${color}-400`}
+                      {community ? (
+                        <Users className="size-4.5" />
+                      ) : (
+                        <Globe className="size-4.5" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <h4
+                        className={`text-white text-xs font-bold truncate group-hover:text-${color}-400 transition-colors flex items-center gap-2`}
                       >
-                        {community ? "Community" : "Public"}
-                      </span>
-                    </h4>
-                    <p className="text-slate-400 text-[10px] truncate leading-normal mt-0.5">
-                      By {authorName} &bull;{" "}
-                      {folder.description || "Shared workspace"}
-                    </p>
+                        {folder.name}
+                        <span
+                          className={`text-[8px] font-bold px-1.5 py-0.5 rounded-md bg-${color}-500/10 border border-${color}-500/20 text-${color}-400`}
+                        >
+                          {community ? "Community" : "Public"}
+                        </span>
+                      </h4>
+                      <p className="text-slate-400 text-[10px] truncate leading-normal mt-0.5">
+                        By {authorName} &bull;{" "}
+                        {folder.description || "Shared workspace"}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <ArrowUpRight
-                  className={`size-3.5 text-slate-500 group-hover:text-${color}-400 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all flex-shrink-0`}
-                />
+                  <ArrowUpRight
+                    className={`size-3.5 text-slate-500 group-hover:text-${color}-400 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all flex-shrink-0`}
+                  />
+                </Link>
+              );
+            })}
+          </div>
+          {communityWorkspaces.length > 5 && (
+            <div className="flex justify-center mt-2">
+              <Link
+                href="/library?view=workspaces"
+                className="text-xs font-bold text-cyan-400 hover:text-white transition-colors bg-white/5 border border-white/10 hover:border-cyan-500/30 px-4 py-2 rounded-lg flex items-center gap-1.5 active:scale-95 duration-200"
+              >
+                <span>View More Workspaces</span>
+                <ArrowUpRight className="size-3.5" />
               </Link>
-            );
-          })}
+            </div>
+          )}
         </div>
       )}
     </div>

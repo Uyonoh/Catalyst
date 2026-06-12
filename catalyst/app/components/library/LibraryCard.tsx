@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import GlassPanel from "../GlassPanel";
-import { Star, Copy, Check, Edit } from "lucide-react";
+import { Star, Copy, Check, Edit, Globe, Users, ArrowUpRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   PROMPT_TYPE_TOKENS,
   PROMPT_TYPE_FALLBACK,
@@ -26,6 +27,7 @@ export interface LibraryItem {
   has_gradient: boolean;
   user_id?: string;
   is_favorite?: boolean;
+  isWorkspace?: boolean;
 }
 
 interface LibraryCardProps {
@@ -47,12 +49,13 @@ export function formatUpdated(isoString: string): string {
 }
 
 export default function LibraryCard({ item }: LibraryCardProps) {
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
   const { user } = useUser();
   const [isFavorited, setIsFavorited] = useState(false);
 
   useEffect(() => {
-    if (user && item) {
+    if (user && item && !item.isWorkspace) {
       checkPromptFavoriteStatus(user.id, item).then(setIsFavorited).catch(console.error);
     }
   }, [user, item]);
@@ -81,27 +84,52 @@ export default function LibraryCard({ item }: LibraryCardProps) {
     }
   };
 
+  const handleCardClick = () => {
+    if (item.isWorkspace) {
+      router.push(`/workspace/${item.id}`);
+    } else {
+      router.push(`/studio/${item.id}`);
+    }
+  };
+
   return (
     <GlassPanel
       hoverable
       className="p-5 flex flex-col gap-4 group cursor-pointer relative overflow-hidden active:scale-[0.98] transition-all h-full"
+      onClick={handleCardClick}
     >
       {item.has_gradient && (
         <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-cyan-500/10 to-transparent rounded-bl-full -mr-4 -mt-4 transition-opacity opacity-50 group-hover:opacity-100" />
       )}
       <div className="flex justify-between items-start z-10">
         <div className="flex items-center gap-3">
-          {(() => {
-            const token = PROMPT_TYPE_TOKENS[item.icon] || PROMPT_TYPE_FALLBACK;
-            const { Icon } = token;
-            return (
-              <div
-                className={`size-10 rounded-lg ${token.bg} flex items-center justify-center ${token.text} border ${token.border} group-hover:scale-110 transition-transform`}
-              >
-                <Icon className="size-5" />
-              </div>
-            );
-          })()}
+          {item.isWorkspace ? (
+            <div
+              className={`size-10 rounded-lg ${
+                item.icon === "users"
+                  ? "bg-purple-500/10 border-purple-500/20 text-purple-400"
+                  : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+              } flex items-center justify-center border group-hover:scale-110 transition-transform`}
+            >
+              {item.icon === "users" ? (
+                <Users className="size-5" />
+              ) : (
+                <Globe className="size-5" />
+              )}
+            </div>
+          ) : (
+            (() => {
+              const token = PROMPT_TYPE_TOKENS[item.icon] || PROMPT_TYPE_FALLBACK;
+              const { Icon } = token;
+              return (
+                <div
+                  className={`size-10 rounded-lg ${token.bg} flex items-center justify-center ${token.text} border ${token.border} group-hover:scale-110 transition-transform`}
+                >
+                  <Icon className="size-5" />
+                </div>
+              );
+            })()
+          )}
           <div>
             <h3 className="text-white font-bold leading-tight group-hover:text-cyan-400 transition-colors">
               {item.title}
@@ -111,14 +139,20 @@ export default function LibraryCard({ item }: LibraryCardProps) {
             </p>
           </div>
         </div>
-        {/* Add favourite button */}
-        <button
-          onClick={handleFavorite}
-          className={`transition-colors duration-200 ${isFavorited ? "text-yellow-400" : "text-slate-500 hover:text-yellow-400"}`}
-          aria-label="Favourite"
-        >
-          <Star className={`size-5 ${isFavorited ? "fill-yellow-400" : ""}`} />
-        </button>
+        
+        {item.isWorkspace ? (
+          <div className="text-slate-500 group-hover:text-cyan-400 transition-colors">
+            <ArrowUpRight className="size-5 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+          </div>
+        ) : (
+          <button
+            onClick={handleFavorite}
+            className={`transition-colors duration-200 ${isFavorited ? "text-yellow-400" : "text-slate-500 hover:text-yellow-400"}`}
+            aria-label="Favourite"
+          >
+            <Star className={`size-5 ${isFavorited ? "fill-yellow-400" : ""}`} />
+          </button>
+        )}
       </div>
       <div className="h-[1px] w-full bg-white/5" />
       <p className="text-slate-300 text-sm leading-relaxed line-clamp-3 font-mono opacity-80 code-preview p-2 rounded border border-white/10 bg-white/5">
@@ -139,26 +173,29 @@ export default function LibraryCard({ item }: LibraryCardProps) {
           })()}
           <span className="text-slate-500 text-xs font-medium">{item.tag}</span>
         </div>
-        <div className="flex gap-1 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={handleCopy}
-            className={`p-1.5 hover:bg-white/10 rounded-md transition-colors ${copied ? "text-emerald-400" : "text-slate-400 hover:text-cyan-400"}`}
-            title={copied ? "Copied!" : "Copy Full Prompt"}
-          >
-            {copied ? (
-              <Check className="size-5" />
-            ) : (
-              <Copy className="size-5" />
-            )}
-          </button>
-          <a
-            href={`/studio/${item.id}`}
-            className="p-1.5 hover:bg-white/10 rounded-md text-slate-400 hover:text-cyan-400 transition-colors flex items-center justify-center"
-            title="Edit"
-          >
-            <Edit className="size-5" />
-          </a>
-        </div>
+        {!item.isWorkspace && (
+          <div className="flex gap-1 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={handleCopy}
+              className={`p-1.5 hover:bg-white/10 rounded-md transition-colors ${copied ? "text-emerald-400" : "text-slate-400 hover:text-cyan-400"}`}
+              title={copied ? "Copied!" : "Copy Full Prompt"}
+            >
+              {copied ? (
+                <Check className="size-5" />
+              ) : (
+                <Copy className="size-5" />
+              )}
+            </button>
+            <a
+              href={`/studio/${item.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="p-1.5 hover:bg-white/10 rounded-md text-slate-400 hover:text-cyan-400 transition-colors flex items-center justify-center"
+              title="Edit"
+            >
+              <Edit className="size-5" />
+            </a>
+          </div>
+        )}
       </div>
     </GlassPanel>
   );

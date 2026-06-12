@@ -5,6 +5,7 @@ interface GlassPanelProps {
   className?: string;
   hoverable?: boolean;
   gradientBorder?: boolean;
+  onClick?: () => void;
 }
 
 export default function GlassPanel({
@@ -12,12 +13,13 @@ export default function GlassPanel({
   className = "",
   hoverable = false,
   gradientBorder = false,
+  onClick,
 }: GlassPanelProps) {
   const baseClasses = `${className} ${hoverable ? "hover:bg-white/5 transition-colors" : ""}`;
 
   if (gradientBorder) {
     return (
-      <div className="relative group h-full">
+      <div className="relative group h-full" onClick={onClick}>
         <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-primary rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500" />
         <div
           className={`relative glass-panel rounded-xl h-full ${baseClasses}`}
@@ -29,6 +31,6 @@ export default function GlassPanel({
   }
 
   return (
-    <div className={`glass-panel rounded-xl ${baseClasses}`}>{children}</div>
+    <div className={`glass-panel rounded-xl ${baseClasses}`} onClick={onClick}>{children}</div>
   );
 }
