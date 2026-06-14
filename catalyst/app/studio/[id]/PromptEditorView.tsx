@@ -4,7 +4,9 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import PromptEditor from "../../components/studio/PromptEditor";
-import Notification, { NotificationType } from "../../components/history/Notification";
+import Notification, {
+  NotificationType,
+} from "../../components/history/Notification";
 import { useUser } from "../../context/AuthContext";
 import { Sparkles, X, ArrowRight } from "lucide-react";
 
@@ -42,13 +44,22 @@ function detectDownloadFormat(text: string): { ext: string; mime: string } {
   // YAML detection (simple heuristic: has top-level key: value lines)
   if (/^[a-zA-Z_][\w-]*\s*:/m.test(trimmed) && !trimmed.startsWith("#!")) {
     const yamlLines = trimmed.split("\n");
-    const keyValueLines = yamlLines.filter((l) => /^\s*[a-zA-Z_][\w-]*\s*:/.test(l));
-    if (keyValueLines.length >= 2 && keyValueLines.length >= yamlLines.length * 0.3) {
+    const keyValueLines = yamlLines.filter((l) =>
+      /^\s*[a-zA-Z_][\w-]*\s*:/.test(l),
+    );
+    if (
+      keyValueLines.length >= 2 &&
+      keyValueLines.length >= yamlLines.length * 0.3
+    ) {
       return { ext: "yaml", mime: "text/yaml" };
     }
   }
   // Markdown detection (has headings, bold, or code blocks)
-  if (/^#{1,6}\s/m.test(trimmed) || /\*\*[^*]+\*\*/.test(trimmed) || /```/.test(trimmed)) {
+  if (
+    /^#{1,6}\s/m.test(trimmed) ||
+    /\*\*[^*]+\*\*/.test(trimmed) ||
+    /```/.test(trimmed)
+  ) {
     return { ext: "md", mime: "text/markdown" };
   }
   // Default: plain text
@@ -104,7 +115,9 @@ function UpgradeModal({ onClose }: { onClose: () => void }) {
                 </h2>
                 <p className="text-slate-400 text-sm mt-1 leading-relaxed">
                   Downloading prompts is a{" "}
-                  <span className="text-amber-400 font-semibold">Pro &amp; Enterprise</span>{" "}
+                  <span className="text-amber-400 font-semibold">
+                    Pro &amp; Enterprise
+                  </span>{" "}
                   feature. Upgrade your plan to export your prompts as files.
                 </p>
               </div>
@@ -118,8 +131,15 @@ function UpgradeModal({ onClose }: { onClose: () => void }) {
                   Pro
                 </span>
                 <ul className="flex flex-col gap-1">
-                  {["Download prompts", "500 prompts/day", "Priority support"].map((f) => (
-                    <li key={f} className="flex items-center gap-1.5 text-[11px] text-slate-300">
+                  {[
+                    "Download prompts",
+                    "500 prompts/day",
+                    "Priority support",
+                  ].map((f) => (
+                    <li
+                      key={f}
+                      className="flex items-center gap-1.5 text-[11px] text-slate-300"
+                    >
                       <span className="size-1.5 rounded-full bg-cyan-400 shrink-0" />
                       {f}
                     </li>
@@ -132,8 +152,15 @@ function UpgradeModal({ onClose }: { onClose: () => void }) {
                   Enterprise
                 </span>
                 <ul className="flex flex-col gap-1">
-                  {["Download prompts", "Unlimited usage", "Dedicated support"].map((f) => (
-                    <li key={f} className="flex items-center gap-1.5 text-[11px] text-slate-300">
+                  {[
+                    "Download prompts",
+                    "Unlimited usage",
+                    "Dedicated support",
+                  ].map((f) => (
+                    <li
+                      key={f}
+                      className="flex items-center gap-1.5 text-[11px] text-slate-300"
+                    >
                       <span className="size-1.5 rounded-full bg-purple-400 shrink-0" />
                       {f}
                     </li>
@@ -174,7 +201,10 @@ export default function PromptEditorView({
   const { profile } = useUser();
   const [isSaving, setIsSaving] = useState(false);
   const [isPublic, setIsPublic] = useState(initialData.is_public);
-  const [notification, setNotification] = useState<{ message: string; type: NotificationType } | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: NotificationType;
+  } | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [workspaces, setWorkspaces] = useState<any[]>([]);
 
@@ -189,7 +219,7 @@ export default function PromptEditorView({
           .from("workspaces")
           .select("id, name, visibility, user_id")
           .or(`user_id.eq.${currentUserId},visibility.eq.community`);
-        
+
         if (!error && data) {
           setWorkspaces(data);
         }
@@ -200,7 +230,13 @@ export default function PromptEditorView({
     fetchWorkspaces();
   }, [currentUserId]);
 
-  const handleSave = async (title: string, text: string, categorySlug: string, tags: string, workspaceId: string | null) => {
+  const handleSave = async (
+    title: string,
+    text: string,
+    categorySlug: string,
+    tags: string,
+    workspaceId: string | null,
+  ) => {
     try {
       setIsSaving(true);
 
@@ -223,20 +259,18 @@ export default function PromptEditorView({
         }
       } else {
         // Create a new prompt (copy) for the current user
-        const { error } = await supabase
-          .from("prompts")
-          .insert({
-            title,
-            content: text,
-            snippet: text.substring(0, 150) + (text.length > 150 ? "..." : ""),
-            raw_input: initialData.raw_input,
-            target_model: initialData.target_model,
-            user_id: currentUserId,
-            is_public: isPublic,
-            icon: categorySlug,
-            tag: tags,
-            workspace_id: workspaceId || null,
-          });
+        const { error } = await supabase.from("prompts").insert({
+          title,
+          content: text,
+          snippet: text.substring(0, 150) + (text.length > 150 ? "..." : ""),
+          raw_input: "",
+          target_model: initialData.target_model,
+          user_id: currentUserId,
+          is_public: isPublic,
+          icon: categorySlug,
+          tag: tags,
+          workspace_id: workspaceId || null,
+        });
 
         if (error) {
           console.error("Failed to create new prompt copy:", error);
@@ -281,7 +315,10 @@ export default function PromptEditorView({
         .eq("id", id);
 
       if (error) {
-        setNotification({ message: "Failed to update visibility", type: "error" });
+        setNotification({
+          message: "Failed to update visibility",
+          type: "error",
+        });
         console.error("Error updating visibility:", error);
       } else {
         setIsPublic(newVisibility);
@@ -298,13 +335,21 @@ export default function PromptEditorView({
     }
   };
 
-  const handleDownload = (text: string, title: string, formatParam?: string) => {
+  const handleDownload = (
+    text: string,
+    title: string,
+    formatParam?: string,
+  ) => {
     if (userPlan === "free") {
       setShowUpgradeModal(true);
       return;
     }
 
-    const downloadFormat = (formatParam || initialData.format || "text").toLowerCase();
+    const downloadFormat = (
+      formatParam ||
+      initialData.format ||
+      "text"
+    ).toLowerCase();
     let ext = "txt";
     let mime = "text/plain";
 
@@ -348,7 +393,9 @@ export default function PromptEditorView({
         onDiscard={handleDiscard}
         onSave={handleSave}
         onVisibilityChange={handleVisibilityChange}
-        onDownload={(text, title) => handleDownload(text, title, initialData.format)}
+        onDownload={(text, title) =>
+          handleDownload(text, title, initialData.format)
+        }
         userPlan={userPlan}
         isLoading={isSaving}
         className="pt-0 pb-0 px-0 sm:px-0"
@@ -362,7 +409,9 @@ export default function PromptEditorView({
         />
       )}
 
-      {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
+      {showUpgradeModal && (
+        <UpgradeModal onClose={() => setShowUpgradeModal(false)} />
+      )}
     </main>
   );
 }
