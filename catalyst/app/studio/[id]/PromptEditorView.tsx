@@ -240,6 +240,40 @@ export default function PromptEditorView({
     try {
       setIsSaving(true);
 
+      if (workspaceId) {
+        const workspace = workspaces.find(
+          (workspace) => workspace.id === workspaceId,
+        );
+
+        if (!workspace) {
+          console.error("Invalid workspaceID: ", workspaceID);
+          return;
+        }
+
+        const is_comminity = workspace.visibility == "community";
+        console.log("Community: ", is_comminity);
+        // Comm owner can change workspace
+        // other cant
+        // com owner can
+        //
+        if (is_comminity && !isAuthor) {
+          console.log("Not author");
+          const { error } = await supabase
+            .from("prompts")
+            .update({
+              content: text,
+              snippet:
+                text.substring(0, 150) + (text.length > 150 ? "..." : ""),
+              tag: tags,
+            })
+            .eq("id", id);
+          if (error) {
+            console.error(error);
+          }
+          return;
+        }
+      }
+
       if (isAuthor) {
         // Update existing prompt
         const { error } = await supabase
