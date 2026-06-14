@@ -24,9 +24,8 @@ interface WorkspaceItem {
   visibility: string;
   user_id: string;
   created_at: string;
-  profiles?: {
-    full_name: string | null;
-    email: string | null;
+  user_metadata?: {
+    name: string | null;
   } | null;
 }
 
@@ -85,9 +84,8 @@ export default function WorkspacesOverview({
           visibility,
           user_id,
           created_at,
-          profiles (
-            full_name,
-            email
+          user_metadata (
+            name
           )
         `,
         )
@@ -430,11 +428,10 @@ export default function WorkspacesOverview({
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[260px] overflow-y-auto pr-1 dropdown-scroll">
             {communityWorkspaces.slice(0, 5).map((folder) => {
-              const prof: any = Array.isArray(folder.profiles)
-                ? folder.profiles[0]
-                : folder.profiles;
-              const authorName =
-                prof?.full_name || prof?.email?.split("@")[0] || "Architect";
+              const prof: any = Array.isArray(folder.user_metadata)
+                ? folder.user_metadata[0]
+                : folder.user_metadata;
+              const authorName = prof?.name || "Architect";
               const community = folder.visibility == "community";
               const color = community ? "purple" : "green";
               return (

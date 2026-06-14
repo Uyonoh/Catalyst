@@ -37,17 +37,16 @@ async function getLibraryWorkspaces(searchParams: {
       visibility,
       user_id,
       created_at,
-      profiles (
-        full_name,
-        email
+      user_metadata (
+        name
       )
-      `
+      `,
     )
     .in("visibility", ["community", "public"]);
 
   if (searchParams.q) {
     query = query.or(
-      `name.ilike.%${searchParams.q}%,description.ilike.%${searchParams.q}%`
+      `name.ilike.%${searchParams.q}%,description.ilike.%${searchParams.q}%`,
     );
   }
 
@@ -70,13 +69,12 @@ async function getLibraryWorkspaces(searchParams: {
   }
 
   const mappedData: LibraryItem[] = (data || []).map((item: any) => {
-    const prof: any = Array.isArray(item.profiles)
-      ? item.profiles[0]
-      : item.profiles;
-    const authorName =
-      prof?.full_name || prof?.email?.split("@")[0] || "Architect";
+    const prof: any = Array.isArray(item.user_metadata)
+      ? item.user_metadata[0]
+      : item.user_metadata;
+    const authorName = prof?.name || "Architect";
     const community = item.visibility === "community";
-    
+
     return {
       id: item.id,
       title: item.name,
@@ -242,10 +240,16 @@ export default async function LibraryPage({
 }) {
   const resolvedSearchParams = await searchParams;
 
-  const pageVal = typeof resolvedSearchParams.page === "string" ? parseInt(resolvedSearchParams.page, 10) : 1;
+  const pageVal =
+    typeof resolvedSearchParams.page === "string"
+      ? parseInt(resolvedSearchParams.page, 10)
+      : 1;
   const currentPage = isNaN(pageVal) || pageVal < 1 ? 1 : pageVal;
 
-  const view = typeof resolvedSearchParams.view === "string" ? resolvedSearchParams.view : "prompts";
+  const view =
+    typeof resolvedSearchParams.view === "string"
+      ? resolvedSearchParams.view
+      : "prompts";
 
   const params = {
     q:
@@ -285,7 +289,11 @@ export default async function LibraryPage({
 
   const { items, totalCount } =
     view === "workspaces"
-      ? await getLibraryWorkspaces({ q: params.q, sort: params.sort, page: params.page })
+      ? await getLibraryWorkspaces({
+          q: params.q,
+          sort: params.sort,
+          page: params.page,
+        })
       : await getLibraryItems(params);
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
@@ -317,4 +325,3 @@ export default async function LibraryPage({
     </>
   );
 }
-

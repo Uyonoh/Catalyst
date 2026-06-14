@@ -18,18 +18,19 @@ export default async function WorkspacePage({ params }: PageProps) {
   // Fetch workspace details and creator profile
   const { data: workspace, error: wError } = await supabase
     .from("workspaces")
-    .select(`
+    .select(
+      `
       id,
       name,
       description,
       visibility,
       user_id,
       created_at,
-      profiles (
-        full_name,
-        email
+      user_metadata (
+        name
       )
-    `)
+    `,
+    )
     .eq("id", id)
     .single();
 
@@ -39,9 +40,12 @@ export default async function WorkspacePage({ params }: PageProps) {
         <Header />
         <main className="flex-1 flex items-center justify-center relative z-10 px-4">
           <div className="text-center p-8 rounded-2xl glass-panel border border-white/5 max-w-md">
-            <h1 className="text-2xl font-bold text-white mb-2">Workspace not found</h1>
+            <h1 className="text-2xl font-bold text-white mb-2">
+              Workspace not found
+            </h1>
             <p className="text-slate-400 text-sm mb-6">
-              The workspace you are trying to access doesn't exist, is private, or you do not have permission to view it.
+              The workspace you are trying to access doesn't exist, is private,
+              or you do not have permission to view it.
             </p>
             <a
               href="/dashboard"
@@ -59,7 +63,8 @@ export default async function WorkspacePage({ params }: PageProps) {
   // Fetch prompts associated with this workspace
   const { data: prompts = [] } = await supabase
     .from("prompts")
-    .select(`
+    .select(
+      `
       id,
       title,
       content,
@@ -71,17 +76,17 @@ export default async function WorkspacePage({ params }: PageProps) {
       user_id,
       is_favorite,
       profiles (
-        full_name,
-        email
+        name
       )
-    `)
+    `,
+    )
     .eq("workspace_id", id)
     .order("created_at", { ascending: false });
 
   // Map workspace and prompt data
-  const wProfile: any = Array.isArray(workspace.profiles)
-    ? workspace.profiles[0]
-    : workspace.profiles;
+  const wProfile: any = Array.isArray(workspace.user_metadata)
+    ? workspace.user_metadata[0]
+    : workspace.user_metadata;
 
   const workspaceData = {
     id: workspace.id,
@@ -90,13 +95,13 @@ export default async function WorkspacePage({ params }: PageProps) {
     visibility: workspace.visibility || "private",
     user_id: workspace.user_id,
     created_at: workspace.created_at,
-    creatorName: wProfile?.full_name || wProfile?.email?.split("@")[0] || "Architect",
+    creatorName: wProfile?.name || "Architect",
   };
 
   const promptsList = (prompts || []).map((p: any) => {
-    const pProfile: any = Array.isArray(p.profiles)
-      ? p.profiles[0]
-      : p.profiles;
+    const pProfile: any = Array.isArray(p.user_metadata)
+      ? p.user_metadata[0]
+      : p.user_metadata;
 
     return {
       id: p.id,
@@ -109,7 +114,7 @@ export default async function WorkspacePage({ params }: PageProps) {
       created_at: p.created_at,
       user_id: p.user_id,
       is_favorite: p.is_favorite || false,
-      authorName: pProfile?.full_name || pProfile?.email?.split("@")[0] || "Anonymous",
+      authorName: pProfile?.name || "Anonymous",
     };
   });
 
