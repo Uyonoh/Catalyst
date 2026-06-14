@@ -17,6 +17,7 @@ import { useUser } from "../context/AuthContext";
 import { supabaseBrowser } from "../lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { TokenMeter } from "./TokenMeter";
+import NavLinks from "./DesktopNav";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -84,7 +85,8 @@ export default function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">
-          <div className="flex items-center gap-1">
+          <NavLinks user={user ? true : false} />
+          {/*<div className="flex items-center gap-1">
             {user && (
               <Link
                 href="/dashboard"
@@ -117,7 +119,7 @@ export default function Header() {
                 History
               </Link>
             )}
-          </div>
+          </div>*/}
 
           {/* User actions */}
           <div className="flex items-center gap-3 border-l border-white/10 pl-6">
