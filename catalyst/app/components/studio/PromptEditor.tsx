@@ -4,21 +4,21 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import GlassPanel from "../GlassPanel";
 import { useCatalog } from "../../context/CatalogContext";
-import { 
-  ArrowLeft, 
-  Loader2, 
-  Sparkles, 
-  Copy, 
+import {
+  ArrowLeft,
+  Loader2,
+  Sparkles,
+  Copy,
   Check,
-  Save, 
-  Lock, 
+  Save,
+  Lock,
   Globe,
   MessageSquare,
   Terminal,
   Image as ImageIcon,
   Box,
   Palette,
-  Download
+  Download,
 } from "lucide-react";
 
 const ICON_MAP: Record<string, any> = {
@@ -40,12 +40,23 @@ interface PromptEditorProps {
   initialCategory?: string;
   initialTags?: string;
   initialWorkspaceId?: string | null;
-  availableWorkspaces?: { id: string; name: string; visibility: string; user_id: string }[];
+  availableWorkspaces?: {
+    id: string;
+    name: string;
+    visibility: string;
+    user_id: string;
+  }[];
   onDiscard?: () => void;
-  onSave?: (title: string, text: string, category: string, tags: string, workspaceId: string | null) => void;
+  onSave?: (
+    title: string,
+    text: string,
+    category: string,
+    tags: string,
+    workspaceId: string | null,
+  ) => void;
   onVisibilityChange?: (isPublic: boolean) => void;
   onDownload?: (text: string, title: string) => void;
-  userPlan?: 'free' | 'pro' | 'enterprise';
+  userPlan?: "free" | "pro" | "enterprise";
   isLoading?: boolean;
   className?: string;
 }
@@ -65,20 +76,27 @@ export default function PromptEditor({
   onSave,
   onVisibilityChange,
   onDownload,
-  userPlan = 'free',
+  userPlan = "free",
   isLoading = false,
-  className
+  className,
 }: PromptEditorProps) {
-  const canDownload = userPlan === 'pro' || userPlan === 'enterprise';
+  const canDownload = userPlan === "pro" || userPlan === "enterprise";
   const router = useRouter();
   const { models, categories } = useCatalog();
   const [editedText, setEditedText] = useState(initialEditedText);
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory || "");
+  const [selectedCategory, setSelectedCategory] = useState(
+    initialCategory || "",
+  );
   const [editedTitle, setEditedTitle] = useState(title);
   const [editedTags, setEditedTags] = useState(initialTags);
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>(initialWorkspaceId || "");
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>(
+    initialWorkspaceId || "",
+  );
   const [copied, setCopied] = useState(false);
-  const selectedModel = models.find(m => m.slug === selectedModelId || m.name === selectedModelId) || models[0] || { name: "Unknown", icon: "chat" };
+  const selectedModel = models.find(
+    (m) => m.slug === selectedModelId || m.name === selectedModelId,
+  ) ||
+    models[0] || { name: "Unknown", icon: "chat" };
 
   useEffect(() => {
     setEditedText(initialEditedText);
@@ -98,20 +116,30 @@ export default function PromptEditor({
   };
 
   const handleApply = () => {
-    if (onSave) onSave(editedTitle, editedText, selectedCategory, editedTags, selectedWorkspaceId || null);
+    if (onSave)
+      onSave(
+        editedTitle,
+        editedText,
+        selectedCategory,
+        editedTags,
+        selectedWorkspaceId || null,
+      );
   };
 
   const handleDiscard = () => {
     if (onDiscard) onDiscard();
   };
 
-  const baseContainerClass = "flex-1 w-full max-w-[1000px] mx-auto px-4 sm:px-6 flex flex-col gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500";
-  const finalContainerClass = className ? `${baseContainerClass} ${className}` : `${baseContainerClass} pt-4 pb-12`;
+  const baseContainerClass =
+    "flex-1 w-full max-w-[1000px] mx-auto px-4 sm:px-6 flex flex-col gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500";
+  const finalContainerClass = className
+    ? `${baseContainerClass} ${className}`
+    : `${baseContainerClass} pt-4 pb-12`;
 
   return (
     <div className={finalContainerClass}>
       <div className="flex items-center gap-4 mb-2">
-        <button 
+        <button
           onClick={() => {
             if (onDiscard) onDiscard();
             else router.back();
@@ -124,7 +152,7 @@ export default function PromptEditor({
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight text-white flex items-center gap-3">
             Prompt Editor
             {isLoading && (
-               <Loader2 className="animate-spin text-cyan-400 size-6" />
+              <Loader2 className="animate-spin text-cyan-400 size-6" />
             )}
           </h1>
           <p className="text-slate-400 text-sm md:text-base">
@@ -134,12 +162,11 @@ export default function PromptEditor({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
         {/* Main Editor Section */}
         <div className="lg:col-span-8 flex flex-col gap-6">
           <GlassPanel className="p-6 md:p-8 flex flex-col gap-4 relative overflow-hidden group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/20 to-primary/20 rounded-2xl blur opacity-50 transition-opacity duration-500 group-hover:opacity-75" />
-            
+
             <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-4 mb-2">
               <div className="flex items-center gap-3">
                 <div className="bg-cyan-500/20 p-2 rounded-xl text-cyan-400 border border-cyan-500/30">
@@ -153,17 +180,23 @@ export default function PromptEditor({
                     placeholder="Prompt Title"
                     className="w-full text-white font-bold tracking-tight text-lg bg-transparent border-none p-0 focus:outline-none focus:ring-0 placeholder:text-slate-500/50"
                   />
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">Ready for your AI model</p>
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">
+                    Ready for your AI model
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-2">
-                <button 
+                <button
                   onClick={handleCopy}
                   className={`p-2 rounded-lg transition-all ${copied ? "text-emerald-400" : "text-slate-400 hover:text-cyan-400 hover:bg-white/5"}`}
                   title={copied ? "Copied!" : "Copy to clipboard"}
                 >
-                  {copied ? <Check className="size-5" /> : <Copy className="size-5" />}
+                  {copied ? (
+                    <Check className="size-5" />
+                  ) : (
+                    <Copy className="size-5" />
+                  )}
                 </button>
               </div>
             </div>
@@ -190,7 +223,11 @@ export default function PromptEditor({
             <button
               onClick={() => onDownload?.(editedText, editedTitle)}
               disabled={isLoading}
-              title={canDownload ? "Download prompt" : "Upgrade to Pro or Enterprise to download"}
+              title={
+                canDownload
+                  ? "Download prompt"
+                  : "Upgrade to Pro or Enterprise to download"
+              }
               className={`relative w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center justify-center gap-2 ${
                 canDownload
                   ? "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white"
@@ -218,7 +255,6 @@ export default function PromptEditor({
 
         {/* Sidebar Data */}
         <div className="lg:col-span-4 flex flex-col gap-6">
-          
           {/* Only Author Sees Raw Intent */}
           {isAuthor && (
             <GlassPanel className="p-6">
@@ -226,11 +262,13 @@ export default function PromptEditor({
                 <div className="bg-purple-500/20 p-1.5 rounded-lg text-purple-400 shrink-0">
                   <Lock className="size-5" />
                 </div>
-                <span className="text-sm font-bold text-white uppercase tracking-wide">Raw Intent</span>
+                <span className="text-sm font-bold text-white uppercase tracking-wide">
+                  Raw Intent
+                </span>
               </div>
               <div className="p-4 bg-black/30 rounded-lg border border-white/5">
-                <p className="text-slate-400 text-sm italic font-medium leading-relaxed overflow-hidden break-words text-ellipsis line-clamp-6">
-                  "{initialRawIntent || 'Loading intent...'}"
+                <p className="text-slate-400 text-sm italic font-medium leading-relaxed overflow-y-auto h-40">
+                  "{initialRawIntent || "Loading intent..."}"
                 </p>
               </div>
               <p className="text-[10px] text-slate-500 mt-3 text-center uppercase tracking-widest font-bold">
@@ -241,17 +279,23 @@ export default function PromptEditor({
 
           {/* Metadata Panel */}
           <GlassPanel className="p-6">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wide mb-4">Metadata</h3>
-            
+            <h3 className="text-sm font-bold text-white uppercase tracking-wide mb-4">
+              Metadata
+            </h3>
+
             <div className="flex flex-col gap-4">
               <div className="flex justify-between items-center py-2 border-b border-white/5">
                 <span className="text-slate-400 text-sm">Target Engine</span>
                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 border border-white/10 rounded-lg">
                   {(() => {
                     const Icon = ICON_MAP[selectedModel.icon];
-                    return Icon ? <Icon className="size-4 text-cyan-400" /> : null;
+                    return Icon ? (
+                      <Icon className="size-4 text-cyan-400" />
+                    ) : null;
                   })()}
-                  <span className="text-xs text-white font-medium">{selectedModel.name}</span>
+                  <span className="text-xs text-white font-medium">
+                    {selectedModel.name}
+                  </span>
                 </div>
               </div>
 
@@ -282,7 +326,8 @@ export default function PromptEditor({
                   <option value="">None (Personal)</option>
                   {(availableWorkspaces || []).map((w) => (
                     <option key={w.id} value={w.id}>
-                      {w.name} {w.visibility === 'community' ? '(Community)' : ''}
+                      {w.name}{" "}
+                      {w.visibility === "community" ? "(Community)" : ""}
                     </option>
                   ))}
                 </select>
@@ -302,33 +347,35 @@ export default function PromptEditor({
 
               <div className="flex justify-between items-center py-2">
                 <span className="text-slate-400 text-sm">Visibility</span>
-                <button 
+                <button
                   onClick={() => onVisibilityChange?.(!isPublic)}
                   disabled={isLoading}
                   className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border transition-all ${
-                    isPublic 
-                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
+                    isPublic
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
                       : "bg-white/5 border-white/10 text-slate-400 hover:text-white"
                   } hover:scale-105 active:scale-95 cursor-pointer`}
                 >
                   {isPublic ? (
                     <>
                       <Globe className="size-4" />
-                      <span className="text-xs font-medium uppercase tracking-tight">Public</span>
+                      <span className="text-xs font-medium uppercase tracking-tight">
+                        Public
+                      </span>
                     </>
                   ) : (
                     <>
                       <Lock className="size-4" />
-                      <span className="text-xs font-medium uppercase tracking-tight">Private</span>
+                      <span className="text-xs font-medium uppercase tracking-tight">
+                        Private
+                      </span>
                     </>
                   )}
                 </button>
               </div>
             </div>
           </GlassPanel>
-          
         </div>
-
       </div>
     </div>
   );
