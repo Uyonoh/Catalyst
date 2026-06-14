@@ -263,7 +263,7 @@ export default function PromptEditorView({
           title,
           content: text,
           snippet: text.substring(0, 150) + (text.length > 150 ? "..." : ""),
-          raw_input: "",
+          raw_input: content,
           target_model: initialData.target_model,
           user_id: currentUserId,
           is_public: isPublic,
