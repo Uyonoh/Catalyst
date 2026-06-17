@@ -246,7 +246,7 @@ export default function PromptEditorView({
         );
 
         if (!workspace) {
-          console.error("Invalid workspaceID: ", workspaceID);
+          console.error("Invalid workspaceID: ", workspaceId);
           return;
         }
 
@@ -297,7 +297,7 @@ export default function PromptEditorView({
           title,
           content: text,
           snippet: text.substring(0, 150) + (text.length > 150 ? "..." : ""),
-          raw_input: content,
+          raw_input: text,
           target_model: initialData.target_model,
           user_id: currentUserId,
           is_public: isPublic,
