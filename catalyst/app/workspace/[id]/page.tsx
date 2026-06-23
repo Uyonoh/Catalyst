@@ -75,8 +75,8 @@ export default async function WorkspacePage({ params }: PageProps) {
       created_at,
       user_id,
       is_favorite,
-      profiles (
-        full_name
+      user_metadata (
+        name
       )
     `,
     )
@@ -99,9 +99,9 @@ export default async function WorkspacePage({ params }: PageProps) {
   };
 
   const promptsList = (prompts || []).map((p: any) => {
-    const pProfile: any = Array.isArray(p.profiles)
-      ? p.profiles[0]
-      : p.profiles;
+    const pProfile: any = Array.isArray(p.user_metadata)
+      ? p.user_metadata[0]
+      : p.user_metadata;
 
     return {
       id: p.id,
@@ -114,7 +114,7 @@ export default async function WorkspacePage({ params }: PageProps) {
       created_at: p.created_at,
       user_id: p.user_id,
       is_favorite: p.is_favorite || false,
-      authorName: pProfile?.full_name || "Anonymous",
+      authorName: pProfile?.name || "Anonymous",
     };
   });
 
