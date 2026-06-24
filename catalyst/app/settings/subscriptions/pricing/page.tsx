@@ -3,19 +3,19 @@
 import { useState } from "react";
 import { Check, Sparkles, Zap, Shield, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useUser } from "../../../context/AuthContext";
 
 const TIERS = [
   {
-    name: "Free Tier",
+    name: "Free",
     price: "$0",
     period: "forever",
-    description: "Ideal for beginners and hobbyists seeking core prompt optimization tools.",
+    description:
+      "Ideal for beginners and hobbyists seeking core prompt optimization tools.",
     features: [
       "Access to standard models (GPT-3.5, Gemini Flash)",
-      "Up to 50 optimized prompts total",
-      "Up to 5 workspace folders",
-      "1,000 daily token limit",
-      "Basic live analyses",
+      "100 monthly token limit",
+      "Up to 20 saved prompts",
     ],
     cta: "Current Plan",
     tierKey: "free",
@@ -25,43 +25,20 @@ const TIERS = [
     borderClass: "border-white/10",
     glowClass: "",
   },
- {
-    name: "Basic Tier",
-    price: "$10",
-    period: "per month",
-    description: "Designed for professionals, power prompt engineers, and advanced creators.",
-    features: [
-      "Access to premium models (GPT-4o, Claude Opus, Midjourney v6)",
-      "Unlimited optimized prompts",
-      "Unlimited workspace folders",
-      "50,000 daily token limit",
-      "Deep Intent & live NLP analysis",
-      "Priority prompt rendering queue",
-    ],
-    cta: "Upgrade to Pro",
-    tierKey: "pro",
-    highlight: true,
-    icon: Sparkles,
-    colorClass: "text-cyan-400",
-    borderClass: "border-cyan-500/30",
-    glowClass: "shadow-[0_0_30px_rgba(6,182,212,0.15)]",
-  },
-
   {
-    name: "Pro Tier",
-    price: "$20",
+    name: "Basic",
+    price: "$3",
     period: "per month",
-    description: "Designed for professionals, power prompt engineers, and advanced creators.",
+    description:
+      "Designed for professionals, power prompt engineers, and advanced creators.",
     features: [
-      "Access to premium models (GPT-4o, Claude Opus, Midjourney v6)",
-      "Unlimited optimized prompts",
-      "Unlimited workspace folders",
-      "50,000 daily token limit",
-      "Deep Intent & live NLP analysis",
-      "Priority prompt rendering queue",
+      "access to premium models (gpt-4o, claude opus, midjourney v6)",
+      "up to 50 saved prompts",
+      "up to 3 managed workspaces",
+      "100 weekly token limit",
     ],
-    cta: "Upgrade to Pro",
-    tierKey: "pro",
+    cta: "upgrade to Basic",
+    tierKey: "basic",
     highlight: false,
     icon: Sparkles,
     colorClass: "text-cyan-400",
@@ -69,20 +46,69 @@ const TIERS = [
     glowClass: "shadow-[0_0_30px_rgba(6,182,212,0.15)]",
   },
   {
-    name: "Enterprise Tier",
-    price: "$50",
+    name: "plus",
+    price: "$7",
     period: "per month",
-    description: "Built for studios, agencies, and high-frequency production systems.",
+    description:
+      "designed for professionals, power prompt engineers, and advanced creators.",
+    cta: "Upgrade to Plus",
     features: [
-      "Unlimited daily tokens (zero limit)",
-      "Access to ultra-advanced & fine-tuned custom models",
-      "Dedicated high-speed rendering pipelines",
-      "Enterprise analytics and log audits",
-      "Dedicated customer support manager",
-      "Custom integration features",
+      "access to premium models (gpt-4o, claude opus, midjourney v6)",
+      "up to 100 saved prompts",
+      "up to 10 managed workspaces",
+      "250 weekly token limit",
     ],
-    cta: "Upgrade to Enterprise",
-    tierKey: "enterprise",
+    tierKey: "plus",
+    highlight: true,
+    icon: Sparkles,
+    colorClass: "text-blue-400",
+    borderClass: "border-blue-500/30",
+    bgClass: "bg-blue-500",
+    hoverClass: "bg-red-400",
+    glowClass: "shadow-[0_0_30px_rgba(59,130,246,0.15)]",
+  },
+  {
+    name: "Pro",
+    price: "$12",
+    period: "per month",
+    description:
+      "Built for studios, agencies, and high-frequency production systems.",
+    features: [
+      "access to premium models (gpt-4o, claude opus, midjourney v6)",
+      "up to 200 saved prompts",
+      "up to 30 managed workspaces",
+      "300 weekly token limit",
+    ],
+    cta: "Upgrade to Pro",
+    tierKey: "pro",
+    highlight: false,
+    icon: Shield,
+    colorClass: "text-amber-400", // Closest match to gold
+    borderClass: "border-yellow-500/20",
+    glowClass: "shadow-[0_0_30px_rgba(245,158,11,0.15)]",
+  },
+  {
+    name: "Ultra",
+    price: "$20",
+    period: "per month",
+    description:
+      "Built for studios, agencies, and high-frequency production systems.",
+    // features: [
+    //   "Unlimited daily tokens (zero limit)",
+    //   "Access to ultra-advanced & fine-tuned custom models",
+    //   "Dedicated high-speed rendering pipelines",
+    //   "Enterprise analytics and log audits",
+    //   "Dedicated customer support manager",
+    //   "Custom integration features",
+    // ],
+    features: [
+      "access to premium models (gpt-4o, claude opus, midjourney v6)",
+      "Unlimited saved prompts",
+      "Unlimited managed workspaces",
+      "Unlimited tokens",
+    ],
+    cta: "Upgrade to Ultra",
+    tierKey: "ultra",
     highlight: false,
     icon: Shield,
     colorClass: "text-purple-400",
@@ -94,6 +120,8 @@ const TIERS = [
 export default function PricingPage() {
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const { profile } = useUser();
+  const currentPlan = profile?.plan ?? "free";
 
   const handleSubscribe = async (tier: string) => {
     if (tier === "free") return;
@@ -112,7 +140,9 @@ export default function PricingPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Something went wrong. Please try again.");
+        throw new Error(
+          result.message || "Something went wrong. Please try again.",
+        );
       }
 
       if (result.url) {
@@ -139,9 +169,12 @@ export default function PricingPage() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-black text-white tracking-tight">Subscription Plans</h2>
+        <h2 className="text-3xl font-black text-white tracking-tight">
+          Subscription Plans
+        </h2>
         <p className="text-slate-400 text-sm max-w-xl">
-          Choose the billing plan that fits your prompt development lifecycle. Scale up or cancel at any time.
+          Choose the billing plan that fits your prompt development lifecycle.
+          Scale up or cancel at any time.
         </p>
       </div>
 
@@ -155,7 +188,7 @@ export default function PricingPage() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-4">
         {TIERS.map((tier) => {
           const Icon = tier.icon;
-          const isCurrentPlan = tier.tierKey === "free"; // For UI demo context
+          const isCurrentPlan = tier.tierKey === currentPlan; // For UI demo context
           if (!tier.borderClass) {
             console.error(
               `Tier ${tier.name} has no border set: ${JSON.stringify(tier)}`,
@@ -170,21 +203,29 @@ export default function PricingPage() {
               }`}
             >
               {tier.highlight && (
-                <div className="absolute -top-3.5 right-6 px-3.5 py-1 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(6,182,212,0.4)]">
+                <div
+                  className={`absolute -top-3.5 right-6 px-3.5 py-1 ${tier.bgClass} text-black text-[10px] font-black uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(6,182,212,0.4)]`}
+                >
                   Most Popular
                 </div>
               )}
 
               <div className="flex flex-col gap-5">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2.5 rounded-xl bg-white/5 border border-white/5`}>
+                  <div
+                    className={`p-2.5 rounded-xl bg-white/5 border border-white/5`}
+                  >
                     <Icon className={`size-5 ${tier.colorClass}`} />
                   </div>
-                  <h3 className="text-lg font-bold text-white leading-none">{tier.name}</h3>
+                  <h3 className="text-lg font-bold text-white leading-none">
+                    {tier.name}
+                  </h3>
                 </div>
 
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-4xl font-extrabold text-white tracking-tight">{tier.price}</span>
+                  <span className="text-4xl font-extrabold text-white tracking-tight">
+                    {tier.price}
+                  </span>
                   <span className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
                     / {tier.period}
                   </span>
@@ -223,7 +264,7 @@ export default function PricingPage() {
                     disabled={loadingTier !== null}
                     className={`w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                       tier.highlight
-                        ? "bg-cyan-500 hover:bg-cyan-400 text-black hover:-translate-y-0.5 active:scale-95 shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+                        ? `${tier.bgClass} hover:${tier.hoverClass} text-black hover:-translate-y-0.5 active:scale-95 ${tier.glowClass}`
                         : "bg-white/5 hover:bg-white/10 border border-white/10 text-white hover:-translate-y-0.5 active:scale-95"
                     } disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
                   >
