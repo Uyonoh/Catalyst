@@ -1,17 +1,69 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Plus, X, SlidersHorizontal, Globe, Users, Eye } from "lucide-react";
+import { Search, Plus, X, SlidersHorizontal, Globe, Users, Eye, FolderPlus, Loader2, PlusCircle, AlertTriangle } from "lucide-react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import WorkspaceFilters from "./WorkspaceFilters";
+import { useUser } from "../../context/AuthContext";
+import { supabaseBrowser } from "../../lib/supabase-browser";
 
 export default function WorkspaceSearch() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { user } = useUser();
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
+  // Creation modal states
+  const [isCreating, setIsCreating] = useState(false);
+  const [newWorkspaceName, setNewWorkspaceName] = useState("");
+  const [newWorkspaceDesc, setNewWorkspaceDesc] = useState("");
+  const [newWorkspaceVisibility, setNewWorkspaceVisibility] = useState<
+    "private" | "public" | "community"
+  >("private");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleCreateWorkspace = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newWorkspaceName.trim() || !user) return;
+
+    setIsLoading(true);
+    setErrorMsg("");
+
+    try {
+      const { data, error } = await supabaseBrowser
+        .from("workspaces")
+        .insert({
+          name: newWorkspaceName.trim(),
+          description: newWorkspaceDesc.trim() || null,
+          visibility: newWorkspaceVisibility,
+          user_id: user.id,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data) {
+        setNewWorkspaceName("");
+        setNewWorkspaceDesc("");
+        setNewWorkspaceVisibility("private");
+        setIsCreating(false);
+        // Redirect to the newly created workspace
+        router.push(`/workspace/${data.id}`);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message || "Failed to create workspace");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   // Visibility is 'all' by default, or read from url
   const currentVisibility = searchParams.get("visibility") || "all";
@@ -110,9 +162,15 @@ export default function WorkspaceSearch() {
               )}
             </button>
             <button
-              className="h-12 w-12 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-lg hover:shadow-cyan-500/20 active:scale-95"
+              className="h-12 w-12 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-lg hover:shadow-cyan-500/20 active:scale-95 cursor-pointer"
               title="Create New Workspace"
-              onClick={() => router.push("/")}
+              onClick={() => {
+                if (!user) {
+                  router.push("/login");
+                } else {
+                  setIsCreating(true);
+                }
+              }}
             >
               <Plus className="size-6 font-bold" />
             </button>
@@ -147,6 +205,105 @@ export default function WorkspaceSearch() {
       </div>
 
       <WorkspaceFilters isOpen={isFiltersOpen} onClose={() => setIsFiltersOpen(false)} />
+
+      {/* Creation Modal */}
+      {isCreating && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+            onClick={() => setIsCreating(false)}
+          />
+          <div className="relative z-10 w-full max-w-md rounded-xl border border-white/10 bg-[#0c1520] p-6 shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center gap-3 mb-4 border-b border-white/10 pb-3">
+              <div className="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                <FolderPlus className="size-5" />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-base">Create New Workspace</h3>
+                <p className="text-slate-400 text-xs mt-0.5">Initialize a new engineering workspace</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleCreateWorkspace} className="flex flex-col gap-4">
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  Workspace Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newWorkspaceName}
+                  onChange={(e) => setNewWorkspaceName(e.target.value)}
+                  placeholder="E.g., Production Copilot"
+                  maxLength={40}
+                  className="w-full bg-black/40 border border-white/10 rounded-lg text-white text-xs p-2.5 outline-none focus:border-cyan-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  Privacy / Visibility
+                </label>
+                <select
+                  value={newWorkspaceVisibility}
+                  onChange={(e: any) => setNewWorkspaceVisibility(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-lg text-slate-200 text-xs p-2.5 outline-none focus:border-cyan-500 transition-colors cursor-pointer"
+                >
+                  <option value="private">Private (Only me)</option>
+                  <option value="public">Public (Read-only for others)</option>
+                  <option value="community">
+                    Community (Read-write for others)
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  Description (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={newWorkspaceDesc}
+                  onChange={(e) => setNewWorkspaceDesc(e.target.value)}
+                  placeholder="Briefly describe the workspace scope..."
+                  maxLength={80}
+                  className="w-full bg-black/40 border border-white/10 rounded-lg text-white text-xs p-2.5 outline-none focus:border-cyan-500 transition-colors"
+                />
+              </div>
+
+              {errorMsg && (
+                <span className="text-[10px] text-rose-400 font-medium">
+                  {errorMsg}
+                </span>
+              )}
+
+              <div className="flex items-center justify-end gap-3 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCreating(false)}
+                  className="px-4 py-2.5 text-xs font-bold text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading || !newWorkspaceName.trim()}
+                  className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold rounded-lg hover:shadow-lg transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  {isLoading ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <>
+                      <PlusCircle className="size-4" />
+                      Create Workspace
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }
