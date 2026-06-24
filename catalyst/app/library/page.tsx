@@ -4,6 +4,7 @@ import LibraryBackground from "../components/library/LibraryBackground";
 import LibraryHero from "../components/library/LibraryHero";
 import LibraryFeatured from "../components/library/LibraryFeatured";
 import LibrarySearch from "../components/library/LibrarySearch";
+import WorkspaceSearch from "../components/library/WorkspaceSearch";
 import LibraryTags from "../components/library/LibraryTags";
 import LibraryGrid from "../components/library/LibraryGrid";
 import Pagination from "../components/Pagination";
@@ -26,6 +27,7 @@ async function getLibraryWorkspaces(searchParams: {
   q?: string;
   sort?: string;
   page?: number;
+  visibility?: string;
 }): Promise<{ items: LibraryItem[]; totalCount: number }> {
   let query = supabase
     .from("workspaces")
@@ -41,8 +43,13 @@ async function getLibraryWorkspaces(searchParams: {
         name
       )
       `,
-    )
-    .in("visibility", ["community", "public"]);
+    );
+
+  if (searchParams.visibility && ["community", "public"].includes(searchParams.visibility)) {
+    query = query.eq("visibility", searchParams.visibility);
+  } else {
+    query = query.in("visibility", ["community", "public"]);
+  }
 
   if (searchParams.q) {
     query = query.or(
@@ -284,6 +291,10 @@ export default async function LibraryPage({
       typeof resolvedSearchParams.sort === "string"
         ? resolvedSearchParams.sort
         : undefined,
+    visibility:
+      typeof resolvedSearchParams.visibility === "string"
+        ? resolvedSearchParams.visibility
+        : undefined,
     page: currentPage,
   };
 
@@ -293,6 +304,7 @@ export default async function LibraryPage({
           q: params.q,
           sort: params.sort,
           page: params.page,
+          visibility: params.visibility,
         })
       : await getLibraryItems(params);
 
@@ -309,7 +321,7 @@ export default async function LibraryPage({
           <LibraryHero />
           <LibraryViewToggle />
           {view !== "workspaces" && <LibraryFeatured />}
-          <LibrarySearch />
+          {view === "workspaces" ? <WorkspaceSearch /> : <LibrarySearch />}
           {view !== "workspaces" && <LibraryTags />}
           <LibraryGrid items={items} />
           <Pagination
