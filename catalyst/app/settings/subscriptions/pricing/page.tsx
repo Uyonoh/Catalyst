@@ -156,6 +156,11 @@ export default function PricingPage() {
         {TIERS.map((tier) => {
           const Icon = tier.icon;
           const isCurrentPlan = tier.tierKey === "free"; // For UI demo context
+          if (!tier.borderClass) {
+            console.error(
+              `Tier ${tier.name} has no border set: ${JSON.stringify(tier)}`,
+            );
+          }
 
           return (
             <div
