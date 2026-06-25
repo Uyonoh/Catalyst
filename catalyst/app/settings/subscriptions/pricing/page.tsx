@@ -9,7 +9,7 @@ const TIERS = [
   {
     name: "Free",
     alias: "Spark",
-    price: "$0",
+    price: 0,
     period: "forever",
     description:
       "Ideal for beginners and hobbyists seeking core prompt optimization tools.",
@@ -31,7 +31,7 @@ const TIERS = [
   {
     name: "Basic",
     alias: "Orbit",
-    price: "$3",
+    price: 3,
     period: "per month",
     description:
       "Designed for professionals, power prompt engineers, and advanced creators.",
@@ -54,7 +54,7 @@ const TIERS = [
   {
     name: "Plus",
     alias: "Nova",
-    price: "$7",
+    price: 7,
     period: "per month",
     description:
       "designed for professionals, power prompt engineers, and advanced creators.",
@@ -77,7 +77,7 @@ const TIERS = [
   {
     name: "Pro",
     alias: "Pulsar",
-    price: "$12",
+    price: 12,
     period: "per month",
     description:
       "Built for studios, agencies, and high-frequency production systems.",
@@ -101,7 +101,7 @@ const TIERS = [
   {
     name: "Ultra",
     alias: "Infinity",
-    price: "$20",
+    price: 20,
     period: "per month",
     description:
       "Built for studios, agencies, and high-frequency production systems.",
@@ -241,7 +241,7 @@ export default function PricingPage() {
 
                 <div className="flex items-baseline gap-1 mt-2">
                   <span className="text-4xl font-extrabold text-white tracking-tight">
-                    {tier.price}
+                    ${tier.price}
                   </span>
                   <span className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
                     / {tier.period}
