@@ -1,7 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { Check, Sparkles, Orbit, Aperture, Activity, Infinity, Zap, Shield, Loader2, ArrowLeft } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  Check,
+  Sparkles,
+  Orbit,
+  Aperture,
+  Activity,
+  Infinity,
+  Zap,
+  Shield,
+  Loader2,
+  ArrowLeft,
+} from "lucide-react";
 import Link from "next/link";
 import { useUser } from "../../../context/AuthContext";
 
@@ -136,11 +147,31 @@ const TIERS = [
   },
 ];
 
+async function getUserCurrency() {
+  const response = await fetch("/api/detect-currency");
+  const data = await response.json();
+
+  return data.currencyData;
+}
+
 export default function PricingPage() {
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [symbol, setSymbol] = useState<string | null>(null);
   const { profile } = useUser();
   const currentPlan = profile?.plan ?? "free";
+
+  useEffect(() => {
+    const fetchSymbol = async () => {
+      const response = await fetch("/api/detect-currency");
+      const data = await response.json();
+
+      setSymbol(data.currencyData.symbol ?? "$");
+      // console.log("CUR: ", data.currencyData);
+    };
+
+    fetchSymbol();
+  }, []);
 
   const handleSubscribe = async (tier: string) => {
     if (tier === "free") return;
@@ -230,7 +261,9 @@ export default function PricingPage() {
               )}
 
               <div className="flex flex-col gap-5">
-                <h2 className={`text-center text-2xl font-bold leading-none ${tier.colorClass}`}>
+                <h2
+                  className={`text-center text-2xl font-bold leading-none ${tier.colorClass}`}
+                >
                   {tier.alias}
                 </h2>
                 <div className="flex items-center gap-3">
@@ -239,25 +272,40 @@ export default function PricingPage() {
                   >
                     <Icon className={`size-5 ${tier.colorClass}`} />
                   </div>
-                  <h3 className={`text-lg font-bold ${tier.colorClass} leading-none`}>
+                  <h3
+                    className={`text-lg font-bold ${tier.colorClass} leading-none`}
+                  >
                     {tier.name}
                   </h3>
                 </div>
 
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span className={`tracking-tight ${
-                    tier.discountedPrice ? "line-through text-slate-400 text-2xl text-bold" : "text-white text-4xl font-extrabold "}`}>
+                  <span
+                    className={`tracking-tight ${
+                      tier.discountedPrice
+                        ? "line-through text-slate-400 text-2xl text-bold"
+                        : "text-white text-4xl font-extrabold "
+                    }`}
+                  >
                     ${tier.price}
                   </span>
                   {tier.discountedPrice && (
                     <span className="text-white text-4xl font-extrabold trackiing-tight">
-                     ${tier.discountedPrice}
+                      ${tier.discountedPrice}
                     </span>
                   )}
                   <span className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
                     / {tier.period}
                   </span>
                 </div>
+                {symbol != "$" && (
+                  <div className="flex items-baseline gap-1 mt-2">
+                    <span className="text-white text-4xl font-extrabold trackiing-tight">
+                      {symbol}
+                      {tier.discountedPrice * 1350}
+                    </span>
+                  </div>
+                )}
 
                 <p className="text-xs text-slate-400 leading-relaxed font-medium mt-1">
                   {tier.description}
@@ -284,7 +332,7 @@ export default function PricingPage() {
               <div className="mt-8">
                 {isCurrentPlan ? (
                   <div className="w-full text-center py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-400 cursor-not-allowed">
-                     Active Plan
+                    Active Plan
                   </div>
                 ) : (
                   <button

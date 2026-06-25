@@ -8,7 +8,7 @@ export async function GET(request) {
 
   try {
     // Call a free IP geolocation API
-    const res = await fetch(`http://ip-api.com/json/197.211.63.112`);
+    const res = await fetch(`http://ip-api.com/json/${ip}`);
     const data = await res.json();
 
     // Define your supported locations and target currencies
