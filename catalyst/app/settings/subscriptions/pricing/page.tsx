@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Sparkles, Zap, Shield, Loader2, ArrowLeft } from "lucide-react";
+import { Check, Sparkles, Orbit, Aperture, Activity, Infinity, Zap, Shield, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "../../../context/AuthContext";
 
 const TIERS = [
   {
     name: "Free",
+    alias: "Spark",
     price: "$0",
     period: "forever",
     description:
@@ -29,6 +30,7 @@ const TIERS = [
   },
   {
     name: "Basic",
+    alias: "Orbit",
     price: "$3",
     period: "per month",
     description:
@@ -51,6 +53,7 @@ const TIERS = [
   },
   {
     name: "Plus",
+    alias: "Nova",
     price: "$7",
     period: "per month",
     description:
@@ -73,6 +76,7 @@ const TIERS = [
   },
   {
     name: "Pro",
+    alias: "Pulsar",
     price: "$12",
     period: "per month",
     description:
@@ -96,6 +100,7 @@ const TIERS = [
   },
   {
     name: "Ultra",
+    alias: "Infinity",
     price: "$20",
     period: "per month",
     description:
@@ -220,6 +225,9 @@ export default function PricingPage() {
               )}
 
               <div className="flex flex-col gap-5">
+                <h2 className={`text-center text-2xl font-bold leading-none ${tier.colorClass}`}>
+                  {tier.alias}
+                </h2>
                 <div className="flex items-center gap-3">
                   <div
                     className={`p-2.5 rounded-xl bg-white/5 border border-white/5`}
