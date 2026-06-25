@@ -274,7 +274,7 @@ export default function PricingPage() {
                     className={`w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                       tier.highlight
                         ? `${tier.bgClass} hover:${tier.hoverClass} text-black hover:-translate-y-0.5 active:scale-95 ${tier.glowClass}`
-                        : "bg-white/5 hover:bg-white/10 border border-white/10 text-white hover:-translate-y-0.5 active:scale-95"
+                        : `${tier.bgClass} hover:${tier.hoverClass} border border-white/10 text-white hover:-translate-y-0.5 active:scale-95`
                     } disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
                   >
                     {loadingTier === tier.tierKey ? (
