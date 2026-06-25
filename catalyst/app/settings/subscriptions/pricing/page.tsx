@@ -17,7 +17,7 @@ const TIERS = [
       "100 monthly token limit",
       "Up to 20 saved prompts",
     ],
-    cta: "Current Plan",
+    cta: "Default Plan",
     tierKey: "free",
     highlight: false,
     icon: Zap,
@@ -39,7 +39,7 @@ const TIERS = [
       "up to 3 managed workspaces",
       "100 weekly token limit",
     ],
-    cta: "upgrade to Basic",
+    cta: "Switch to Basic",
     tierKey: "basic",
     highlight: false,
     icon: Sparkles,
@@ -55,7 +55,7 @@ const TIERS = [
     period: "per month",
     description:
       "designed for professionals, power prompt engineers, and advanced creators.",
-    cta: "Upgrade to Plus",
+    cta: "Switch to Plus",
     features: [
       "access to premium models (gpt-4o, claude opus, midjourney v6)",
       "up to 100 saved prompts",
@@ -65,10 +65,10 @@ const TIERS = [
     tierKey: "plus",
     highlight: true,
     icon: Sparkles,
-    colorClass: "text-blue-400",
-    borderClass: "border-blue-500/30",
-    bgClass: "bg-blue-500",
-    hoverClass: "bg-blue-400",
+    colorClass: "text-blue-300",
+    borderClass: "border-blue-400/30",
+    bgClass: "bg-blue-400",
+    hoverClass: "bg-blue-300",
     glowClass: "shadow-[0_0_30px_rgba(59,130,246,0.15)]",
   },
   {
@@ -83,7 +83,7 @@ const TIERS = [
       "up to 30 managed workspaces",
       "300 weekly token limit",
     ],
-    cta: "Upgrade to Pro",
+    cta: "Switch to Pro",
     tierKey: "pro",
     highlight: false,
     icon: Shield,
@@ -114,7 +114,7 @@ const TIERS = [
       "Unlimited managed workspaces",
       "Unlimited tokens",
     ],
-    cta: "Upgrade to Ultra",
+    cta: "Switch to Ultra",
     tierKey: "ultra",
     highlight: false,
     icon: Shield,
@@ -274,7 +274,7 @@ export default function PricingPage() {
                     className={`w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                       tier.highlight
                         ? `${tier.bgClass} hover:${tier.hoverClass} text-black hover:-translate-y-0.5 active:scale-95 ${tier.glowClass}`
-                        : `${tier.bgClass} hover:${tier.hoverClass} border border-white/10 text-white hover:-translate-y-0.5 active:scale-95`
+                        : `text-white ${tier.bgClass} hover:${tier.hoverClass} border border-white/10  hover:-translate-y-0.5 active:scale-95`
                     } disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
                   >
                     {loadingTier === tier.tierKey ? (
