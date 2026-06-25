@@ -23,6 +23,8 @@ const TIERS = [
     icon: Zap,
     colorClass: "text-slate-400",
     borderClass: "border-white/10",
+    bgClass: "bg-slate-500",
+    hoverClass: "bg-slate-400 text-white",
     glowClass: "",
   },
   {
@@ -43,10 +45,12 @@ const TIERS = [
     icon: Sparkles,
     colorClass: "text-cyan-400",
     borderClass: "border-cyan-500/30",
+    bgClass: "bg-cyan-500",
+    hoverClass: "bg-cyan-400",
     glowClass: "shadow-[0_0_30px_rgba(6,182,212,0.15)]",
   },
   {
-    name: "plus",
+    name: "Plus",
     price: "$7",
     period: "per month",
     description:
@@ -64,7 +68,7 @@ const TIERS = [
     colorClass: "text-blue-400",
     borderClass: "border-blue-500/30",
     bgClass: "bg-blue-500",
-    hoverClass: "bg-red-400",
+    hoverClass: "bg-blue-400",
     glowClass: "shadow-[0_0_30px_rgba(59,130,246,0.15)]",
   },
   {
@@ -85,6 +89,9 @@ const TIERS = [
     icon: Shield,
     colorClass: "text-amber-400", // Closest match to gold
     borderClass: "border-yellow-500/20",
+    bgClass: "bg-amber-500",
+    hoverClass: "bg-amber-400",
+
     glowClass: "shadow-[0_0_30px_rgba(245,158,11,0.15)]",
   },
   {
@@ -113,6 +120,8 @@ const TIERS = [
     icon: Shield,
     colorClass: "text-purple-400",
     borderClass: "border-purple-500/20",
+    bgClass: "bg-purple-500",
+    hoverClass: "bg-purple-400",
     glowClass: "shadow-[0_0_30px_rgba(168,85,247,0.1)]",
   },
 ];
@@ -217,7 +226,7 @@ export default function PricingPage() {
                   >
                     <Icon className={`size-5 ${tier.colorClass}`} />
                   </div>
-                  <h3 className="text-lg font-bold text-white leading-none">
+                  <h3 className={`text-lg font-bold ${tier.colorClass} leading-none`}>
                     {tier.name}
                   </h3>
                 </div>
@@ -256,7 +265,7 @@ export default function PricingPage() {
               <div className="mt-8">
                 {isCurrentPlan ? (
                   <div className="w-full text-center py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-400 cursor-not-allowed">
-                    Default Active Plan
+                     Active Plan
                   </div>
                 ) : (
                   <button
