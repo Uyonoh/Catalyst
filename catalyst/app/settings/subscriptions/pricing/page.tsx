@@ -10,6 +10,7 @@ const TIERS = [
     name: "Free",
     alias: "Spark",
     price: 0,
+    discountedPrice: null,
     period: "forever",
     description:
       "Ideal for beginners and hobbyists seeking core prompt optimization tools.",
@@ -32,6 +33,7 @@ const TIERS = [
     name: "Basic",
     alias: "Orbit",
     price: 3,
+    discountedPrice: 1,
     period: "per month",
     description:
       "Designed for professionals, power prompt engineers, and advanced creators.",
@@ -55,6 +57,7 @@ const TIERS = [
     name: "Plus",
     alias: "Nova",
     price: 7,
+    discountedPrice: 3,
     period: "per month",
     description:
       "designed for professionals, power prompt engineers, and advanced creators.",
@@ -78,6 +81,7 @@ const TIERS = [
     name: "Pro",
     alias: "Pulsar",
     price: 12,
+    discountedPrice: 5,
     period: "per month",
     description:
       "Built for studios, agencies, and high-frequency production systems.",
@@ -102,6 +106,7 @@ const TIERS = [
     name: "Ultra",
     alias: "Infinity",
     price: 20,
+    discountedPrice: 10,
     period: "per month",
     description:
       "Built for studios, agencies, and high-frequency production systems.",
@@ -240,9 +245,15 @@ export default function PricingPage() {
                 </div>
 
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-4xl font-extrabold text-white tracking-tight">
+                  <span className={`tracking-tight ${
+                    tier.discountedPrice ? "line-through text-slate-400 text-2xl text-bold" : "text-white text-4xl font-extrabold "}`}>
                     ${tier.price}
                   </span>
+                  {tier.discountedPrice && (
+                    <span className="text-white text-4xl font-extrabold trackiing-tight">
+                     ${tier.discountedPrice}
+                    </span>
+                  )}
                   <span className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
                     / {tier.period}
                   </span>
