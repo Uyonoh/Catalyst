@@ -303,7 +303,7 @@ export default function PricingPage() {
                     / {tier.period}
                   </span>
                 </div>
-                {symbol != "$" && rate && (
+                {symbol != "$" && rate && tier.discountedPrice && (
                   <div className="flex items-baseline gap-1 mt-2">
                     <span className="text-white text-2xl font-bold trackiing-tight">
                       {symbol}

@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   const supabase = await createClient();
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    const plans = {
+    const plans: Record<string, string | null | undefined> = {
       "free": null,
       "basic": process.env.NEXT_PUBLIC_PAYSTACK_PLAN_BASIC,
       "plus": process.env.NEXT_PUBLIC_PAYSTACK_PLAN_PLUS,

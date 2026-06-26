@@ -1,10 +1,18 @@
 // app/api/detect-currency/route.js
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 
-export async function GET(request) {
+export async function GET(request: NextRequest) {
   // Read the client IP address from Netlify's forwarded headers
   const forwardedFor = request.headers.get("x-forwarded-for");
   const ip = forwardedFor ? forwardedFor.split(",")[0] : "8.8.8.8";
+
+  interface CountryDetails {
+   currency: string;
+   symbol: string;
+  };
+  
+  type supportedCountryCodes = "NG" | "US";
+  type Countries = Record<supportedCountryCodes, CountryDetails>
 
   try {
     // Call a free IP geolocation API
@@ -12,11 +20,12 @@ export async function GET(request) {
     const data = await res.json();
 
     // Define your supported locations and target currencies
-    const supportedCountries = {
-      NG: { currency: "NGN", symbol: "₦" },
+    const supportedCountries: Countries = {
+      "NG": { currency: "NGN", symbol: "₦" },
+      "US": { currency: "USD", symbol: "$" },
     };
 
-    const userCountry = data.countryCode;
+    const userCountry: supportedCountryCodes = data.countryCode;
     console.log("data: ", data);
 
     if (userCountry && supportedCountries[userCountry]) {
