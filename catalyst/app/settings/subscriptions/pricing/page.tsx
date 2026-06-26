@@ -158,6 +158,7 @@ export default function PricingPage() {
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [symbol, setSymbol] = useState<string | null>(null);
+  const [rate, setRate] = useState<number | null>(null);
   const { profile } = useUser();
   const currentPlan = profile?.plan ?? "free";
 
@@ -165,9 +166,13 @@ export default function PricingPage() {
     const fetchSymbol = async () => {
       const response = await fetch("/api/detect-currency");
       const data = await response.json();
-
       setSymbol(data.currencyData.symbol ?? "$");
       // console.log("CUR: ", data.currencyData);
+      const rateResponse = await fetch(
+        `https://www.currencyexchangetool.com/api/v1/convert?from=USD&to=${data.currencyData.currency}&amount=1`,
+      );
+      const rateData = await rateResponse.json();
+      setRate(rateData.rate);
     };
 
     fetchSymbol();
@@ -298,11 +303,12 @@ export default function PricingPage() {
                     / {tier.period}
                   </span>
                 </div>
-                {symbol != "$" && (
+                {symbol != "$" && rate && (
                   <div className="flex items-baseline gap-1 mt-2">
-                    <span className="text-white text-4xl font-extrabold trackiing-tight">
+                    <span className="text-white text-2xl font-bold trackiing-tight">
                       {symbol}
-                      {tier.discountedPrice * 1350}
+                      {"\u00A0"}
+                      {(tier.discountedPrice * rate).toLocaleString("en-us")}
                     </span>
                   </div>
                 )}
