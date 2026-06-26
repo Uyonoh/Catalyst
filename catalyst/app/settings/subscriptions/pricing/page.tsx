@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { type LucideIcon } from "lucide-react";
 import {
   Check,
   Sparkles,
@@ -16,7 +17,26 @@ import {
 import Link from "next/link";
 import { useUser } from "../../../context/AuthContext";
 
-const TIERS = [
+interface Tier {
+  name: string;
+  alias: string;
+  price: number; 
+  discountedPrice: number | null;
+  period: string;
+  description: string;
+  features: string[];
+  cta: string;
+  tierKey: string;
+  highlight: boolean;
+  icon: LucideIcon; 
+  colorClass: string;
+  borderClass: string;
+  bgClass: string;
+  hoverClass: string;
+  glowClass: string;
+};
+
+const TIERS: Tier[] = [
   {
     name: "Free",
     alias: "Spark",
@@ -157,8 +177,9 @@ async function getUserCurrency() {
 export default function PricingPage() {
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [symbol, setSymbol] = useState<string | null>(null);
-  const [rate, setRate] = useState<number | null>(null);
+  const [symbol, setSymbol] = useState<string>("$");
+  const [currency, setCurrency] = useState<string>("USD");
+  const [rate, setRate] = useState<number>(1);
   const { profile } = useUser();
   const currentPlan = profile?.plan ?? "free";
 
@@ -167,18 +188,25 @@ export default function PricingPage() {
       const response = await fetch("/api/detect-currency");
       const data = await response.json();
       setSymbol(data.currencyData.symbol ?? "$");
-      // console.log("CUR: ", data.currencyData);
+      setCurrency(data.currencyData.currency ?? "USD");
       const rateResponse = await fetch(
         `https://www.currencyexchangetool.com/api/v1/convert?from=USD&to=${data.currencyData.currency}&amount=1`,
       );
       const rateData = await rateResponse.json();
-      setRate(rateData.rate);
+      const rate = rateData.rate;
+      setRate(rate);
     };
 
     fetchSymbol();
   }, []);
 
-  const handleSubscribe = async (tier: string) => {
+
+  const calculateCharge = (tier: Tier) => {
+        const price = tier.discountedPrice ? tier.discountedPrice : tier.price;
+        return  price * rate;
+  };
+
+  const handleSubscribe = async (tier: string, currency: string, amount: number) => {
     if (tier === "free") return;
     setLoadingTier(tier);
     setErrorMsg(null);
@@ -189,7 +217,7 @@ export default function PricingPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ tier }),
+        body: JSON.stringify({ tier, currency, amount }),
       });
 
       const result = await response.json();
@@ -342,7 +370,7 @@ export default function PricingPage() {
                   </div>
                 ) : (
                   <button
-                    onClick={() => handleSubscribe(tier.tierKey)}
+                    onClick={() => handleSubscribe(tier.tierKey, currency, calculateCharge(tier))}
                     disabled={loadingTier !== null}
                     className={`w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                       tier.highlight

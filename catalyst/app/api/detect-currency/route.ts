@@ -1,4 +1,3 @@
-// app/api/detect-currency/route.js
 import { NextResponse, NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -16,6 +15,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Call a free IP geolocation API
+    // const ip = "197.211.63.102";
     const res = await fetch(`http://ip-api.com/json/${ip}`);
     const data = await res.json();
 
@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
       currencyData: { currency: "USD", symbol: "$" },
     });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to locate" }, { status: 500 });
+    console.error("Failed to locate user with error: ", error);
+    return NextResponse.json({ error: "Failed to parse location" }, { status: 500 });
   }
 }

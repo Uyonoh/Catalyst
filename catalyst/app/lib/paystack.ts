@@ -54,13 +54,15 @@ interface VerifyResponse {
  */
 export async function initializeTransaction(
   email: string,
+  currency: string,
   amount: number,
   callbackUrl: string,
   planCode?: string
 ): Promise<InitializeResponse> {
   const body: any = {
     email,
-    amount: amount.toString(),
+    currency,
+    amount: (amount * 100).toString(),
     callback_url: callbackUrl,
   };
 
@@ -79,7 +81,9 @@ export async function initializeTransaction(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Paystack error: ${response.statusText} - ${errorText}`);
+    console.error("Payment failed with payload: ", body);
+    console.error(`Paystack error: ${response.statusText} - ${errorText}`);
+    throw new Error("An error occuured while initializing your payment, try again later or contact support!");
   }
 
   return response.json();
@@ -99,6 +103,8 @@ export async function verifyTransaction(reference: string): Promise<VerifyRespon
 
   if (!response.ok) {
     const errorText = await response.text();
+    console.error("Verification failed with reference: ", reference);
+    console.error(`Paystack error: ${response.statusText} - ${errorText}`);
     throw new Error(`Paystack verification error: ${response.statusText} - ${errorText}`);
   }
 

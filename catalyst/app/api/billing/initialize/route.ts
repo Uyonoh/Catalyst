@@ -18,9 +18,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { tier } = await request.json();
+    const { tier, currency, amount } = await request.json();
 
     if (!tier || !(tier in plans)) {
+      console.error("Invalid tier: ", tier);
       return NextResponse.json({ message: "Invalid subscription tier" }, { status: 400 });
     }
 
@@ -43,14 +44,15 @@ export async function POST(request: Request) {
     // but Paystack requires a base payload
     const paystackSession = await initializeTransaction(
       user.email!,
-      0, 
+      currency,
+      amount, 
       callbackUrl,
-      planCode
     );
 
     if (!paystackSession.status) {
+      console.error("Payment status error: ", paystackSession.message);
       return NextResponse.json(
-        { message: paystackSession.message || "Failed to initialize Paystack checkout." },
+        { message: "Failed to initialize checkout." },
         { status: 400 }
       );
     }
