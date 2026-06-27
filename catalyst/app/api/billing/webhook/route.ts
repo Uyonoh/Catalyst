@@ -10,6 +10,14 @@ const supabaseAdmin = createClient(
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
+interface PaymentMetadata {
+  tier: string;
+  userEmail: string;
+  billingCurrency: string;
+  baseAmount: number;
+  referrer?: string;
+};
+
 export async function POST(request: Request) {
   try {
     const rawBody = await request.text();
@@ -40,6 +48,10 @@ export async function POST(request: Request) {
     const payload = JSON.parse(rawBody);
     const event = payload.event;
     const data = payload.data;
+    const meta: PaymentMetadata = data.metadata;
+
+    // Validate data(.customer) against meta
+    // Validate payment amount
 
     console.log(`Paystack Webhook Received Event: ${event}`);
     console.log("Webhook payload: ", payload);
@@ -54,12 +66,12 @@ export async function POST(request: Request) {
       return "free";
     };
 
-    if (event === "subscription.create" || event === "subscription.enable") {
+    if (event === "charge.success" || event === "subscription.create" || event === "subscription.enable") {
       const email = data.customer.email;
       const customerCode = data.customer.customer_code;
-      const planCode = data.plan.plan_code;
+      const planCode = data.plan?.plan_code ?? "";
       const nextPaymentDate = data.next_payment_date; // ISO format string
-      const tier = getTierFromPlanCode(planCode);
+      const tier = meta.tier //getTierFromPlanCode(planCode);
 
       const { error } = await supabaseAdmin
         .from("profiles")

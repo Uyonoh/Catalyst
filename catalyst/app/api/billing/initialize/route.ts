@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { tier, currency, amount } = await request.json();
+    const { tier, currency, amount, baseAmount } = await request.json();
 
     if (!tier || !(tier in plans)) {
       console.error("Invalid tier: ", tier);
@@ -28,10 +28,10 @@ export async function POST(request: Request) {
     // Retrieve plan code from environment variables
     const planCode = plans[tier];
     const metadata = JSON.stringify({
-      plan: tier,
-      user_email: user.email,
-      billing_currency: currency,
-      transaction_amount: amount,
+      tier: tier,
+      userEmail: user.email,
+      billingCurrency: currency,
+      baseAmount: baseAmount, // Amount in USD
     });
 
     if (!planCode) {

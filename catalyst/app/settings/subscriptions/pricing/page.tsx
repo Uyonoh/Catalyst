@@ -206,7 +206,7 @@ export default function PricingPage() {
         return  price * rate;
   };
 
-  const handleSubscribe = async (tier: string, currency: string, amount: number) => {
+  const handleSubscribe = async (tier: string, currency: string, amount: number, baseAmount: number) => {
     if (tier === "free") return;
     setLoadingTier(tier);
     setErrorMsg(null);
@@ -217,7 +217,7 @@ export default function PricingPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ tier, currency, amount }),
+        body: JSON.stringify({ tier, currency, amount, baseAmount }),
       });
 
       const result = await response.json();
@@ -370,7 +370,7 @@ export default function PricingPage() {
                   </div>
                 ) : (
                   <button
-                    onClick={() => handleSubscribe(tier.tierKey, currency, calculateCharge(tier))}
+                    onClick={() => handleSubscribe(tier.tierKey, currency, calculateCharge(tier), tier.price)}
                     disabled={loadingTier !== null}
                     className={`w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                       tier.highlight
