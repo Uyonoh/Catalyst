@@ -57,6 +57,7 @@ export async function initializeTransaction(
   currency: string,
   amount: number,
   callbackUrl: string,
+  metadata: string, 
   planCode?: string
 ): Promise<InitializeResponse> {
   const body: any = {
@@ -64,6 +65,7 @@ export async function initializeTransaction(
     currency,
     amount: (amount * 100).toString(),
     callback_url: callbackUrl,
+    metadata,
   };
 
   if (planCode) {

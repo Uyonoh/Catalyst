@@ -27,6 +27,12 @@ export async function POST(request: Request) {
 
     // Retrieve plan code from environment variables
     const planCode = plans[tier];
+    const metadata = JSON.stringify({
+      plan: tier,
+      user_email: user.email,
+      billing_currency: currency,
+      transaction_amount: amount,
+    });
 
     if (!planCode) {
       return NextResponse.json(
@@ -47,6 +53,7 @@ export async function POST(request: Request) {
       currency,
       amount, 
       callbackUrl,
+      metadata,
     );
 
     if (!paystackSession.status) {

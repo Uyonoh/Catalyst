@@ -16,6 +16,7 @@ export async function POST(request: Request) {
     const paystackSignature = request.headers.get("x-paystack-signature");
 
     if (!paystackSignature) {
+      console.warn("[api/billing/webhook] - User request has invalid paystack signature");
       return NextResponse.json(
         { message: "Missing Paystack signature" },
         { status: 400 },
@@ -29,6 +30,7 @@ export async function POST(request: Request) {
       .digest("hex");
 
     if (hash !== paystackSignature) {
+      console.warn("[api/billing/webhook] - User request has invalid signature");
       return NextResponse.json(
         { message: "Invalid signature verification failed" },
         { status: 401 },
@@ -40,6 +42,7 @@ export async function POST(request: Request) {
     const data = payload.data;
 
     console.log(`Paystack Webhook Received Event: ${event}`);
+    console.log("Webhook payload: ", payload);
 
     // Define subscription tier helper mapping
     const planPro = process.env.NEXT_PUBLIC_PAYSTACK_PLAN_PRO;
