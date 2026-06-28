@@ -16,7 +16,7 @@ export interface Profile {
   email: string;
   full_name: string | null;
   avatar_url: string | null;
-  plan: 'free' | 'pro' | 'enterprise';
+  plan: 'free' | 'basic' | 'plus' | 'pro' | 'ultra';
   daily_tokens_used: number;
   tokens_reset_at: string;
   preferences: Record<string, unknown>;

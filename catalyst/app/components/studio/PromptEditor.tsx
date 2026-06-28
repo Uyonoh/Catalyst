@@ -56,7 +56,7 @@ interface PromptEditorProps {
   ) => void;
   onVisibilityChange?: (isPublic: boolean) => void;
   onDownload?: (text: string, title: string) => void;
-  userPlan?: "free" | "pro" | "enterprise";
+  userPlan?: 'free' | 'basic' | 'plus' | 'pro' | 'ultra';
   isLoading?: boolean;
   className?: string;
 }
@@ -80,7 +80,7 @@ export default function PromptEditor({
   isLoading = false,
   className,
 }: PromptEditorProps) {
-  const canDownload = userPlan === "pro" || userPlan === "enterprise";
+  const canDownload = userPlan !== "free";
   const router = useRouter();
   const { models, categories } = useCatalog();
   const [editedText, setEditedText] = useState(initialEditedText);
@@ -226,7 +226,7 @@ export default function PromptEditor({
               title={
                 canDownload
                   ? "Download prompt"
-                  : "Upgrade to Pro or Enterprise to download"
+                  : "Upgrade to Basic or higher plans to download"
               }
               className={`relative w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center justify-center gap-2 ${
                 canDownload

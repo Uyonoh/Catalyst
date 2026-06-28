@@ -10,7 +10,7 @@ import {
   Bot,
   Zap,
 } from "lucide-react";
-import { FREE_DAILY_LIMIT, PRO_DAILY_LIMIT } from "../../lib/tokens";
+import { FREE_WEEKLY_LIMIT, BASIC_WEEKLY_LIMIT, PLUS_WEEKLY_LIMIT, PRO_WEEKLY_LIMIT, tierLimits } from "../../lib/tokens";
 
 interface TokenLog {
   id: string;
@@ -21,7 +21,7 @@ interface TokenLog {
 }
 
 interface TokenAnalyticsCardProps {
-  plan: "free" | "pro" | "enterprise";
+  plan: "free" | "basic" | "plus" | "pro" | "ultra";
   dailyTokensUsed: number;
   recentLogs: TokenLog[];
   weeklyChartData: { dateStr: string; cost: number }[];
@@ -87,13 +87,12 @@ export default function TokenAnalyticsCard({
 }: TokenAnalyticsCardProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
-  const isEnterprise = plan === "enterprise";
-  const isPro = plan === "pro";
-  const limit = isPro ? PRO_DAILY_LIMIT : FREE_DAILY_LIMIT;
-  const remaining = isEnterprise
+  const isUltra = plan === "ultra";
+  const limit = tierLimits[plan];
+  const remaining = isUltra
     ? Infinity
     : Math.max(0, limit - dailyTokensUsed);
-  const percentage = isEnterprise
+  const percentage = isUltra
     ? 0
     : Math.min(100, Math.round((dailyTokensUsed / limit) * 100));
 
@@ -101,11 +100,11 @@ export default function TokenAnalyticsCard({
   let strokeColor = "stroke-cyan-500";
   let glowColor = "rgba(6, 182, 212, 0.5)"; // cyan glow
   let textClass = "text-cyan-400";
-  let limitLabel = isEnterprise
+  let limitLabel = isUltra
     ? "Unlimited"
-    : `${dailyTokensUsed} / ${limit} Daily`;
+    : `${dailyTokensUsed} / ${limit} Weekly`;
 
-  if (!isEnterprise) {
+  if (!isUltra) {
     if (percentage >= 90) {
       strokeColor = "stroke-rose-500";
       glowColor = "rgba(244, 63, 94, 0.5)";
@@ -206,7 +205,7 @@ export default function TokenAnalyticsCard({
                 fill="transparent"
               />
               {/* Dynamic Quota Arc */}
-              {!isEnterprise && (
+              {!isUltra && (
                 <circle
                   cx={size / 2}
                   cy={size / 2}
@@ -225,7 +224,7 @@ export default function TokenAnalyticsCard({
             </svg>
             {/* Center Content */}
             <div className="absolute flex flex-col items-center justify-center text-center">
-              {isEnterprise ? (
+              {isUltra ? (
                 <>
                   <InfinityIcon className="size-8 text-purple-400" />
                   <span className="text-[10px] text-purple-400 font-bold uppercase tracking-wider mt-1">
@@ -253,7 +252,7 @@ export default function TokenAnalyticsCard({
             </span>
             <span
               className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                plan === "enterprise"
+                plan === "ultra"
                   ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
                   : plan === "pro"
                     ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
@@ -273,7 +272,7 @@ export default function TokenAnalyticsCard({
             </span>
           </div>
 
-          {!isEnterprise && (
+          {!isUltra && (
             <div className="flex items-center justify-between">
               <span className="text-xs text-slate-400 font-medium">
                 Next Reset Countdown

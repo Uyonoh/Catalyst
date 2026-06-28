@@ -87,13 +87,13 @@ export default function SubscriptionPanel({
   recentLogs = [],
   weeklyChartData = [],
 }: SubscriptionPanelProps) {
-  const { dailyLimit, used, percentage, isExhausted } = useTokens();
+  const { weeklyLimit, used, percentage, isExhausted } = useTokens();
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const isPro = plan === "pro" || plan === "enterprise";
+  const isSubscribed = plan !== "free"; 
   const router = useRouter();
 
   const handleManageBilling = async () => {
-    if (!isPro) {
+    if (!isSubscribed) {
       router.push("/settings/subscriptions/pricing");
       return;
     }
@@ -118,10 +118,10 @@ export default function SubscriptionPanel({
   };
 
   const getTierBadge = () => {
-    if (plan === "enterprise")
+    if (plan === "ultra")
       return (
         <div className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase">
-          Enterprise
+          Ultra
         </div>
       );
     if (plan === "pro")
@@ -132,7 +132,7 @@ export default function SubscriptionPanel({
       );
     return (
       <div className="bg-slate-500/10 text-slate-400 border border-slate-500/20 px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase">
-        Free Tier
+      {plan.charAt(0).toUpperCase() + plan.slice(1)}
       </div>
     );
   };
@@ -154,7 +154,7 @@ export default function SubscriptionPanel({
               Catalyst Studio {getTierBadge()}
             </h3>
             <p className="text-slate-400 text-sm">
-              {isPro
+              {isSubscribed
                 ? "You have full access to advanced features, premium models, and higher token limits."
                 : "Upgrade to unlock premium AI models, advanced live analysis, and unlimited prompts."}
             </p>
@@ -170,7 +170,7 @@ export default function SubscriptionPanel({
             ) : (
               <ExternalLink className="size-4" />
             )}
-            {isPro ? "Manage Billing" : "Upgrade Plan"}
+            {isSubscribed ? "Manage Billing" : "Upgrade Plan"}
           </button>
         </div>
 
@@ -178,7 +178,7 @@ export default function SubscriptionPanel({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 pt-8 border-t border-white/5">
           <div className="flex items-center gap-3">
             <Check
-              className={`size-5 ${isPro ? "text-cyan-400" : "text-green-400"}`}
+              className={`size-5 ${isSubscribed ? "text-cyan-400" : "text-green-400"}`}
             />
             <span className="text-sm font-medium text-slate-300">
               Standard Models (GPT-3.5, Gemini Flash)
@@ -186,32 +186,32 @@ export default function SubscriptionPanel({
           </div>
           <div className="flex items-center gap-3">
             <Check
-              className={`size-5 ${isPro ? "text-cyan-400" : "text-green-400"}`}
+              className={`size-5 ${isSubscribed ? "text-cyan-400" : "text-green-400"}`}
             />
             <span className="text-sm font-medium text-slate-300">
               Basic Workspace Folders
             </span>
           </div>
           <div className="flex items-center gap-3">
-            {isPro ? (
+            {isSubscribed ? (
               <Check className="size-5 text-cyan-400" />
             ) : (
               <div className="size-5 rounded-full border border-slate-600/50" />
             )}
             <span
-              className={`text-sm font-medium ${isPro ? "text-slate-300" : "text-slate-500"}`}
+              className={`text-sm font-medium ${isSubscribed ? "text-slate-300" : "text-slate-500"}`}
             >
               Premium Models (GPT-4o, Claude Opus)
             </span>
           </div>
           <div className="flex items-center gap-3">
-            {isPro ? (
+            {isSubscribed ? (
               <Check className="size-5 text-cyan-400" />
             ) : (
               <div className="size-5 rounded-full border border-slate-600/50" />
             )}
             <span
-              className={`text-sm font-medium ${isPro ? "text-slate-300" : "text-slate-500"}`}
+              className={`text-sm font-medium ${isSubscribed ? "text-slate-300" : "text-slate-500"}`}
             >
               Deep Intent & NLP Analysis
             </span>
@@ -232,10 +232,10 @@ export default function SubscriptionPanel({
               <div className="flex items-center justify-end gap-2 text-white font-mono text-xl">
                 {promptsCount}{" "}
                 <span className="text-slate-500 text-sm font-sans">
-                  {!isPro ? "/ 50" : "/ ∞"}
+                  {!isSubscribed ? "/ 50" : "/ ∞"}
                 </span>
               </div>
-              {!isPro && (
+              {!isSubscribed && (
                 <div className="w-full bg-black/40 h-2 rounded-full overflow-hidden">
                   <div
                     className="bg-cyan-400 h-full rounded-full transition-all"
@@ -256,10 +256,10 @@ export default function SubscriptionPanel({
               <div className="flex items-center justify-end gap-2 text-white font-mono text-xl">
                 {workspacesCount}{" "}
                 <span className="text-slate-500 text-sm font-sans">
-                  {!isPro ? "/ 5" : "/ ∞"}
+                  {!isSubscribed ? "/ 5" : "/ ∞"}
                 </span>
               </div>
-              {!isPro && (
+              {!isSubscribed && (
                 <div className="w-full bg-black/40 h-2 rounded-full overflow-hidden">
                   <div
                     className="bg-cyan-400 h-full rounded-full transition-all"
@@ -297,7 +297,7 @@ export default function SubscriptionPanel({
           >
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-end gap-2 text-white font-mono text-xl">
-                {plan === "enterprise" ? (
+                {plan === "ultra" ? (
                   <span className="flex items-center gap-1.5 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                     Unlimited{" "}
                     <InfinityIcon className="w-5 h-5 text-purple-400" />
@@ -306,12 +306,12 @@ export default function SubscriptionPanel({
                   <>
                     {used.toLocaleString()}{" "}
                     <span className="text-slate-500 text-sm font-sans">
-                      / {dailyLimit.toLocaleString()} tokens
+                      / {weeklyLimit.toLocaleString()} tokens
                     </span>
                   </>
                 )}
               </div>
-              {plan !== "enterprise" && (
+              {plan !== "ultra" && (
                 <div className="w-full bg-black/40 h-2 rounded-full overflow-hidden">
                   <div
                     className={`${

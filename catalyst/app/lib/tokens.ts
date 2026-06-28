@@ -1,5 +1,17 @@
-export const FREE_DAILY_LIMIT = 50;
-export const PRO_DAILY_LIMIT = 200;
+export const FREE_MONTHLY_LIMIT = 50;
+
+export const FREE_WEEKLY_LIMIT = 50;
+export const BASIC_WEEKLY_LIMIT = 100;
+export const PLUS_WEEKLY_LIMIT = 250;
+export const PRO_WEEKLY_LIMIT = 500;
+
+export const tierLimits: Record<string, number> = {
+  "free": FREE_WEEKLY_LIMIT,
+  "basic": BASIC_WEEKLY_LIMIT,
+  "plus": PLUS_WEEKLY_LIMIT,
+  "pro": PRO_WEEKLY_LIMIT,
+  "ultra": 0,
+};
 
 export interface TokenCheckResult {
   ok: boolean;

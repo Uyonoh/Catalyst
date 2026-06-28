@@ -7,22 +7,22 @@ import Link from "next/link";
 
 export function TokenMeter() {
   const {
-    isPro,
-    isEnterprise,
-    dailyLimit,
+    isSubscribed,
+    isUltra,
+    weeklyLimit,
     remaining,
     percentage,
     isExhausted,
   } = useTokens();
 
-  if (isEnterprise) {
+  if (isUltra) {
     return (
       <Link
         href="/settings/subscriptions#usage-stats"
         className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-full border border-indigo-500/20 hover:bg-indigo-500/5 transition-colors cursor-pointer"
       >
         <span className="text-xs font-semibold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-          ENTERPRISE
+          ULTRA
         </span>
         <InfinityIcon className="w-3.5 h-3.5 text-purple-400" />
       </Link>
@@ -57,17 +57,17 @@ export function TokenMeter() {
       title={
         isExhausted
           ? "Quota reached. Resets tomorrow at midnight UTC."
-          : `${remaining} of ${dailyLimit} tokens remaining`
+          : `${remaining} of ${weeklyLimit} tokens remaining`
       }
     >
       {/* Text Label */}
-      {isPro ? (
+      {isSubscribed ? (
         <span className="text-xs font-medium text-slate-300">
-          <span className={textColor}>{remaining}</span> / {dailyLimit} tokens
+          <span className={textColor}>{remaining}</span> / {weeklyLimit} tokens
         </span>
       ) : (
         <span className="text-xs font-medium text-slate-300">
-          <span className={textColor}>{remaining}</span> / {dailyLimit} tokens
+          <span className={textColor}>{remaining}</span> / {weeklyLimit} tokens
         </span>
       )}
 
@@ -93,15 +93,15 @@ export function TokenMeter() {
 
 export function TokensMobile() {
   const {
-    isPro,
-    isEnterprise,
-    dailyLimit,
+    isSubscribed,
+    isUltra,
+    weeklyLimit,
     remaining,
     percentage,
     isExhausted,
   } = useTokens();
 
-  if (isEnterprise) {
+  if (isUltra) {
     return (
       <Link
         href="/settings/subscriptions#usage-stats"
@@ -140,11 +140,11 @@ export function TokensMobile() {
       title={
         isExhausted
           ? "Quota reached. Resets tomorrow at midnight UTC."
-          : `${remaining} of ${dailyLimit} tokens remaining`
+          : `${remaining} of ${weeklyLimit} tokens remaining`
       }
     >
       <span className="text-xs font-medium text-slate-300">
-        <span className={textColor}>{remaining}</span> / {dailyLimit}
+        <span className={textColor}>{remaining}</span> / {weeklyLimit}
       </span>
 
       {isExhausted && (
