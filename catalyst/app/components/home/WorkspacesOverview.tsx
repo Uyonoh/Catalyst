@@ -34,11 +34,19 @@ interface WorkspacesOverviewProps {
   promptsCount: number;
 }
 
+const PLAN_LIMITS: Record<string, { workspaces: number; prompts: number }> = {
+  free: { workspaces: 0, prompts: 20 },
+  basic: { workspaces: 3, prompts: 50 },
+  plus: { workspaces: 10, prompts: 100 },
+  pro: { workspaces: 30, prompts: 200 },
+  ultra: { workspaces: Infinity, prompts: Infinity },
+};
+
 export default function WorkspacesOverview({
   initialWorkspaces = [],
   promptsCount = 0,
 }: WorkspacesOverviewProps) {
-  const { user } = useUser();
+  const { user, profile } = useUser();
 
   // State variables
   const [activeTab, setActiveTab] = useState<"mine" | "community">("mine");
@@ -63,6 +71,11 @@ export default function WorkspacesOverview({
   const [workspaceToDelete, setWorkspaceToDelete] =
     useState<WorkspaceItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const userPlan = profile?.plan || "free";
+  const workspaceLimit = PLAN_LIMITS[userPlan]?.workspaces || 0;
+  const currentWorkspacesCount = myWorkspaces.length;
+  const isLimitReached = currentWorkspacesCount >= workspaceLimit;
 
   // Fetch community workspaces when active tab changes
   useEffect(() => {
@@ -228,7 +241,25 @@ export default function WorkspacesOverview({
       </div>
 
       {/* Creation form */}
-      {isCreating && (
+      {isCreating && isLimitReached && (
+        <div className="p-5 rounded-xl bg-red-500/10 border border-red-500/20 mb-6 animate-slideDown flex flex-col gap-3">
+          <div className="flex items-center gap-2 text-red-400">
+            <AlertTriangle className="size-5" />
+            <h4 className="font-bold text-sm">Workspace Limit Reached</h4>
+          </div>
+          <p className="text-xs text-slate-300">
+            Your current plan ({userPlan.toUpperCase()}) allows up to {workspaceLimit} workspaces. You are currently using {currentWorkspacesCount}.
+          </p>
+          <Link
+            href="/settings/subscriptions/pricing"
+            className="self-start text-xs font-bold text-cyan-400 hover:underline flex items-center gap-1"
+          >
+            Upgrade your plan to create more workspaces <ArrowUpRight className="size-3" />
+          </Link>
+        </div>
+      )}
+
+      {isCreating && !isLimitReached && (
         <form
           onSubmit={handleCreateWorkspace}
           className="p-5 rounded-xl bg-white/5 border border-white/10 mb-6 animate-slideDown flex flex-col gap-4"

@@ -11,7 +11,7 @@ export default function WorkspaceSearch() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const { user } = useUser();
+  const { user, profile } = useUser();
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -25,6 +25,31 @@ export default function WorkspaceSearch() {
   >("private");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [workspacesCount, setWorkspacesCount] = useState(0);
+
+  const PLAN_LIMITS: Record<string, { workspaces: number; prompts: number }> = {
+    free: { workspaces: 0, prompts: 20 },
+    basic: { workspaces: 3, prompts: 50 },
+    plus: { workspaces: 10, prompts: 100 },
+    pro: { workspaces: 30, prompts: 200 },
+    ultra: { workspaces: Infinity, prompts: Infinity },
+  };
+
+  const userPlan = profile?.plan || "free";
+  const workspaceLimit = PLAN_LIMITS[userPlan]?.workspaces || 0;
+  const isLimitReached = workspacesCount >= workspaceLimit;
+
+  useEffect(() => {
+    if (user) {
+      supabaseBrowser
+        .from("workspaces")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .then(({ count }) => {
+          setWorkspacesCount(count || 0);
+        });
+    }
+  }, [user, isCreating]);
 
   const handleCreateWorkspace = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -224,83 +249,117 @@ export default function WorkspaceSearch() {
               </div>
             </div>
 
-            <form onSubmit={handleCreateWorkspace} className="flex flex-col gap-4">
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                  Workspace Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newWorkspaceName}
-                  onChange={(e) => setNewWorkspaceName(e.target.value)}
-                  placeholder="E.g., Production Copilot"
-                  maxLength={40}
-                  className="w-full bg-black/40 border border-white/10 rounded-lg text-white text-xs p-2.5 outline-none focus:border-cyan-500 transition-colors"
-                />
+            {isLimitReached ? (
+              <div className="flex flex-col gap-4 py-2">
+                <div className="flex items-center gap-2 text-red-400">
+                  <AlertTriangle className="size-5" />
+                  <h4 className="font-bold text-sm">Workspace Limit Reached</h4>
+                </div>
+                <p className="text-xs text-slate-300">
+                  Your current plan ({userPlan.toUpperCase()}) allows up to {workspaceLimit} workspaces. You are currently using {workspacesCount}.
+                </p>
+                <div className="flex justify-between items-center mt-2 border-t border-white/10 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsCreating(false)}
+                    className="px-4 py-2.5 rounded-lg border border-white/10 text-xs font-bold text-slate-300 hover:bg-white/5 hover:text-white transition-colors cursor-pointer"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCreating(false);
+                      router.push("/settings/subscriptions/pricing");
+                    }}
+                    className="px-4 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold transition-all shadow-lg hover:shadow-cyan-500/10 active:scale-95 cursor-pointer"
+                  >
+                    Upgrade Plan
+                  </button>
+                </div>
               </div>
+            ) : (
+              <form onSubmit={handleCreateWorkspace} className="flex flex-col gap-4">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Workspace Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newWorkspaceName}
+                    onChange={(e) => setNewWorkspaceName(e.target.value)}
+                    placeholder="E.g., Production Copilot"
+                    maxLength={40}
+                    className="w-full bg-black/40 border border-white/10 rounded-lg text-white text-xs p-2.5 outline-none focus:border-cyan-500 transition-colors"
+                  />
+                </div>
 
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                  Privacy / Visibility
-                </label>
-                <select
-                  value={newWorkspaceVisibility}
-                  onChange={(e: any) => setNewWorkspaceVisibility(e.target.value)}
-                  className="w-full bg-black/40 border border-white/10 rounded-lg text-slate-200 text-xs p-2.5 outline-none focus:border-cyan-500 transition-colors cursor-pointer"
-                >
-                  <option value="private">Private (Only me)</option>
-                  <option value="public">Public (Read-only for others)</option>
-                  <option value="community">
-                    Community (Read-write for others)
-                  </option>
-                </select>
-              </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Privacy / Visibility
+                  </label>
+                  <select
+                    value={newWorkspaceVisibility}
+                    onChange={(e: any) => setNewWorkspaceVisibility(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 rounded-lg text-slate-200 text-xs p-2.5 outline-none focus:border-cyan-500 transition-colors cursor-pointer"
+                  >
+                    <option value="private">Private (Only me)</option>
+                    <option value="public">Public (Read-only for others)</option>
+                    <option value="community">
+                      Community (Read-write for others)
+                    </option>
+                  </select>
+                </div>
 
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                  Description (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={newWorkspaceDesc}
-                  onChange={(e) => setNewWorkspaceDesc(e.target.value)}
-                  placeholder="Briefly describe the workspace scope..."
-                  maxLength={80}
-                  className="w-full bg-black/40 border border-white/10 rounded-lg text-white text-xs p-2.5 outline-none focus:border-cyan-500 transition-colors"
-                />
-              </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Description (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={newWorkspaceDesc}
+                    onChange={(e) => setNewWorkspaceDesc(e.target.value)}
+                    placeholder="Briefly describe the workspace scope..."
+                    maxLength={80}
+                    className="w-full bg-black/40 border border-white/10 rounded-lg text-white text-xs p-2.5 outline-none focus:border-cyan-500 transition-colors"
+                  />
+                </div>
 
-              {errorMsg && (
-                <span className="text-[10px] text-rose-400 font-medium">
-                  {errorMsg}
-                </span>
-              )}
+                {errorMsg && (
+                  <span className="text-[10px] text-rose-400 font-medium">
+                    {errorMsg}
+                  </span>
+                )}
 
-              <div className="flex items-center justify-end gap-3 mt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsCreating(false)}
-                  className="px-4 py-2.5 text-xs font-bold text-slate-400 hover:text-white transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isLoading || !newWorkspaceName.trim()}
-                  className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold rounded-lg hover:shadow-lg transition-all disabled:opacity-50 cursor-pointer"
-                >
-                  {isLoading ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <>
-                      <PlusCircle className="size-4" />
-                      Create Workspace
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
+                <div className="flex items-center justify-end gap-3 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsCreating(false)}
+                    className="px-4 py-2.5 text-xs font-bold text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isLoading || !newWorkspaceName.trim()}
+                    className="px-4 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold hover:opacity-90 transition-all shadow-lg active:scale-95 flex items-center gap-1.5 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="size-3.5 animate-spin" />
+                        <span>Creating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <PlusCircle className="size-4" />
+                        <span>Create Workspace</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}

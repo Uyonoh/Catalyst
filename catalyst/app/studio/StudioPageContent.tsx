@@ -94,8 +94,14 @@ function StudioContent({
 
           if (error) {
             console.error("Failed to auto-save prompt", error);
+            // Refund tokens since LLM parsing succeeded but saving was blocked (e.g. by trigger limits)
+            await supabase.rpc("refund_tokens", {
+              p_user_id: user.id,
+              p_model: selectedModel,
+              p_mode: "text"
+            });
             setNotification({
-              message: "Failed to auto-save prompt",
+              message: error.message || "Failed to auto-save prompt",
               type: "error",
             });
           } else if (data) {
@@ -106,10 +112,15 @@ function StudioContent({
             // Redirect to the edit page for the newly saved prompt
             router.push(`/studio/${data.id}`);
           }
-        } catch (err) {
+        } catch (err: any) {
           console.error("Error auto-saving prompt", err);
+          await supabase.rpc("refund_tokens", {
+            p_user_id: user.id,
+            p_model: selectedModel,
+            p_mode: "text"
+          });
           setNotification({
-            message: "An error occurred while saving",
+            message: err.message || "An error occurred while saving",
             type: "error",
           });
         } finally {
