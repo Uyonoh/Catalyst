@@ -309,7 +309,7 @@ export default function SubscriptionPanel({
 
           <SettingsFormRow
             label="Weekly Token Usage"
-            description="Weekly tokens consumed by AI generations (resets weekly on Monday at 00:00 UTC)."
+            description="Rolling-window tokens consumed by AI generations (resets 7 days after your first request in each window)."
           >
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-end gap-2 text-white font-mono text-xl">

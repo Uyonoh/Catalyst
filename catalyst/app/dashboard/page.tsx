@@ -80,6 +80,7 @@ export default async function DashboardPage() {
   const profile = profileRes.data || {
     plan: "free",
     daily_tokens_used: 0,
+    tokens_reset_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     full_name: null,
   };
 
@@ -175,6 +176,7 @@ export default async function DashboardPage() {
             <TokenAnalyticsCard
               plan={profile.plan as any}
               dailyTokensUsed={profile.daily_tokens_used}
+              tokensResetAt={profile.tokens_reset_at ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()}
               recentLogs={recentLogs}
               weeklyChartData={weeklyChartData}
             />
