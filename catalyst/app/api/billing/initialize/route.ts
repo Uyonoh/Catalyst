@@ -25,8 +25,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Invalid subscription tier" }, { status: 400 });
     }
 
-    // Retrieve plan code from environment variables
-    const planCode = plans[tier];
     const metadata = JSON.stringify({
       tier: tier,
       userEmail: user.email,
@@ -34,20 +32,11 @@ export async function POST(request: Request) {
       baseAmount: baseAmount, // Amount in USD
     });
 
-    if (!planCode) {
-      return NextResponse.json(
-        { message: `Paystack Plan Code for ${tier} is not configured on the server.` },
-        { status: 500 }
-      );
-    }
-
     // Build the dynamic callback URL (redirecting back to settings after success)
     const origin = request.headers.get("origin") || "http://localhost:3000";
     const callbackUrl = `${origin}/settings/subscriptions?session=success`;
 
-    // Initialize Paystack transaction with the chosen plan
-    // Amount is 0 because recurring plans determine the amount in their setup, 
-    // but Paystack requires a base payload
+    // Initialize Paystack transaction with the dynamic amount
     const paystackSession = await initializeTransaction(
       user.email!,
       currency,

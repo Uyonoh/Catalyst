@@ -131,25 +131,18 @@ export default function TokenAnalyticsCard({
   // Find max cost in weekly logs to scale the chart bars
   const maxWeeklyCost = Math.max(...weeklyChartData.map((d) => d.cost), 10);
 
-  // Time remaining to UTC midnight
-  const getUTCMidnightCountdown = () => {
+  // Time remaining to next Monday 00:00:00 UTC
+  const getUTCMondayCountdown = () => {
     const now = new Date();
     const utcNow = new Date(now.toUTCString());
-    const utcMidnight = new Date(
-      Date.UTC(
-        utcNow.getUTCFullYear(),
-        utcNow.getUTCMonth(),
-        utcNow.getUTCDate() + 1,
-        0,
-        0,
-        0,
-        0,
-      ),
-    );
-    const diffMs = utcMidnight.getTime() - utcNow.getTime();
-    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const nextMonday = new Date(utcNow);
+    nextMonday.setUTCDate(utcNow.getUTCDate() + ((1 + 7 - utcNow.getUTCDay()) % 7 || 7));
+    nextMonday.setUTCHours(0, 0, 0, 0);
+    const diffMs = nextMonday.getTime() - utcNow.getTime();
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}h ${minutes}m`;
+    return `${days}d ${hours}h ${minutes}m`;
   };
 
   return (
@@ -181,9 +174,9 @@ export default function TokenAnalyticsCard({
           </button>
           {showTooltip && (
             <div className="absolute right-0 top-full mt-1.5 w-64 p-3 bg-slate-950/95 border border-white/10 rounded-lg text-[11px] text-slate-300 leading-relaxed shadow-xl backdrop-blur-md z-30 transition-all">
-              Optimizing prompts consumes daily tokens based on model
-              intelligence and modalities. Free tier grants 50 tokens daily. Pro
-              Tier expands quota to 200 tokens. Quota resets at 00:00 UTC.
+              Optimizing prompts consumes weekly tokens based on model
+              intelligence and modalities. Free tier grants 25 tokens weekly. Pro
+              Tier expands quota to 500 tokens weekly. Quota resets weekly on Monday at 00:00 UTC.
             </div>
           )}
         </div>
@@ -265,7 +258,7 @@ export default function TokenAnalyticsCard({
 
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-400 font-medium">
-              Daily Tokens Spent
+              Weekly Tokens Spent
             </span>
             <span className={`font-mono text-sm font-bold ${textClass}`}>
               {limitLabel}
@@ -279,7 +272,7 @@ export default function TokenAnalyticsCard({
               </span>
               <span className="text-slate-200 text-xs font-semibold flex items-center gap-1 font-mono">
                 <Zap className="size-3 text-yellow-500" />
-                {getUTCMidnightCountdown()}
+                {getUTCMondayCountdown()}
               </span>
             </div>
           )}

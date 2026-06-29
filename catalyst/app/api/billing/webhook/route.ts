@@ -56,22 +56,14 @@ export async function POST(request: Request) {
     console.log(`Paystack Webhook Received Event: ${event}`);
     console.log("Webhook payload: ", payload);
 
-    // Define subscription tier helper mapping
-    const planPro = process.env.NEXT_PUBLIC_PAYSTACK_PLAN_PRO;
-    const planEnterprise = process.env.NEXT_PUBLIC_PAYSTACK_PLAN_ENTERPRISE;
-
-    const getTierFromPlanCode = (planCode: string) => {
-      if (planCode === planPro) return "pro";
-      if (planCode === planEnterprise) return "enterprise";
-      return "free";
-    };
-
-    if (event === "charge.success" || event === "subscription.create" || event === "subscription.enable") {
+    if (event === "charge.success") {
       const email = data.customer.email;
       const customerCode = data.customer.customer_code;
-      const planCode = data.plan?.plan_code ?? "";
-      const nextPaymentDate = data.next_payment_date; // ISO format string
-      const tier = meta.tier //getTierFromPlanCode(planCode);
+      const authCode = data.authorization?.authorization_code;
+      const amount = data.amount;
+      const currency = data.currency;
+      const tier = meta.tier || "free";
+      const periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
       const { error } = await supabaseAdmin
         .from("profiles")
@@ -79,8 +71,10 @@ export async function POST(request: Request) {
           plan: tier,
           paystack_customer_code: customerCode,
           subscription_status: "active",
-          plan_id: planCode,
-          current_period_end: nextPaymentDate,
+          paystack_authorization_code: authCode,
+          billing_amount: amount,
+          billing_currency: currency,
+          current_period_end: periodEnd,
         })
         .eq("email", email);
 

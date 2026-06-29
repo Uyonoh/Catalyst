@@ -47,7 +47,7 @@ const TIERS: Tier[] = [
       "Ideal for beginners and hobbyists seeking core prompt optimization tools.",
     features: [
       "Access to standard models (GPT-3.5, Gemini Flash)",
-      "100 monthly token limit",
+      "25 weekly token limit",
       "Up to 20 saved prompts",
     ],
     cta: "Default Plan",
@@ -120,7 +120,7 @@ const TIERS: Tier[] = [
       "access to premium models (gpt-4o, claude opus, midjourney v6)",
       "up to 200 saved prompts",
       "up to 30 managed workspaces",
-      "300 weekly token limit",
+      "500 weekly token limit",
     ],
     cta: "Switch to Pro",
     tierKey: "pro",

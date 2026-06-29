@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useState } from "react";
 import SettingsFormRow from "../SettingsFormRow";
 import {
@@ -118,21 +119,36 @@ export default function SubscriptionPanel({
   };
 
   const getTierBadge = () => {
-    if (plan === "ultra")
-      return (
-        <div className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase">
+    const badges: Record<string, React.ReactElement> = {
+      free: (
+        <div className="bg-slate-500/10 text-slate-400 border border-slate-500/20 px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase">
+          Free
+        </div>
+      ),
+      basic: (
+        <div className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase">
+          Basic
+        </div>
+      ),
+      plus: (
+        <div className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase">
+          Plus
+        </div>
+      ),
+      pro: (
+        <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase">
+          Pro
+        </div>
+      ),
+      ultra: (
+        <div className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase bg-gradient-to-r from-purple-500/10 to-indigo-500/10">
           Ultra
         </div>
-      );
-    if (plan === "pro")
-      return (
-        <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase">
-          Pro Tier
-        </div>
-      );
-    return (
+      ),
+    };
+    return badges[plan.toLowerCase()] ?? (
       <div className="bg-slate-500/10 text-slate-400 border border-slate-500/20 px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase">
-      {plan.charAt(0).toUpperCase() + plan.slice(1)}
+        {plan}
       </div>
     );
   };
@@ -292,8 +308,8 @@ export default function SubscriptionPanel({
           </SettingsFormRow>
 
           <SettingsFormRow
-            label="Daily Token Usage"
-            description="Daily tokens consumed by AI generations (resets at midnight UTC)."
+            label="Weekly Token Usage"
+            description="Weekly tokens consumed by AI generations (resets weekly on Monday at 00:00 UTC)."
           >
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-end gap-2 text-white font-mono text-xl">

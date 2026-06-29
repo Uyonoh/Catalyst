@@ -208,7 +208,7 @@ export default function RawIntentPanel() {
                 <span>
                   {showControls ? "Apply & Generate" : "Generate Prompt"}
                 </span>
-                {profile?.plan !== "enterprise" && (
+                {profile?.plan !== "ultra" && (
                   <span className="text-[14px] font-normal">
                     Costs {cost} tokens
                   </span>
