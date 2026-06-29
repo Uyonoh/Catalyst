@@ -19,6 +19,7 @@ export interface Profile {
   plan: 'free' | 'basic' | 'plus' | 'pro' | 'ultra';
   daily_tokens_used: number;
   tokens_reset_at: string;
+  bonus_tokens?: number;
   preferences: Record<string, unknown>;
 }
 

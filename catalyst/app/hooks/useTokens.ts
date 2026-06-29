@@ -8,9 +8,10 @@ export function useTokens() {
   const isSubscribed        = profile?.plan !== 'free';
   const weeklyLimit   = tierLimits[profile?.plan ?? "free"]; 
   const used         = profile?.daily_tokens_used ?? 0;
-  const remaining    = isUltra ? Infinity : Math.max(0, weeklyLimit - used);
+  const bonusTokens  = profile?.bonus_tokens ?? 0;
+  const remaining    = isUltra ? Infinity : Math.max(0, weeklyLimit - used + bonusTokens);
   const percentage   = isUltra ? 100 : Math.round((used / weeklyLimit) * 100);
   const isExhausted  = !isUltra && remaining === 0;
 
-  return { isSubscribed, isUltra, weeklyLimit, used, remaining, percentage, isExhausted, refreshProfile };
+  return { isSubscribed, isUltra, weeklyLimit, used, bonusTokens, remaining, percentage, isExhausted, refreshProfile };
 }

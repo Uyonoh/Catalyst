@@ -10,6 +10,7 @@ export function TokenMeter() {
     isSubscribed,
     isUltra,
     weeklyLimit,
+    bonusTokens,
     remaining,
     percentage,
     isExhausted,
@@ -57,19 +58,21 @@ export function TokenMeter() {
       title={
         isExhausted
           ? "Quota reached. Resets tomorrow at midnight UTC."
-          : `${remaining} of ${weeklyLimit} tokens remaining`
+          : bonusTokens > 0
+            ? `${remaining} tokens remaining (${weeklyLimit} limit + ${bonusTokens} bonus)`
+            : `${remaining} of ${weeklyLimit} tokens remaining`
       }
     >
       {/* Text Label */}
-      {isSubscribed ? (
-        <span className="text-xs font-medium text-slate-300">
-          <span className={textColor}>{remaining}</span> / {weeklyLimit} tokens
-        </span>
-      ) : (
-        <span className="text-xs font-medium text-slate-300">
-          <span className={textColor}>{remaining}</span> / {weeklyLimit} tokens
-        </span>
-      )}
+      <span className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+        <span className={textColor}>{remaining}</span> / {weeklyLimit}
+        {bonusTokens > 0 && (
+          <span className="text-[10px] text-purple-400 font-bold bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20 flex items-center gap-0.5">
+            +{bonusTokens} bonus
+          </span>
+        )}
+        <span>tokens</span>
+      </span>
 
       {/* Progress Arc/Bar */}
       <div
@@ -96,6 +99,7 @@ export function TokensMobile() {
     isSubscribed,
     isUltra,
     weeklyLimit,
+    bonusTokens,
     remaining,
     percentage,
     isExhausted,
@@ -140,11 +144,18 @@ export function TokensMobile() {
       title={
         isExhausted
           ? "Quota reached. Resets tomorrow at midnight UTC."
-          : `${remaining} of ${weeklyLimit} tokens remaining`
+          : bonusTokens > 0
+            ? `${remaining} tokens remaining (${weeklyLimit} limit + ${bonusTokens} bonus)`
+            : `${remaining} of ${weeklyLimit} tokens remaining`
       }
     >
-      <span className="text-xs font-medium text-slate-300">
-        <span className={textColor}>{remaining}</span> / {weeklyLimit}
+      <span className="text-xs font-medium text-slate-300 flex items-center gap-1">
+        <span className={textColor}>{remaining}</span>/{weeklyLimit}
+        {bonusTokens > 0 && (
+          <span className="text-[9px] text-purple-400 font-bold bg-purple-500/10 px-1 rounded border border-purple-500/20">
+            +{bonusTokens}
+          </span>
+        )}
       </span>
 
       {isExhausted && (

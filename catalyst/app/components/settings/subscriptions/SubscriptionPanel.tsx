@@ -14,6 +14,7 @@ import {
   BarChart3,
   Bot,
   Sparkles,
+  Ticket,
 } from "lucide-react";
 import { useTokens } from "../../../hooks/useTokens";
 import { useRouter } from "next/navigation";
@@ -88,10 +89,49 @@ export default function SubscriptionPanel({
   recentLogs = [],
   weeklyChartData = [],
 }: SubscriptionPanelProps) {
-  const { weeklyLimit, used, percentage, isExhausted } = useTokens();
+  const { weeklyLimit, used, percentage, isExhausted, refreshProfile } = useTokens();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const isSubscribed = plan !== "free"; 
   const router = useRouter();
+
+  const [promoCode, setPromoCode] = useState("");
+  const [isRedeeming, setIsRedeeming] = useState(false);
+  const [redeemStatus, setRedeemStatus] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
+
+  const handleRedeemCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!promoCode.trim()) return;
+    setIsRedeeming(true);
+    setRedeemStatus({ type: null, message: "" });
+    try {
+      const res = await fetch("/api/settings/redeem-coupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: promoCode }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setRedeemStatus({ type: "error", message: data.error || "Failed to redeem code." });
+      } else {
+        setRedeemStatus({
+          type: "success",
+          message: `Successfully redeemed! Added ${data.amount} bonus tokens.`,
+        });
+        setPromoCode("");
+        if (refreshProfile) {
+          await refreshProfile();
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setRedeemStatus({ type: "error", message: "Network error. Please try again." });
+    } finally {
+      setIsRedeeming(false);
+    }
+  };
 
   const handleManageBilling = async () => {
     if (!isSubscribed) {
@@ -232,6 +272,62 @@ export default function SubscriptionPanel({
               Deep Intent & NLP Analysis
             </span>
           </div>
+        </div>
+      </div>
+
+      {/* Promo Code Card */}
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/20 p-5 sm:p-8">
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500" />
+        
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400">
+              <Ticket className="size-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white">Redeem Promo Code</h3>
+              <p className="text-slate-400 text-xs mt-0.5">
+                Have a coupon or voucher? Enter it below to extend your token limit.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleRedeemCoupon} className="flex flex-col sm:flex-row gap-3 mt-2">
+            <input
+              type="text"
+              placeholder="e.g. WELCOME50"
+              value={promoCode}
+              onChange={(e) => setPromoCode(e.target.value)}
+              disabled={isRedeeming}
+              className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-mono uppercase tracking-wider text-sm"
+            />
+            <button
+              type="submit"
+              disabled={isRedeeming || !promoCode.trim()}
+              className="shrink-0 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium px-6 py-2.5 rounded-xl transition-all disabled:opacity-50 disabled:pointer-events-none shadow-[0_0_15px_rgba(147,51,234,0.1)] hover:shadow-[0_0_20px_rgba(147,51,234,0.3)] cursor-pointer text-sm"
+            >
+              {isRedeeming ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  <span>Redeeming...</span>
+                </>
+              ) : (
+                <span>Apply Code</span>
+              )}
+            </button>
+          </form>
+
+          {redeemStatus.type && (
+            <div
+              className={`mt-2 p-3 rounded-xl border text-xs font-medium animate-fadeIn ${
+                redeemStatus.type === "success"
+                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                  : "bg-red-500/10 border-red-500/20 text-red-400"
+              }`}
+            >
+              {redeemStatus.message}
+            </div>
+          )}
         </div>
       </div>
 
