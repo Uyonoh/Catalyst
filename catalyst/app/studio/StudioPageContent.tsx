@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import RawIntentPanel from "../components/studio/RawIntentPanel";
 import LiveAnalysisPanel from "../components/studio/LiveAnalysisPanel";
@@ -12,7 +12,10 @@ import PromptEditor from "../components/studio/PromptEditor";
 import Notification, {
   NotificationType,
 } from "../components/history/Notification";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, Sparkles, Image as ImageIcon } from "lucide-react";
+
+// Lazy load the newly built Image Optimization view
+const ImageOptimizeView = React.lazy(() => import("./optimize/ImageOptimizeView"));
 
 export default function StudioPageContent() {
   const [showAnalysis, setShowAnalysis] = useState(false);
@@ -62,6 +65,10 @@ function StudioContent({
     message: string;
     type: NotificationType;
   } | null>(null);
+  
+  // Active workspace modes: "prompt" or "image" (Spec 1 view switcher)
+  const [activeMode, setActiveMode] = useState<"prompt" | "image">("prompt");
+
   const { user } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -151,49 +158,97 @@ function StudioContent({
       </div>
 
       <main className="flex-1 w-full max-w-[1100px] mx-auto pt-16 pb-12 px-4 sm:px-6 flex flex-col justify-center gap-6 md:gap-8 animate-in fade-in duration-300">
-        <section className="flex items-start justify-between gap-4">
+        
+        {/* Header Action Frame with Toggle Switch */}
+        <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
           <div className="flex flex-col gap-1">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
               Prompt Studio
             </h1>
-            <p className="text-slate-400 text-base md:text-lg">
-              Refine your ideas into high-quality, purpose-driven prompts.
+            <p className="text-slate-400 text-xs sm:text-sm">
+              Refine your ideas into high-quality prompts and optimized media assets.
             </p>
+          </div>
+
+          {/* Mode Switcher Pill Control */}
+          <div className="flex bg-black/40 border border-white/10 p-1 rounded-xl self-start sm:self-center">
+            <button
+              onClick={() => setActiveMode("prompt")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeMode === "prompt"
+                  ? "bg-primary/20 text-white border border-primary/30"
+                  : "text-slate-400 hover:text-slate-200 border border-transparent"
+              }`}
+            >
+              <Sparkles className="size-3.5" />
+              Prompt Generator
+            </button>
+            <button
+              onClick={() => setActiveMode("image")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeMode === "image"
+                  ? "bg-primary/20 text-white border border-primary/30"
+                  : "text-slate-400 hover:text-slate-200 border border-transparent"
+              }`}
+            >
+              <ImageIcon className="size-3.5" />
+              Image & Video
+            </button>
           </div>
         </section>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          <div className="flex-1 min-w-0 w-full">
-            <RawIntentPanel />
-          </div>
+        {/* ────────────── MODE 1: PROMPT BUILDER WORKFLOW ────────────── */}
+        {activeMode === "prompt" && (
+          <div className="flex flex-col gap-6 md:gap-8 animate-in fade-in slide-in-from-left-4 duration-300">
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="flex-1 min-w-0 w-full">
+                <RawIntentPanel />
+              </div>
 
-          <div
-            onTransitionEnd={(e) => {
-              if (
-                e.propertyName === "max-width" ||
-                e.propertyName === "max-height"
-              ) {
-                setIsTransitioning(false);
-              }
-            }}
-            className={`
-                analysis-panel-slot self-stretch lg:w-[50%] lg:flex-shrink-0 w-full h-full
-                ${showAnalysis ? "" : "analysis-panel-slot--hidden"}
-                ${!showAnalysis && !isTransitioning ? "hidden" : "block"}
-              `}
-            aria-hidden={!showAnalysis}
-          >
-            <div className="w-full h-full min-w-[320px] lg:min-w-[450px] xl:min-w-[600px]">
-              <LiveAnalysisPanel />
+              <div
+                onTransitionEnd={(e) => {
+                  if (
+                    e.propertyName === "max-width" ||
+                    e.propertyName === "max-height"
+                  ) {
+                    setIsTransitioning(false);
+                  }
+                }}
+                className={`
+                    analysis-panel-slot self-stretch lg:w-[50%] lg:flex-shrink-0 w-full h-full
+                    ${showAnalysis ? "" : "analysis-panel-slot--hidden"}
+                    ${!showAnalysis && !isTransitioning ? "hidden" : "block"}
+                  `}
+                aria-hidden={!showAnalysis}
+              >
+                <div className="w-full h-full min-w-[320px] lg:min-w-[450px] xl:min-w-[600px]">
+                  <LiveAnalysisPanel />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-12 flex flex-col gap-4">
+                <OptimizationSettings />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-12 flex flex-col gap-4">
-            <OptimizationSettings />
+        {/* ────────────── MODE 2: IMAGE / VIDEO WORKBENCH ────────────── */}
+        {activeMode === "image" && (
+          <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center min-h-[300px]">
+                  <Loader2 className="size-8 animate-spin text-cyan-400" />
+                </div>
+              }
+            >
+              <ImageOptimizeView />
+            </Suspense>
           </div>
-        </div>
+        )}
       </main>
 
       <div className="fixed bottom-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-900/50 to-transparent pointer-events-none" />
