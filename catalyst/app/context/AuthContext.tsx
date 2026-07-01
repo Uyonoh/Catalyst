@@ -17,7 +17,7 @@ export interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   plan: 'free' | 'basic' | 'plus' | 'pro' | 'ultra';
-  daily_tokens_used: number;
+  tokens_used: number;
   tokens_reset_at: string;
   bonus_tokens?: number;
   preferences: Record<string, unknown>;
