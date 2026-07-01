@@ -34,7 +34,7 @@ export default async function DashboardPage() {
     getRecentPrompts(user.id),
     supabase
       .from("profiles")
-      .select("plan, daily_tokens_used, tokens_reset_at, full_name")
+      .select("plan, tokens_used, tokens_reset_at, full_name")
       .eq("id", user.id)
       .single(),
     supabase
@@ -79,7 +79,7 @@ export default async function DashboardPage() {
   // Handle profile response
   const profile = profileRes.data || {
     plan: "free",
-    daily_tokens_used: 0,
+    tokens_used: 0,
     tokens_reset_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     full_name: null,
   };
@@ -175,7 +175,7 @@ export default async function DashboardPage() {
             {/* Real-time resource Quota ring, weekly trend bar chart & usage logs ledger */}
             <TokenAnalyticsCard
               plan={profile.plan as any}
-              dailyTokensUsed={profile.daily_tokens_used}
+              dailyTokensUsed={profile.tokens_used}
               tokensResetAt={profile.tokens_reset_at ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()}
               recentLogs={recentLogs}
               weeklyChartData={weeklyChartData}
