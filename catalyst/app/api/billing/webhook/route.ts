@@ -65,6 +65,37 @@ export async function POST(request: Request) {
       const tier = meta.tier || "free";
       const periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
+      const subscriptionCode = data.subscription?.subscription_code || null;
+      const emailToken = data.subscription?.email_token || null;
+
+      // Fetch user profile id for logging transactions
+      const { data: profile, error: profileError } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("email", email)
+        .single();
+
+      if (profileError || !profile) {
+        console.error("Failed to retrieve profile for transaction logging:", profileError);
+      } else {
+        // Insert transaction record
+        const { error: txError } = await supabaseAdmin
+          .from("transactions")
+          .insert({
+            user_id: profile.id,
+            reference: data.reference,
+            amount: amount,
+            currency: currency,
+            status: data.status || "success",
+            plan_tier: tier,
+            payment_method: data.channel || "card",
+            paid_at: data.paid_at ? new Date(data.paid_at).toISOString() : new Date().toISOString(),
+          });
+        if (txError) {
+          console.error("Database error on logging transaction:", txError);
+        }
+      }
+
       const { error } = await supabaseAdmin
         .from("profiles")
         .update({
@@ -75,6 +106,8 @@ export async function POST(request: Request) {
           billing_amount: amount,
           billing_currency: currency,
           current_period_end: periodEnd,
+          paystack_subscription_code: subscriptionCode,
+          paystack_email_token: emailToken,
         })
         .eq("email", email);
 

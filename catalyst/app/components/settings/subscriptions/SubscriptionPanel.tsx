@@ -15,6 +15,8 @@ import {
   Bot,
   Sparkles,
   Ticket,
+  History,
+  AlertTriangle,
 } from "lucide-react";
 import { useTokens } from "../../../hooks/useTokens";
 import { useRouter } from "next/navigation";
@@ -27,6 +29,7 @@ interface SubscriptionPanelProps {
   favoritesCount?: number;
   recentLogs?: any[];
   weeklyChartData?: any[];
+  transactions?: any[];
 }
 
 const MODEL_THEME: Record<
@@ -88,11 +91,42 @@ export default function SubscriptionPanel({
   favoritesCount = 0,
   recentLogs = [],
   weeklyChartData = [],
+  transactions = [],
 }: SubscriptionPanelProps) {
   const { weeklyLimit, used, percentage, isExhausted, refreshProfile } = useTokens();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const isSubscribed = plan !== "free"; 
   const router = useRouter();
+
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+
+  const handleCancelSubscription = async () => {
+    setIsCanceling(true);
+    setCancelError(null);
+    try {
+      const res = await fetch("/api/billing/cancel", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCancelError(data.message || "Failed to cancel subscription.");
+      } else {
+        setShowCancelModal(false);
+        // Refresh token profile and reload page
+        if (refreshProfile) {
+          await refreshProfile();
+        }
+        router.refresh();
+      }
+    } catch (err) {
+      console.error(err);
+      setCancelError("Network error. Please try again.");
+    } finally {
+      setIsCanceling(false);
+    }
+  };
 
   const [promoCode, setPromoCode] = useState("");
   const [isRedeeming, setIsRedeeming] = useState(false);
@@ -216,18 +250,28 @@ export default function SubscriptionPanel({
             </p>
           </div>
 
-          <button
-            onClick={handleManageBilling}
-            disabled={isRedirecting}
-            className="shrink-0 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium px-5 py-2.5 rounded-xl transition-colors disabled:opacity-50 min-w-[160px] cursor-pointer"
-          >
-            {isRedirecting ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <ExternalLink className="size-4" />
+          <div className="flex flex-col sm:flex-row gap-3">
+            {isSubscribed && (
+              <button
+                onClick={() => setShowCancelModal(true)}
+                className="shrink-0 flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-medium px-5 py-2.5 rounded-xl transition-colors cursor-pointer"
+              >
+                Cancel Subscription
+              </button>
             )}
-            {isSubscribed ? "Manage Billing" : "Upgrade Plan"}
-          </button>
+            <button
+              onClick={handleManageBilling}
+              disabled={isRedirecting}
+              className="shrink-0 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium px-5 py-2.5 rounded-xl transition-colors disabled:opacity-50 min-w-[160px] cursor-pointer"
+            >
+              {isRedirecting ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <ExternalLink className="size-4" />
+              )}
+              {isSubscribed ? "Manage Billing" : "Upgrade Plan"}
+            </button>
+          </div>
         </div>
 
         {/* Feature comparison mini-table */}
@@ -555,6 +599,116 @@ export default function SubscriptionPanel({
           )}
         </div>
       </section>
+
+      {/* Transaction History Section */}
+      <section className="mt-6 flex flex-col gap-4">
+        <div className="flex items-center gap-2">
+          <History className="size-5 text-cyan-400" />
+          <h5 className="text-white text-sm font-bold uppercase tracking-wider">
+            Transaction History
+          </h5>
+        </div>
+
+        {transactions.length === 0 ? (
+          <div className="p-8 border border-dashed border-white/5 rounded-2xl bg-black/10 text-center text-xs text-slate-500">
+            No transactions recorded yet.
+          </div>
+        ) : (
+          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-black/20">
+            <table className="w-full text-left border-collapse min-w-[500px]">
+              <thead>
+                <tr className="border-b border-white/10 bg-white/[0.02] text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">
+                  <th className="p-4">Date</th>
+                  <th className="p-4">Reference</th>
+                  <th className="p-4">Plan</th>
+                  <th className="p-4">Amount</th>
+                  <th className="p-4">Method</th>
+                  <th className="p-4">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5 text-xs text-slate-300">
+                {transactions.map((tx: any) => {
+                  const dateStr = new Date(tx.created_at).toLocaleDateString([], {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  });
+                  const formattedAmount = (tx.amount / 100).toLocaleString(undefined, {
+                    style: "currency",
+                    currency: tx.currency || "USD",
+                  });
+
+                  return (
+                    <tr key={tx.id} className="hover:bg-white/[0.01] transition-colors">
+                      <td className="p-4 font-medium">{dateStr}</td>
+                      <td className="p-4 font-mono text-[10px] text-slate-500">{tx.reference}</td>
+                      <td className="p-4 capitalize font-semibold">{tx.plan_tier}</td>
+                      <td className="p-4 font-bold text-white">{formattedAmount}</td>
+                      <td className="p-4 capitalize text-slate-400">{tx.payment_method || "card"}</td>
+                      <td className="p-4">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                            tx.status === "success"
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              : "bg-red-500/10 text-red-400 border border-red-500/20"
+                          }`}
+                        >
+                          {tx.status}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {/* Cancellation Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="relative w-full max-w-md rounded-3xl border border-red-500/20 bg-[#101922] p-6 shadow-[0_0_50px_rgba(239,68,68,0.15)] flex flex-col gap-5">
+            <div className="flex items-center gap-3 text-red-400">
+              <div className="p-2 rounded-xl bg-red-500/10 border border-red-500/20">
+                <AlertTriangle className="size-6" />
+              </div>
+              <h3 className="text-xl font-bold">Cancel Subscription</h3>
+            </div>
+            
+            <p className="text-slate-300 text-sm">
+              Are you sure you want to cancel your Catalyst plan? You will immediately lose access to premium AI models, custom workspaces, and higher token caps.
+            </p>
+
+            {cancelError && (
+              <div className="p-3 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 text-xs font-semibold">
+                {cancelError}
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3 mt-2">
+              <button
+                disabled={isCanceling}
+                onClick={handleCancelSubscription}
+                className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 text-white font-semibold py-2.5 rounded-xl transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isCanceling ? <Loader2 className="size-4 animate-spin" /> : null}
+                Yes, Cancel Plan
+              </button>
+              <button
+                disabled={isCanceling}
+                onClick={() => {
+                  setShowCancelModal(false);
+                  setCancelError(null);
+                }}
+                className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold py-2.5 rounded-xl transition-all cursor-pointer"
+              >
+                Keep My Plan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

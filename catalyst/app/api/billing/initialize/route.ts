@@ -36,6 +36,8 @@ export async function POST(request: Request) {
     const origin = request.headers.get("origin") || "http://localhost:3000";
     const callbackUrl = `${origin}/settings/subscriptions?session=success`;
 
+    const planCode = plans[tier];
+
     // Initialize Paystack transaction with the dynamic amount
     const paystackSession = await initializeTransaction(
       user.email!,
@@ -43,6 +45,7 @@ export async function POST(request: Request) {
       amount, 
       callbackUrl,
       metadata,
+      planCode || undefined,
     );
 
     if (!paystackSession.status) {

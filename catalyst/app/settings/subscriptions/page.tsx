@@ -18,21 +18,23 @@ export default async function SubscriptionsSettings() {
     .eq("id", user.id)
     .single();
 
-  // Fetch counts, list logs, and weekly logs in parallel
+  // Fetch counts, list logs, weekly logs, and transaction history in parallel
   const [
     promptsCountRes,
     analysesCountRes,
     workspacesCountRes,
     favoritesCountRes,
     usageLogsRes,
-    weeklyLogsRes
+    weeklyLogsRes,
+    transactionsRes
   ] = await Promise.all([
     supabase.from("prompts").select("*", { count: "exact", head: true }).eq("user_id", user.id),
     supabase.from("prompt_analyses").select("*", { count: "exact", head: true }).eq("user_id", user.id),
     supabase.from("workspaces").select("*", { count: "exact", head: true }).eq("user_id", user.id),
     supabase.from("prompts").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("is_favorite", true),
     supabase.from("token_usage_log").select("id, model_slug, mode, cost, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
-    supabase.from("token_usage_log").select("cost, created_at").eq("user_id", user.id).gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+    supabase.from("token_usage_log").select("cost, created_at").eq("user_id", user.id).gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+    supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
   ]);
 
   const promptsCount = promptsCountRes.count || 0;
@@ -40,6 +42,7 @@ export default async function SubscriptionsSettings() {
   const workspacesCount = workspacesCountRes.count || 0;
   const favoritesCount = favoritesCountRes.count || 0;
   const recentLogs = usageLogsRes.data || [];
+  const transactions = transactionsRes.data || [];
 
   // Compile last 7 days of token consumption costs grouped by day
   const weeklyChartData = Array.from({ length: 7 }, (_, i) => {
@@ -78,6 +81,7 @@ export default async function SubscriptionsSettings() {
             favoritesCount={favoritesCount}
             recentLogs={recentLogs}
             weeklyChartData={weeklyChartData}
+            transactions={transactions}
           />
         </section>
       </div>
