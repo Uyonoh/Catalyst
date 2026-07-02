@@ -285,7 +285,7 @@ export default function PricingPage() {
 
   const calculateCharge = (tier: Tier) => {
     const price = tier.discountedPrice ? tier.discountedPrice : tier.price;
-    return price * rate;
+    return Number((price * rate).toFixed(2));
   };
 
   const handleSubscribe = async (
@@ -450,7 +450,10 @@ export default function PricingPage() {
                     <span className="text-white text-2xl font-bold tracking-tight">
                       {symbol}
                       {"\u00A0"}
-                      {(tier.discountedPrice * rate).toLocaleString("en-us")}
+                      {calculateCharge(tier).toLocaleString("en-us", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      })}
                     </span>
                   </div>
                 )}
