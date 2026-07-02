@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Call a free IP geolocation API
-    // const ip = "197.211.63.102";
+    const ip = "197.211.63.102";
     const res = await fetch(`http://ip-api.com/json/${ip}`);
     const data = await res.json();
 
