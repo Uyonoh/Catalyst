@@ -63,14 +63,15 @@ export async function initializeTransaction(
   const body: any = {
     email,
     currency,
-    amount: (amount * 100).toString(),
+    amount: (amount * 100).toFixed(0),
     callback_url: callbackUrl,
     metadata,
   };
 
-  if (planCode) {
+  /*  if (planCode) {
     body.plan = planCode;
   }
+  */
 
   const response = await fetch(`${PAYSTACK_API_URL}/transaction/initialize`, {
     method: "POST",
