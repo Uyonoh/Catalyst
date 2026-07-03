@@ -251,15 +251,7 @@ export default function SubscriptionPanel({
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            {isSubscribed && (
-              <button
-                onClick={() => setShowCancelModal(true)}
-                className="shrink-0 flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-medium px-5 py-2.5 rounded-xl transition-colors cursor-pointer"
-              >
-                Cancel Subscription
-              </button>
-            )}
-            <button
+                        <button
               onClick={handleManageBilling}
               disabled={isRedirecting}
               className="shrink-0 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium px-5 py-2.5 rounded-xl transition-colors disabled:opacity-50 min-w-[160px] cursor-pointer"
@@ -317,6 +309,17 @@ export default function SubscriptionPanel({
             </span>
           </div>
         </div>
+        <div className="flex justify-center sm:justify-end pt-6">
+          {isSubscribed && (
+              <button
+                onClick={() => setShowCancelModal(true)}
+                className="shrink-0 flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-medium px-5 py-2.5 rounded-xl transition-colors cursor-pointer"
+              >
+                Cancel Subscription
+              </button>
+            )}
+        </div>
+
       </div>
 
       {/* Promo Code Card */}
@@ -667,8 +670,8 @@ export default function SubscriptionPanel({
 
       {/* Cancellation Modal */}
       {showCancelModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
-          <div className="relative w-full max-w-md rounded-3xl border border-red-500/20 bg-[#101922] p-6 shadow-[0_0_50px_rgba(239,68,68,0.15)] flex flex-col gap-5">
+        <div className="fixed inset-0 z-50 flex justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="sticky top-[25vh] sm:top-[50vh] z-60 w-full max-w-md h-fit rounded-3xl border border-red-500/20 bg-[#101922] p-6 shadow-[0_0_50px_rgba(239,68,68,0.15)] flex flex-col gap-5">
             <div className="flex items-center gap-3 text-red-400">
               <div className="p-2 rounded-xl bg-red-500/10 border border-red-500/20">
                 <AlertTriangle className="size-6" />
