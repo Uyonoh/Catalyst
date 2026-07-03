@@ -262,7 +262,7 @@ export default function PricingPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [symbol, setSymbol] = useState<string>("$");
   const [currency, setCurrency] = useState<string>("USD");
-  const [rate, setRate] = useState<number>(1);
+  const [rate, setRate] = useState<number | null>(null);
   const [isCompareOpen, setIsCompareOpen] = useState(false);
   const { profile } = useUser();
   const currentPlan = profile?.plan ?? "free";
@@ -271,13 +271,13 @@ export default function PricingPage() {
     const fetchSymbol = async () => {
       const response = await fetch("/api/detect-currency");
       const data = await response.json();
-      setSymbol(data.currencyData.symbol ?? "$");
-      setCurrency(data.currencyData.currency ?? "USD");
+      setSymbol(data?.currencyData?.symbol ?? "$");
+      setCurrency(data?.currencyData?.currency ?? "USD");
       const rateResponse = await fetch(
         `https://www.currencyexchangetool.com/api/v1/convert?from=USD&to=${data.currencyData.currency}&amount=1`,
       );
       const rateData = await rateResponse.json();
-      setRate(rateData.rate);
+      setRate(rateData?.rate ?? 1);
     };
 
     fetchSymbol();
