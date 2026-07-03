@@ -285,7 +285,7 @@ export default function PricingPage() {
 
   const calculateCharge = (tier: Tier) => {
     const price = tier.discountedPrice ? tier.discountedPrice : tier.price;
-    return Number((price * rate).toFixed(2));
+    return Number((price * (rate ?? 1)).toFixed(2));
   };
 
   const handleSubscribe = async (
