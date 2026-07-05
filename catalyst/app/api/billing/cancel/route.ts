@@ -23,7 +23,7 @@ export async function POST() {
 
     const { paystack_subscription_code, paystack_email_token, plan } = profile;
 
-    if (plan === "free" || !paystack_subscription_code) {
+    if (plan === "free") {
       return NextResponse.json({ message: "No active subscription to cancel" }, { status: 400 });
     }
 
@@ -34,7 +34,7 @@ export async function POST() {
     }
 
     // Call Paystack API to cancel subscription
-    const response = await fetch("https://api.paystack.co/subscription/disable", {
+    /** const response = await fetch("https://api.paystack.co/subscription/disable", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
@@ -55,6 +55,7 @@ export async function POST() {
         { status: 400 }
       );
     }
+    */
 
     // Update profile in DB to free
     const { error: updateError } = await supabase
