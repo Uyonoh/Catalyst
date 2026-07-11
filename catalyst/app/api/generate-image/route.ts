@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { generateImage } from "../../lib/llm/router";
 
 export async function POST(request: Request) {
   try {
@@ -13,7 +14,11 @@ export async function POST(request: Request) {
     }
 
     // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // await new Promise((resolve) => setTimeout(resolve, 1500));
+   
+    const response = await generateImage(prompt);
+    // const data = await generateImage(prompt);
+    const data = await response.json();
 
     // Determine dimensions based on aspect ratio
     let width = 512;
@@ -41,7 +46,10 @@ export async function POST(request: Request) {
     const seed = Math.floor(Math.random() * 9999999);
     
     // Using a reliable public mockup/unsplash source with query to vary it slightly
-    const url = `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=${width}&h=${height}&q=80&sig=${seed}`;
+    // const url = `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=${width}&h=${height}&q=80&sig=${seed}`;
+
+    const url = data?.imageUrl;
+    console.log("URL: ", data?.imageUrl);
 
     return NextResponse.json({
       url,
