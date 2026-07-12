@@ -13,11 +13,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Simulate network delay
-    // await new Promise((resolve) => setTimeout(resolve, 1500));
-   
-    const response = await generateImage(prompt);
-    // const data = await generateImage(prompt);
+    const structuredPrompt = `${prompt}. Avoid these concepts: ${negativePrompt}. The output AspectRatio should be ${aspectRatio}`;
+    const response = await generateImage(structuredPrompt);
     const data = await response.json();
 
     // Determine dimensions based on aspect ratio
