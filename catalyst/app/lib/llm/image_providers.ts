@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { InferenceClient } from "@huggingface/inference";
 import { NextResponse } from "next/server";
 
 export interface ImageLLMProvider {
@@ -101,6 +102,47 @@ export const pollinationsProvider: ImageLLMProvider = {
   },
 };
 
+export const huggingfaceProvider: ImageLLMProvider = {
+  id: "huggingface",
+  get keys() { return getEnvKeys("HF_TOKEN") },
+  async call(prompt: string, key: string): Promise<NextResponse<ImageResponse>> {
+
+    const hf = new InferenceClient(key);
+    const responseBlob = await hf.textToImage(
+      {
+        model: 'black-forest-labs/FLUX.1-schnell',
+        inputs: prompt,
+        // parameters: {},
+      },
+      {
+        outputType: "blob"
+      }
+    );
+
+    // Convert raw binary Blob into Node.js Buffer
+    const arrayBuffer = await responseBlob.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Format buffer as a base64 string that the img tag can read natively
+    const base64Image = buffer.toString('base64');
+    const imageUrl = `data:image/jpeg;base64,${base64Image}`;
+
+    if (!base64Image) {
+      return NextResponse.json(
+        { error: "Model did not return valid image data" },
+        { status: 500 }
+      );
+    }
+    return NextResponse.json(
+      { imageUrl: imageUrl },
+      { status: 201 }
+    );
+  },
+  isRateLimitError(err: any): boolean {
+    return err?.message?.includes("429");
+  },
+};
+
 export const groqProvider: ImageLLMProvider = {
   id: "groq",
   get keys() { return getEnvKeys("GROQ_API_KEY"); },
@@ -165,4 +207,4 @@ export const openRouterProvider: ImageLLMProvider = {
   },
 };
 
-export const IMAGE_PROVIDERS = [geminiProvider, pollinationsProvider];
+export const IMAGE_PROVIDERS = [huggingfaceProvider, geminiProvider, pollinationsProvider];

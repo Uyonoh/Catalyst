@@ -46,7 +46,6 @@ export async function POST(request: Request) {
     // const url = `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=${width}&h=${height}&q=80&sig=${seed}`;
 
     const url = data?.imageUrl;
-    console.log("URL: ", data?.imageUrl);
 
     return NextResponse.json({
       url,
