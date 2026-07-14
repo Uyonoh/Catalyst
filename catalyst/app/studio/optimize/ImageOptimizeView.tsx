@@ -90,13 +90,7 @@ export default function ImageOptimizeView() {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       {/* ─── LEFT COLUMN: Prompt form, source upload and preview generation ─── */}
       <div className="lg:col-span-8 flex flex-col gap-6">
-        <PromptBuilderForm
-          fields={fields}
-          onChangeField={setField}
-          assembledPrompt={assembledPrompt}
-          onReset={handleReset}
-        />
-
+        {/*
         <ImageUploadZone
           imageSrc={imageSrc}
           onChange={setImageSrc}
@@ -106,6 +100,14 @@ export default function ImageOptimizeView() {
           onStrengthChange={setStrength}
           instructions={instructions}
           onInstructionsChange={setInstructions}
+        />
+        */}
+
+        <PromptBuilderForm
+          fields={fields}
+          onChangeField={setField}
+          assembledPrompt={assembledPrompt}
+          onReset={handleReset}
         />
 
         <GenerationPreview
@@ -117,11 +119,14 @@ export default function ImageOptimizeView() {
           onValidationFail={() => triggerNotification("A subject is required to generate an image", "error")}
         />
 
+        {/*
         <SceneVariations
           baseAssembledPrompt={assembledPrompt}
           shotTypePhrase={fields.shotType}
           aspectRatio={fields.aspectRatio}
         />
+        */}
+
       </div>
 
       {/* ─── RIGHT COLUMN: Presets, template styling, session log, sharing ─── */}
