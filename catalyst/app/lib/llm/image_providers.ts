@@ -2,10 +2,27 @@ import { GoogleGenAI } from "@google/genai";
 import { InferenceClient } from "@huggingface/inference";
 import { NextResponse } from "next/server";
 
+export interface ModelParameters {
+  model?: string;
+  width?: number;
+  height?: number;
+  size?: string;
+  aspectRatio?: number;
+  numImages?: number;
+  negativePrompt?: string;
+  numInferenceSteps?: number;
+  cfgScale?: number; // Classifier free guidance. Higher value to adhere strictly to prompts
+  temperature?: number;
+  initImage?: string; // Reference image for image-image generations
+  mask?: string; // Mask for reference image: the parts to be edited
+  denoisingStrength?: number; // 0.0 - 1.0, controls how much the original image is changed
+  seed?: number; // set seed for reproducability
+};
+
 export interface ImageLLMProvider {
   id: string;
   keys: string[];
-  call(prompt: string, key: string): Promise<NextResponse<ImageResponse>>;
+  call(prompt: string, key: string, parameters: ModelParameters | null): Promise<NextResponse<ImageResponse>>;
   isRateLimitError(err: any): boolean;
 };
 
@@ -27,7 +44,7 @@ function getEnvKeys(prefix: string): string[] {
 export const geminiProvider: ImageLLMProvider = {
   id: "gemini",
   get keys() { return getEnvKeys("GEMINI_API_KEY"); },
-  async call(prompt: string, key: string): Promise<NextResponse<ImageResponse>> {
+  async call(prompt: string, key: string, parameters: ModelParameters | null): Promise<NextResponse<ImageResponse>> {
     const ai = new GoogleGenAI({ apiKey: key });
     const response = await ai.models.generateContent({
       model: "gemini-3.1-flash-lite-image",
@@ -79,9 +96,9 @@ export const geminiProvider: ImageLLMProvider = {
 };
 
 export const pollinationsProvider: ImageLLMProvider = {
-  id: "pollinations.ai",
+  id: "pollinations",
   get keys() { return ["Dummy Key"] },
-  async call(prompt: string, key: string): Promise<NextResponse<ImageResponse>> {
+  async call(prompt: string, key: string, parameters: ModelParameters | null): Promise<NextResponse<ImageResponse>> {
 
     const encodedPrompt = encodeURIComponent(prompt);
     const imageUrl = `https://image.pollinations.ai/p/${encodedPrompt}?enhance=true`;
@@ -105,7 +122,7 @@ export const pollinationsProvider: ImageLLMProvider = {
 export const huggingfaceProvider: ImageLLMProvider = {
   id: "huggingface",
   get keys() { return getEnvKeys("HF_TOKEN") },
-  async call(prompt: string, key: string): Promise<NextResponse<ImageResponse>> {
+  async call(prompt: string, key: string, parameters: ModelParameters | null): Promise<NextResponse<ImageResponse>> {
 
     const hf = new InferenceClient(key);
     const responseBlob = await hf.textToImage(
@@ -146,7 +163,7 @@ export const huggingfaceProvider: ImageLLMProvider = {
 export const groqProvider: ImageLLMProvider = {
   id: "groq",
   get keys() { return getEnvKeys("GROQ_API_KEY"); },
-  async call(prompt: string, key: string): Promise<NextResponse<ImageResponse>> {
+  async call(prompt: string, key: string, parameters: ModelParameters | null): Promise<NextResponse<ImageResponse>> {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -176,7 +193,7 @@ export const groqProvider: ImageLLMProvider = {
 export const openRouterProvider: ImageLLMProvider = {
   id: "openrouter",
   get keys() { return getEnvKeys("OPENROUTER_API_KEY"); },
-  async call(prompt: string, key: string): Promise<NextResponse<ImageResponse>> {
+  async call(prompt: string, key: string, parameters: ModelParameters | null): Promise<NextResponse<ImageResponse>> {
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {

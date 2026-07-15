@@ -2,13 +2,15 @@
 
 import React, { useState } from "react";
 import { Sparkles, Loader2, RefreshCw, AlertTriangle, HelpCircle } from "lucide-react";
+import { useWorkspace } from "../../../context/WorkspaceContext";
 import { GenerateStatus, GenerateResult } from "../hooks/useImageGenerate";
+import ModelSelector from "./ImageModelSelector";
 
 interface GenerationPreviewProps {
   status: GenerateStatus;
   result: GenerateResult | null;
   error: string | null;
-  onGenerate: () => void;
+  onGenerate: (model: string) => void;
   hasSubject: boolean;
   onValidationFail: () => void;
 }
@@ -23,22 +25,29 @@ export default function GenerationPreview({
 }: GenerationPreviewProps) {
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const handleGenerateClick = () => {
+   const {
+     selectedModel: selectedModelId,
+     setSelectedModel: setSelectedModelId,
+   } = useWorkspace();
+
+  const handleGenerateClick = (model: string) => {
     setValidationError(null);
     if (!hasSubject) {
       setValidationError("Please enter a subject description first.");
       onValidationFail();
       return;
     }
-    onGenerate();
+    onGenerate(model);
   };
 
   return (
     <div className="flex flex-col gap-4">
       {/* Action / Trigger Row */}
-      <div className="flex flex-col sm:flex-row items-center gap-3">
+      <div className="flex flex-col items-center gap-3">
+        <div className="flex items-center justify-between w-full gap-3">
+        <span className="hidden sm:inline"> <ModelSelector /> </span>
         <button
-          onClick={handleGenerateClick}
+          onClick={() => handleGenerateClick(selectedModelId)}
           disabled={status === "loading"}
           className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-primary text-white font-black text-sm shadow-neon hover:shadow-neon-strong transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -54,6 +63,8 @@ export default function GenerationPreview({
             </>
           )}
         </button>
+        <span className="flex sm:hidden"> <ModelSelector /> </span>
+        </div>
 
         {validationError && (
           <span className="text-xs text-rose-400 font-bold flex items-center gap-1.5 animate-bounce">
@@ -110,7 +121,7 @@ export default function GenerationPreview({
               {error || "An unexpected error occurred while communicating with the engine."}
             </p>
             <button
-              onClick={handleGenerateClick}
+              onClick={() => handleGenerateClick(selectedModelId)}
               className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-300 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all cursor-pointer"
             >
               <RefreshCw className="size-3" />

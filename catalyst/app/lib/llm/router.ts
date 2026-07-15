@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { ALL_PROVIDERS } from "./providers";
 import { IMAGE_PROVIDERS } from "./image_providers";
-import type { ImageResponse } from "./image_providers";
+import type { ImageResponse, ModelParameters } from "./image_providers";
 
 // Helper to shuffle an array (Fisher-Yates)
 function shuffle<T>(array: T[]): T[] {
@@ -48,12 +48,13 @@ export async function generateRefinedPrompt(prompt: string): Promise<string> {
     }
   }
 
+  console.error("All LLM providers exhausted. Our servers are currently experiencing high demand. Please try again later.");
   throw new Error("All LLM providers exhausted. Our servers are currently experiencing high demand. Please try again later.");
 }
 
 
 
-export async function generateImage(prompt: string): Promise<NextResponse<ImageResponse>> {
+export async function generateImage(selectedProvider: string, prompt: string, parameters: ModelParameters | null): Promise<NextResponse<ImageResponse>> {
   const ObjectProviders = IMAGE_PROVIDERS;
 
   for (const provider of ObjectProviders) {
@@ -63,12 +64,16 @@ export async function generateImage(prompt: string): Promise<NextResponse<ImageR
       continue;
     }
 
+    if (selectedProvider !== provider.id) {
+      continue;
+    }
+
     const shuffledKeys = shuffle(keys);
 
     for (const key of shuffledKeys) {
       try {
         console.log(`Trying provider [${provider.id}] with key ending in '...${key.substring(key.length - 4)}'`);
-        const result = await provider.call(prompt, key);
+        const result = await provider.call(prompt, key, parameters);
         return result;
       } catch (err: any) {
         if (provider.isRateLimitError(err)) {
@@ -78,11 +83,13 @@ export async function generateImage(prompt: string): Promise<NextResponse<ImageR
           // If it's a structural error (e.g., bad model, invalid format), we still want to fallback 
           // or fail. If we fail, it stops everything. We fallback for maximum resilience.
           console.error(`Provider [${provider.id}] failed with non-rate-limit error:`, err);
+          console.error(`Error with key=${key}}, params=${parameters}`);
           continue;
         }
       }
     }
   }
 
+  console.error("All LLM providers exhausted. Our servers are currently experiencing high demand. Please try again later.");
   throw new Error("All LLM providers exhausted. Our servers are currently experiencing high demand. Please try again later.");
 }

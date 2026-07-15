@@ -15,7 +15,7 @@ export function useImageGenerate() {
   const [result, setResult] = useState<GenerateResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const generate = async (prompt: string, negativePrompt: string, aspectRatio: string) => {
+  const generate = async (model: string, prompt: string, negativePrompt: string, aspectRatio: string) => {
     if (!prompt || prompt.trim() === "") {
       setError("Prompt / Subject is required to generate an image.");
       setStatus("error");
@@ -33,6 +33,7 @@ export function useImageGenerate() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          model,
           prompt,
           negativePrompt,
           aspectRatio,

@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { generateImage } from "../../lib/llm/router";
+import type { ModelParameters } from "../../lib/llm/image_providers";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { prompt, negativePrompt, aspectRatio } = body;
+    const { model, prompt, negativePrompt, aspectRatio } = body;
 
     if (!prompt || prompt.trim() === "") {
       return NextResponse.json(
@@ -14,7 +15,11 @@ export async function POST(request: Request) {
     }
 
     const structuredPrompt = `${prompt}. Avoid these concepts: ${negativePrompt}. The output AspectRatio should be ${aspectRatio}`;
-    const response = await generateImage(structuredPrompt);
+    const parameters: ModelParameters = {
+      aspectRatio: aspectRatio,
+      negativePrompt: negativePrompt,
+    };
+    const response = await generateImage(model, structuredPrompt, parameters); // provider, prompt, params
     const data = await response.json();
 
     // Determine dimensions based on aspect ratio

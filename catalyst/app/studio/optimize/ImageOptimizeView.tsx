@@ -52,7 +52,7 @@ export default function ImageOptimizeView() {
     setNotification({ message, type });
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (model: string) => {
     if (!fields.subject.trim()) {
       triggerNotification("Subject definition is required.", "error");
       return;
@@ -68,7 +68,7 @@ export default function ImageOptimizeView() {
       }
     }
 
-    const payload = await generate(finalPrompt, fields.negativePrompt, fields.aspectRatio);
+    const payload = await generate(model, finalPrompt, fields.negativePrompt, fields.aspectRatio);
     if (payload) {
       triggerNotification("Image generated successfully!", "success");
       // Add successful generation snapshot to session history list

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Sparkles, Loader2, Play } from "lucide-react";
 import { useImageGenerate } from "../hooks/useImageGenerate";
+import { useWorkspace } from "../../../context/WorkspaceContext";
 
 interface SceneVariationsProps {
   baseAssembledPrompt: string;
@@ -32,6 +33,11 @@ export default function SceneVariations({
 
   const generators = [gen1, gen2, gen3, gen4];
 
+   const {
+     selectedModel: selectedModelId,
+     setSelectedModel: setSelectedModelId,
+   } = useWorkspace();
+
   const handleGenerateVariants = () => {
     if (!baseAssembledPrompt || baseAssembledPrompt.trim() === "") return;
     setHasStarted(true);
@@ -51,7 +57,7 @@ export default function SceneVariations({
         variantPrompt = `${modifier.phrase}, ${baseAssembledPrompt}`;
       }
 
-      generators[index].generate(variantPrompt, "", aspectRatio);
+      generators[index].generate(selectedModelId, variantPrompt, "", aspectRatio);
     });
   };
 
