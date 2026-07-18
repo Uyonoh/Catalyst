@@ -125,11 +125,17 @@ export const huggingfaceProvider: ImageLLMProvider = {
   async call(prompt: string, key: string, parameters: ModelParameters | null): Promise<NextResponse<ImageResponse>> {
 
     const hf = new InferenceClient(key);
+    const defaultWidth = 1024;
+    const defaultHeight = 1024;
+
     const responseBlob = await hf.textToImage(
       {
         model: 'black-forest-labs/FLUX.1-schnell',
         inputs: prompt,
-        // parameters: {},
+        parameters: {
+          width: parameters?.width ?? defaultWidth,
+          height: parameters?.height ?? defaultHeight,
+        },
       },
       {
         outputType: "blob"

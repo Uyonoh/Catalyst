@@ -14,36 +14,58 @@ export async function POST(request: Request) {
       );
     }
 
+    const calculateWidthHeight = (aspectRatio: string) => {
+      const wh = aspectRatio.trim().split(":");
+
+      const validateAR = (AR: number[], LCF: number): number[] => {
+        // Ar: Aspect ratio
+        // LCF: Lowest Common Factor, all width and height must be multiples of this, else the model might encounter errors
+        const wRem = AR[0] % LCF;
+        const hRem = AR[1] % LCF;
+
+        const width = AR[0] - wRem;
+        const height = AR[1] - hRem;
+
+        return [width, height];
+      };
+
+      if (wh.length != 2) {
+        return [512, 512]; // Defuault to 512x512 if aspect Ratio is invalid
+      } else {
+        const ax = parseInt(wh[0]);
+        const ay = parseInt(wh[1]);
+
+        // Convert all ARs to 16/y or x/16 and multiply by 64 to get W and H
+        // Equivalent to setting AR to 1024/y and x/1024
+        const maxWH = 128;
+        let multiplier = 64;
+
+        if (ax > ay) { // landscape
+          multiplier = maxWH / ax;
+        } else {
+          multiplier = maxWH / ay;
+        }
+
+        const width = multiplier * ax;
+        const height = multiplier * ay;
+
+        const baseLCF = 32;
+        return validateAR([width, height], baseLCF);
+      }
+    };
+
     const structuredPrompt = `${prompt}. Avoid these concepts: ${negativePrompt}. The output AspectRatio should be ${aspectRatio}`;
     const parameters: ModelParameters = {
       aspectRatio: aspectRatio,
+      width: calculateWidthHeight(aspectRatio)[0],
+      height: calculateWidthHeight(aspectRatio)[1],
       negativePrompt: negativePrompt,
     };
     const response = await generateImage(model, structuredPrompt, parameters); // provider, prompt, params
     const data = await response.json();
 
     // Determine dimensions based on aspect ratio
-    let width = 512;
-    let height = 512;
-    if (aspectRatio === "16:9") {
-      width = 896;
-      height = 504;
-    } else if (aspectRatio === "9:16") {
-      width = 504;
-      height = 896;
-    } else if (aspectRatio === "4:3") {
-      width = 768;
-      height = 576;
-    } else if (aspectRatio === "3:2") {
-      width = 768;
-      height = 512;
-    } else if (aspectRatio === "2:3") {
-      width = 512;
-      height = 768;
-    } else if (aspectRatio === "21:9") {
-      width = 1008;
-      height = 432;
-    }
+    let [width, height] = calculateWidthHeight(aspectRatio);
 
     const seed = Math.floor(Math.random() * 9999999);
     
@@ -60,8 +82,9 @@ export async function POST(request: Request) {
       prompt
     });
   } catch (error: any) {
+    console.error("Failed to generate image with error: ", error);
     return NextResponse.json(
-      { error: error.message || "Failed to generate image." },
+      { error: "We ran into an error while generating your image.\nPlease try again later" },
       { status: 500 }
     );
   }
