@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { RegexParser } from "@/app/lib/parsing/strategies/RegexParser";
-import { AnalyzerService } from "@/app/lib/engine/AnalyzerService";
-import { CompilerService } from "@/app/lib/engine/CompilerService";
-import { TargetModel } from "@/app/lib/engine/types";
 
-const parser = new RegexParser();
-const analyzerService = new AnalyzerService();
-const compilerService = new CompilerService();
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,32 +13,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let targetModel = TargetModel.CLAUDE_3_5_SONNET;
-    if (model === "gpt") {
-      targetModel = TargetModel.GPT_4O;
-    } else if (model === "claude") {
-      targetModel = TargetModel.CLAUDE_3_5_SONNET;
-    } else if (model === "gemini") {
-      targetModel = TargetModel.GEMINI_1_5_PRO;
-    } else if (model === "llama") {
-      targetModel = TargetModel.LLAMA_3;
-    } else if (model === "grok") {
-      targetModel = TargetModel.GROK_1;
-    } else if (model === "dalle") {
-      targetModel = TargetModel.DALLE_3;
-    } else if (model === "stablediffusion") {
-      targetModel = TargetModel.STABLE_DIFFUSION_XL;
-    } else if (model === "midjourney") {
-      targetModel = TargetModel.MIDJOURNEY_V6;
-    } else if (model === "veo") {
-      targetModel = TargetModel.VEO_VIDEO;
+    const authHeader = req.headers.get("Authorization") || "";
+
+    const backendRes = await fetch(`${BACKEND_URL}/analyze`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: authHeader,
+      },
+      body: JSON.stringify({
+        text,
+        model
+      }),
+    });
+
+    if (!backendRes.ok) {
+      const errorText = await backendRes.text();
+      throw new Error(`FastAPI backend error: ${backendRes.status} ${errorText}`);
     }
 
-    // For Phase 1, we use the fast RegexParser
-    const result = parser.analyze(text);
-    const deconstructed = analyzerService.analyze(text);
-    const optimized = compilerService.compile(deconstructed, targetModel);
-
+    const optimized = await backendRes.json();
     return NextResponse.json(optimized);
   } catch (error) {
     console.error("Parsing Error:", error);
@@ -54,3 +42,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

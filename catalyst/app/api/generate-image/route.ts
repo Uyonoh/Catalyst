@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
-import { generateImage } from "../../lib/llm/router";
-import type { ModelParameters } from "../../lib/llm/image_providers";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: Request) {
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
+
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { model, prompt, negativePrompt, aspectRatio } = body;
@@ -18,8 +18,6 @@ export async function POST(request: Request) {
       const wh = aspectRatio.trim().split(":");
 
       const validateAR = (AR: number[], LCF: number): number[] => {
-        // Ar: Aspect ratio
-        // LCF: Lowest Common Factor, all width and height must be multiples of this, else the model might encounter errors
         const wRem = AR[0] % LCF;
         const hRem = AR[1] % LCF;
 
@@ -30,17 +28,15 @@ export async function POST(request: Request) {
       };
 
       if (wh.length != 2) {
-        return [512, 512]; // Defuault to 512x512 if aspect Ratio is invalid
+        return [512, 512];
       } else {
         const ax = parseInt(wh[0]);
         const ay = parseInt(wh[1]);
 
-        // Convert all ARs to 16/y or x/16 and multiply by 64 to get W and H
-        // Equivalent to setting AR to 1024/y and x/1024
         const maxWH = 128;
         let multiplier = 64;
 
-        if (ax > ay) { // landscape
+        if (ax > ay) {
           multiplier = maxWH / ax;
         } else {
           multiplier = maxWH / ay;
@@ -55,24 +51,34 @@ export async function POST(request: Request) {
     };
 
     const structuredPrompt = `${prompt}. Avoid these concepts: ${negativePrompt}. The output AspectRatio should be ${aspectRatio}`;
-    const parameters: ModelParameters = {
-      aspectRatio: aspectRatio,
-      width: calculateWidthHeight(aspectRatio)[0],
-      height: calculateWidthHeight(aspectRatio)[1],
-      negativePrompt: negativePrompt,
-    };
-    const response = await generateImage(model, structuredPrompt, parameters); // provider, prompt, params
-    const data = await response.json();
-
-    // Determine dimensions based on aspect ratio
+    
+    // Compute dimensions to forward or use locally
     let [width, height] = calculateWidthHeight(aspectRatio);
 
-    const seed = Math.floor(Math.random() * 9999999);
-    
-    // Using a reliable public mockup/unsplash source with query to vary it slightly
-    // const url = `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=${width}&h=${height}&q=80&sig=${seed}`;
+    const authHeader = request.headers.get("Authorization") || "";
 
-    const url = data?.imageUrl;
+    const backendRes = await fetch(`${BACKEND_URL}/generate-image`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: authHeader,
+      },
+      body: JSON.stringify({
+        model,
+        prompt: structuredPrompt,
+        negativePrompt,
+        aspectRatio
+      }),
+    });
+
+    if (!backendRes.ok) {
+      const errorText = await backendRes.text();
+      throw new Error(`FastAPI backend error: ${backendRes.status} ${errorText}`);
+    }
+
+    const data = await backendRes.json();
+    const url = data?.url;
+    const seed = data?.seed || Math.floor(Math.random() * 9999999);
 
     return NextResponse.json({
       url,
@@ -89,3 +95,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

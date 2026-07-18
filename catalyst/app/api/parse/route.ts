@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buildPrompt } from "@/app/lib/prompts/builder";
 import { createClient } from "@/app/lib/supabase-server";
-import { generateRefinedPrompt } from "@/app/lib/llm/router";
+
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,7 +12,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { text, model: modelId, controls, mode = "text" } = await req.json();
+    const body = await req.json();
+    const { text, model: modelId, controls, mode = "text" } = body;
 
     if (!text || typeof text !== "string") {
       return NextResponse.json(
@@ -48,29 +49,37 @@ export async function POST(req: NextRequest) {
       }, { status: 402 });
     }
 
-    const hasAnyKey = Object.keys(process.env).some(k => 
-      k.startsWith("GEMINI_API_KEY") || k.startsWith("GROQ_API_KEY") || k.startsWith("OPENROUTER_API_KEY")
-    );
-
-    if (!hasAnyKey) {
-        // Fallback for development if API key is missing
-        console.warn("No LLM API keys are set. Returning mock response.");
-        return NextResponse.json({
-            refinedPrompt: `[MOCK REFINED PROMPT] ${text}\n\nThis is a placeholder refined prompt because no LLM API keys (GEMINI, GROQ, OPENROUTER) are configured. Please add them to your .env file.`,
-            tokenResult
-        });
-    }
-
-    const prompt = buildPrompt({ text, model: modelId, controls, mode });
-    
-    const format = controls?.outputFormat || "text";
+    const authHeader = req.headers.get("Authorization") || "";
     let refinedText = "";
+    let format = controls?.outputFormat || "text";
+
     try {
-      refinedText = await generateRefinedPrompt(prompt);
+      const backendRes = await fetch(`${BACKEND_URL}/generate-text`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: authHeader,
+        },
+        body: JSON.stringify({
+          text,
+          model: modelId,
+          controls,
+          mode
+        }),
+      });
+
+      if (!backendRes.ok) {
+        const errorText = await backendRes.text();
+        throw new Error(`FastAPI backend error: ${backendRes.status} ${errorText}`);
+      }
+
+      const backendData = await backendRes.json();
+      refinedText = backendData.refinedPrompt;
+      format = backendData.format;
     } catch (llmError: any) {
       console.error("LLM Generation Failed. Reverting tokens.", llmError);
       
-      // Revert tokens using our new RPC
+      // Revert tokens using our RPC
       const { error: revertError } = await supabase.rpc('refund_tokens', {
         p_user_id: user.id,
         p_model: modelId,
@@ -84,7 +93,8 @@ export async function POST(req: NextRequest) {
       const isRateLimit = llmError?.message && (
         llmError.message.includes("exhausted") || 
         llmError.message.includes("high demand") || 
-        llmError.message.includes("429")
+        llmError.message.includes("429") ||
+        llmError.message.includes("503")
       );
 
       if (isRateLimit) {
@@ -100,24 +110,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let cleanedText = refinedText.trim();
-    
-    // Clean up code block wraps if LLM wrapper them (e.g., ```json ... ``` or ``` ... ```)
-    const codeBlockRegex = /^```(?:[a-zA-Z0-9_\-+]+)?\n([\s\S]*?)\n```$/;
-    const match = cleanedText.match(codeBlockRegex);
-    if (match) {
-      cleanedText = match[1].trim();
-    } else {
-      // Also catch cases where the markdown backticks don't have leading/trailing newlines or are using single quotes (as user reported: '''markdown ...''')
-      cleanedText = cleanedText
-        .replace(/^```[a-zA-Z0-9_\-+]*\s*/g, "")
-        .replace(/\s*```$/g, "")
-        .replace(/^'''[a-zA-Z0-9_\-+]*\s*/g, "")
-        .replace(/\s*'''$/g, "");
-    }
-
     return NextResponse.json({ 
-      refinedPrompt: cleanedText, 
+      refinedPrompt: refinedText, 
       format: format,
       tokenResult 
     });
@@ -129,3 +123,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

@@ -10,12 +10,11 @@
     "pretty": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\""
   },
   "dependencies": {
-    "@google/genai": "^1.46.0",
-    "@huggingface/inference": "^4.13.23",
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.110.2",
     "lucide-react": "^0.471.2",
     "next": "16.1.6",
+
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
