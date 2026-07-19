@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+from auth import get_jwks
 from routers import text, image, analyze
 
 app = FastAPI(
@@ -27,6 +28,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Pre-fetch JWKS on startup to avoid first-request latency
+@app.on_event("startup")
+async def startup_event():
+    await get_jwks()
 
 # Include routers
 app.include_router(text.router, prefix="/generate-text", tags=["Text generation"])

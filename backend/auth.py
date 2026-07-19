@@ -1,5 +1,8 @@
+import asyncio
 import os
 import time
+from typing import Any, Dict, Optional
+
 import httpx
 from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -9,17 +12,17 @@ bearer = HTTPBearer()
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET", "")
-# Anon key is required by Supabase to authorize JWKS endpoint requests
+SUPABASE_JWT_AUDIENCE = os.environ.get("SUPABASE_JWT_AUDIENCE", "authenticated")
 SUPABASE_PUBLISHABLE_DEFAULT_KEY = os.environ.get("SUPABASE_PUBLISHABLE_DEFAULT_KEY", "")
 
 # JWKS cache with TTL — keys are rotated by Supabase periodically,
-# so we refresh every hour to avoid stale-key auth failures.
-_jwks_cache: dict | None = None
+# typically every 24-48 hours. We refresh daily to match Supabase rotation.
+_jwks_cache: Optional[Dict[str, Any]] = None
 _jwks_fetched_at: float = 0.0
-JWKS_TTL_SECONDS: int = 3600  # 1 hour
+JWKS_TTL_SECONDS: int = 86400  # 24 hours
 
 
-async def get_jwks() -> dict | None:
+async def get_jwks() -> Optional[Dict[str, Any]]:
     global _jwks_cache, _jwks_fetched_at
 
     now = time.monotonic()
@@ -31,25 +34,26 @@ async def get_jwks() -> dict | None:
     if not SUPABASE_URL:
         return None
 
-    jwks_url = f"{SUPABASE_URL.rstrip('/')}/auth/v1/jwks"
     jwks_url = f"{SUPABASE_URL.rstrip('/')}/auth/v1/.well-known/jwks.json"
 
-    # Supabase requires the anon key in the apikey header to access the JWKS endpoint
-    headers = {}
-    # if SUPABASE_PUBLISHABLE_DEFAULT_KEY:
-    #     headers["apikey"] = SUPABASE_PUBLISHABLE_DEFAULT_KEY
-
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            res = await client.get(jwks_url, headers=headers)
-            res.raise_for_status()
-            _jwks_cache = res.json()
-            _jwks_fetched_at = now
-            return _jwks_cache
-    except Exception as e:
-        print(f"Failed to fetch JWKS from Supabase: {e}")
-        # Return stale cache on network failure rather than rejecting all requests
-        return _jwks_cache
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                res = await client.get(jwks_url)
+                res.raise_for_status()
+                _jwks_cache = res.json()
+                _jwks_fetched_at = now
+                return _jwks_cache
+        except Exception as e:
+            if attempt == max_retries - 1:
+                # Final attempt failed - return stale cache if available
+                if _jwks_cache:
+                    print(f"WARNING: Using stale JWKS cache after {max_retries} fetch failures")
+                else:
+                    print(f"ERROR: JWKS fetch failed and no cache available: {e}")
+                return _jwks_cache
+            await asyncio.sleep(1)
 
 
 async def verify_jwt(credentials: HTTPAuthorizationCredentials = Security(bearer)) -> str:
@@ -67,8 +71,7 @@ async def verify_jwt(credentials: HTTPAuthorizationCredentials = Security(bearer
 
     token_alg = unverified_header.get("alg", "")
 
-    # 1. RS256 path — verify using public JWKS from Supabase (production)
-    # 1. Asymmetric Path — Supports both modern ES256 and production RS256 pools
+    # Asymmetric Path — Supports both modern ES256 and production RS256 pools
     if token_alg in ["ES256", "RS256"]:
         jwks = await get_jwks()
         if jwks and "keys" in jwks:
@@ -80,8 +83,8 @@ async def verify_jwt(credentials: HTTPAuthorizationCredentials = Security(bearer
                     payload = jwt.decode(
                         token,
                         public_key,
-                        algorithms=[token_alg], # Dynamically matches ES256 or RS256
-                        audience="authenticated"
+                        algorithms=[token_alg],
+                        audience=SUPABASE_JWT_AUDIENCE
                     )
                     return payload.get("sub", "")
                 except JWTError as e:
@@ -89,7 +92,8 @@ async def verify_jwt(credentials: HTTPAuthorizationCredentials = Security(bearer
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired authentication token",                headers={"WWW-Authenticate": "Bearer"},
+            detail="Invalid or expired authentication token",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     # 2. HS256 path — for local Supabase dev instances that sign with the JWT secret
@@ -99,7 +103,7 @@ async def verify_jwt(credentials: HTTPAuthorizationCredentials = Security(bearer
                 token,
                 SUPABASE_JWT_SECRET,
                 algorithms=["HS256"],
-                audience="authenticated"
+                audience=SUPABASE_JWT_AUDIENCE
             )
             return payload.get("sub", "")
         except JWTError as e:
