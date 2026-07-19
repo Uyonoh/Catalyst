@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/app/lib/supabase-server";
+import { createClient, getSessionToken } from "@/app/lib/supabase-server";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 
@@ -49,7 +49,13 @@ export async function POST(req: NextRequest) {
       }, { status: 402 });
     }
 
-    const authHeader = req.headers.get("Authorization") || "";
+    // Retrieve the server-side session token to authenticate with FastAPI.
+    // We already verified the user above via getUser(), so the session is valid.
+    const accessToken = await getSessionToken();
+    if (!accessToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     let refinedText = "";
     let format = controls?.outputFormat || "text";
 
@@ -58,7 +64,7 @@ export async function POST(req: NextRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: authHeader,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           text,

@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient, getSessionToken } from "@/app/lib/supabase-server";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify the user server-side — never trust the client's Authorization header
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (!user || authError) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { model, prompt, negativePrompt, aspectRatio } = body;
 
@@ -55,13 +64,17 @@ export async function POST(request: NextRequest) {
     // Compute dimensions to forward or use locally
     let [width, height] = calculateWidthHeight(aspectRatio);
 
-    const authHeader = request.headers.get("Authorization") || "";
+    // Retrieve the server-side session token to authenticate with FastAPI
+    const accessToken = await getSessionToken();
+    if (!accessToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const backendRes = await fetch(`${BACKEND_URL}/generate-image`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: authHeader,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         model,
@@ -95,4 +108,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

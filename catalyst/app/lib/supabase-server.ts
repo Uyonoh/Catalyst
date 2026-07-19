@@ -45,3 +45,20 @@ export async function getServerUser() {
     return null;
   }
 }
+
+/**
+ * Returns the current session's JWT access token for server-side use.
+ * Use this to inject `Authorization: Bearer <token>` when proxying
+ * requests to the FastAPI backend — never forward the client header directly.
+ */
+export async function getSessionToken(): Promise<string | null> {
+  const supabase = await createClient();
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error || !session) return null;
+    return session.access_token;
+  } catch (error) {
+    console.error("Error retrieving session token:", error);
+    return null;
+  }
+}

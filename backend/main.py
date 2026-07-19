@@ -1,4 +1,5 @@
 import os
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -13,10 +14,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for Next.js app communication
+# CORS: read allowed origins from env var (comma-separated list).
+# In production set ALLOWED_ORIGINS to your Next.js deployment URL.
+# e.g. ALLOWED_ORIGINS=https://your-app.vercel.app
+_raw_origins = os.environ.get("ALLOWED_ORIGINS", "http://localhost:3000")
+ALLOWED_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, restrict to the Next.js origin URL
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -30,3 +36,6 @@ app.include_router(analyze.router, prefix="/analyze", tags=["Analyze engine"])
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

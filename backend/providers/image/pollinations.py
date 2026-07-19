@@ -13,6 +13,8 @@ class PollinationsImageProvider:
     async def call(self, prompt: str, key: str, params: Optional[ImageParams]) -> ImageResult:
         encoded_prompt = quote(prompt)
         image_url = f"https://image.pollinations.ai/p/{encoded_prompt}?enhance=true"
+
+        # Pollinatioms generates the image and returns to the user once the url is hit
         return ImageResult(url=image_url)
 
     def is_rate_limit_error(self, err: Exception) -> bool:
