@@ -3,17 +3,23 @@ from schemas import TextGenerateRequest, TextGenerateResponse
 from auth import verify_jwt
 from services.prompt_builder import build_prompt
 from services.router import generate_refined_prompt
+from logging_config import get_logger
 
 router = APIRouter()
+logger = get_logger(__name__)
 
 @router.post("", response_model=TextGenerateResponse)
 async def generate_text_endpoint(req: TextGenerateRequest, user_id: str = Depends(verify_jwt)):
+    logger.info(f"Processing text generation request from user {user_id}")
+    
     prompt_str = build_prompt(
         text=req.text,
         model=req.model,
         controls=req.controls,
         mode=req.mode
     )
+    
+    logger.debug(f"Generated prompt: {prompt_str[:100]}...")
     
     refined_text = await generate_refined_prompt(prompt_str)
     
@@ -33,6 +39,8 @@ async def generate_text_endpoint(req: TextGenerateRequest, user_id: str = Depend
         cleaned_text = cleaned_text.replace("```json", "").replace("```markdown", "").replace("```", "").replace("'''", "").strip()
 
     output_format = req.controls.outputFormat if req.controls and req.controls.outputFormat else "text"
+    
+    logger.info(f"Text generation completed for user {user_id}, output format: {output_format}")
     
     return TextGenerateResponse(
         refinedPrompt=cleaned_text,

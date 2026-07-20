@@ -8,12 +8,16 @@ from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 
+from logging_config import get_logger
+
 bearer = HTTPBearer()
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET", "")
 SUPABASE_JWT_AUDIENCE = os.environ.get("SUPABASE_JWT_AUDIENCE", "authenticated")
 SUPABASE_PUBLISHABLE_DEFAULT_KEY = os.environ.get("SUPABASE_PUBLISHABLE_DEFAULT_KEY", "")
+
+logger = get_logger(__name__)
 
 # JWKS cache with TTL — keys are rotated by Supabase periodically,
 # typically every 24-48 hours. We refresh daily to match Supabase rotation.
@@ -49,9 +53,9 @@ async def get_jwks() -> Optional[Dict[str, Any]]:
             if attempt == max_retries - 1:
                 # Final attempt failed - return stale cache if available
                 if _jwks_cache:
-                    print(f"WARNING: Using stale JWKS cache after {max_retries} fetch failures")
+                    logger.warning(f"Using stale JWKS cache after {max_retries} fetch failures")
                 else:
-                    print(f"ERROR: JWKS fetch failed and no cache available: {e}")
+                    logger.error(f"JWKS fetch failed and no cache available: {e}")
                 return _jwks_cache
             await asyncio.sleep(1)
 
@@ -88,7 +92,7 @@ async def verify_jwt(credentials: HTTPAuthorizationCredentials = Security(bearer
                     )
                     return payload.get("sub", "")
                 except JWTError as e:
-                    print(f"{token_alg} validation failed: {e}")
+                    logger.warning(f"{token_alg} validation failed: {e}")
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -107,7 +111,7 @@ async def verify_jwt(credentials: HTTPAuthorizationCredentials = Security(bearer
             )
             return payload.get("sub", "")
         except JWTError as e:
-            print(f"HS256 validation failed: {e}")
+            logger.warning(f"HS256 validation failed: {e}")
 
     # 3. No valid path succeeded
     raise HTTPException(

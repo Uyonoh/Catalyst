@@ -4,11 +4,15 @@ from schemas import ImageGenerateRequest, ImageGenerateResponse
 from auth import verify_jwt
 from providers.image.base import ImageParams
 from services.router import generate_image
+from logging_config import get_logger
 
 router = APIRouter()
+logger = get_logger(__name__)
 
 @router.post("", response_model=ImageGenerateResponse)
 async def generate_image_endpoint(req: ImageGenerateRequest, user_id: str = Depends(verify_jwt)):
+    logger.info(f"Processing image generation request from user {user_id}, model: {req.model}")
+    
     # Aspect ratio math / dimensions calculator is kept in Next.js to simplify,
     # but here we parse the request and call the provider logic.
     # Next.js will pass computed structured prompt and properties.
@@ -22,6 +26,7 @@ async def generate_image_endpoint(req: ImageGenerateRequest, user_id: str = Depe
     }
     
     width, height = wh_map.get(req.aspectRatio, (1024, 1024))
+    logger.debug(f"Image dimensions: {width}x{height}, aspect ratio: {req.aspectRatio}")
     
     # Setup parameters
     params = ImageParams(
@@ -39,6 +44,8 @@ async def generate_image_endpoint(req: ImageGenerateRequest, user_id: str = Depe
     )
     
     seed = random.randint(0, 9999999)
+    
+    logger.info(f"Image generation completed for user {user_id}, url: {result.url}")
     
     return ImageGenerateResponse(
         url=result.url,
