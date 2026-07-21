@@ -13,6 +13,8 @@ from logging_config import setup_logging, LoggingMiddleware, get_logger
 # Configure logging from environment variables
 log_level = os.environ.get("LOG_LEVEL", "INFO")
 log_format = os.environ.get("LOG_FORMAT", "json")  # Use 'text' for development
+host = os.environ.get("HOST","127.0.0.1" )
+port = os.environ.get("PORT", "8000")  # Use 'text' for development
 setup_logging(log_level=log_level, log_format=log_format)
 
 logger = get_logger(__name__)
@@ -60,4 +62,4 @@ def health_check():
     return {"status": "healthy"}
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host=host, port=int(port), reload=True)
