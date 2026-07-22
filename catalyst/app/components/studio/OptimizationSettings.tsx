@@ -18,7 +18,7 @@ import {
   Ban,
   FileOutput,
 } from "lucide-react";
-import { PromptControls } from "../../lib/prompts/builder";
+import { PromptControls } from "../../lib/engine/types";
 
 const ICON_MAP: Record<string, any> = {
   creativity: Aperture,

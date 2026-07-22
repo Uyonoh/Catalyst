@@ -8,9 +8,8 @@ import React, {
   useEffect,
 } from "react";
 import { useParsing } from "../hooks/useParsing";
-import { OptimizedPrompt } from "../lib/engine/types";
+import { OptimizedPrompt, PromptControls } from "../lib/engine/types";
 import { useUser } from "./AuthContext";
-import { PromptControls } from "../lib/prompts/builder";
 import {
   ModelMode,
   getDefaultMode,
