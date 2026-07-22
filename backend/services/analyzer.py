@@ -1,10 +1,10 @@
 import re
 from typing import List, Dict, Any, Optional
-from services.types import Domain, Intent
-from services.detectors.domain import DomainClassifier
-from services.detectors.intent import IntentClassifier
-from services.detectors.constraint import BaseConstraintExtractor
-from services.detectors.scenario import ScenarioDetector
+from backend.services.types import Domain, Intent
+from backend.services.detectors.domain import DomainClassifier
+from backend.services.detectors.intent import IntentClassifier
+from backend.services.detectors.constraint import BaseConstraintExtractor
+from backend.services.detectors.scenario import ScenarioDetector
 
 class AnalyzerService:
     def __init__(self):

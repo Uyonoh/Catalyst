@@ -3,16 +3,16 @@ import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 from typing import Dict, Any, List
 
-from services.analyzer import AnalyzerService
-from services.compiler import CompilerService
-from services.prompt_builder import build_prompt, build_system_prompt, build_control_directives, PromptControls
-from services.router import generate_refined_prompt, generate_image, shuffle_list, TEXT_PROVIDERS, IMAGE_PROVIDERS
-from services.types import Domain, Intent, TargetModel
-from services.detectors.domain import DomainClassifier
-from services.detectors.intent import IntentClassifier
-from services.detectors.constraint import BaseConstraintExtractor
-from services.detectors.scenario import ScenarioDetector
-from services.prompt_profiles import get_profile_for_model, MODEL_PROFILES
+from backend.services.analyzer import AnalyzerService
+from backend.services.compiler import CompilerService
+from backend.services.prompt_builder import build_prompt, build_system_prompt, build_control_directives, PromptControls
+from backend.services.router import generate_refined_prompt, generate_image, shuffle_list, TEXT_PROVIDERS, IMAGE_PROVIDERS
+from backend.services.types import Domain, Intent, TargetModel
+from backend.services.detectors.domain import DomainClassifier
+from backend.services.detectors.intent import IntentClassifier
+from backend.services.detectors.constraint import BaseConstraintExtractor
+from backend.services.detectors.scenario import ScenarioDetector
+from backend.services.prompt_profiles import get_profile_for_model, MODEL_PROFILES
 
 
 # ============================================================================
@@ -613,11 +613,11 @@ class TestRouterService:
         assert "All LLM providers exhausted" in str(exc_info.value)
 
     @pytest.mark.asyncio
-    @patch("services.router.IMAGE_PROVIDERS")
-    @patch("services.router.shuffle_list")
+    @patch("backend.services.router.IMAGE_PROVIDERS")
+    @patch("backend.services.router.shuffle_list")
     async def test_generate_image_success(self, mock_shuffle, mock_providers):
         """Test successful image generation."""
-        from providers.image.base import ImageResult
+        from backend.providers.image.base import ImageResult
         
         mock_provider = MagicMock()
         mock_provider.id = "huggingface"
@@ -628,7 +628,7 @@ class TestRouterService:
         mock_providers.__iter__ = lambda self: iter([mock_provider])
         mock_shuffle.return_value = ["key1"]
         
-        from providers.image.base import ImageParams
+        from backend.providers.image.base import ImageParams
         result = await generate_image("huggingface", "test prompt", ImageParams(width=1024, height=1024))
         
         assert result.url == "data:image/jpeg;base64,test"

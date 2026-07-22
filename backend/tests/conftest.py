@@ -23,15 +23,15 @@ def mock_jwt_decode(token, key, **kwargs):
 @pytest.fixture
 def mock_auth():
     """Fixture to mock JWT authentication."""
-    with patch("auth.jwt.decode", side_effect=mock_jwt_decode):
-        with patch("auth.get_jwks", new_callable=AsyncMock, return_value={"keys": []}):
+    with patch("backend.auth.jwt.decode", side_effect=mock_jwt_decode):
+        with patch("backend.auth.get_jwks", new_callable=AsyncMock, return_value={"keys": []}):
             yield
 
 @pytest.fixture
 def test_client():
     """Fixture to provide a TestClient for FastAPI endpoints."""
     from fastapi.testclient import TestClient
-    from main import app
+    from backend.main import app
     return TestClient(app)
 
 @pytest.fixture

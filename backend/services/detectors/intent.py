@@ -1,6 +1,6 @@
 import re
 from typing import List, Dict, Tuple, Any
-from services.types import Intent
+from backend.services.types import Intent
 
 class IntentClassifier:
     def __init__(self):

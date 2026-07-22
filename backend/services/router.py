@@ -1,17 +1,17 @@
 import random
 from typing import List, Union, Optional
 from fastapi import HTTPException
-from providers.text.base import LLMTextProvider
-from providers.text.gemini import GeminiTextProvider
-from providers.text.groq import GroqTextProvider
-from providers.text.openrouter import OpenRouterTextProvider
+from backend.providers.text.base import LLMTextProvider
+from backend.providers.text.gemini import GeminiTextProvider
+from backend.providers.text.groq import GroqTextProvider
+from backend.providers.text.openrouter import OpenRouterTextProvider
 
-from providers.image.base import LLMImageProvider, ImageParams, ImageResult
-from providers.image.gemini import GeminiImageProvider
-from providers.image.huggingface import HuggingFaceImageProvider
-from providers.image.pollinations import PollinationsImageProvider
+from backend.providers.image.base import LLMImageProvider, ImageParams, ImageResult
+from backend.providers.image.gemini import GeminiImageProvider
+from backend.providers.image.huggingface import HuggingFaceImageProvider
+from backend.providers.image.pollinations import PollinationsImageProvider
 
-from logging_config import get_logger
+from backend.logging_config import get_logger
 
 logger = get_logger(__name__)
 

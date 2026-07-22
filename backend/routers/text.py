@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
-from schemas import TextGenerateRequest, TextGenerateResponse
-from auth import verify_jwt
-from services.prompt_builder import build_prompt
-from services.router import generate_refined_prompt
-from logging_config import get_logger
+from backend.schemas import TextGenerateRequest, TextGenerateResponse
+from backend.auth import verify_jwt
+from backend.services.prompt_builder import build_prompt
+from backend.services.router import generate_refined_prompt
+from backend.logging_config import get_logger
 
 router = APIRouter()
 logger = get_logger(__name__)

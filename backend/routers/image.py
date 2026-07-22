@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 import random
-from schemas import ImageGenerateRequest, ImageGenerateResponse
-from auth import verify_jwt
-from providers.image.base import ImageParams
-from services.router import generate_image
-from logging_config import get_logger
+from backend.schemas import ImageGenerateRequest, ImageGenerateResponse
+from backend.auth import verify_jwt
+from backend.providers.image.base import ImageParams
+from backend.services.router import generate_image
+from backend.logging_config import get_logger
 
 router = APIRouter()
 logger = get_logger(__name__)

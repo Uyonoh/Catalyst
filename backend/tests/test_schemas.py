@@ -4,7 +4,7 @@ from pydantic import ValidationError
 from datetime import datetime
 from typing import Optional, Dict, Any, List
 
-from schemas import (
+from backend.schemas import (
     PromptControls,
     TextGenerateRequest,
     TextGenerateResponse,

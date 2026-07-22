@@ -1,5 +1,5 @@
 from typing import Dict, Any, Tuple
-from services.types import TargetModel, Domain, Intent
+from backend.services.types import TargetModel, Domain, Intent
 
 class CompilerService:
     def compile(self, metadata: Dict[str, Any], target: str) -> Dict[str, Any]:

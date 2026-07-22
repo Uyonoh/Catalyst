@@ -4,7 +4,7 @@ from io import BytesIO
 from typing import Optional
 import asyncio
 from huggingface_hub import InferenceClient
-from providers.image.base import ImageParams, ImageResult
+from backend.providers.image.base import ImageParams, ImageResult
 
 class HuggingFaceImageProvider:
     def __init__(self):

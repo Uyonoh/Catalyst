@@ -1,5 +1,5 @@
-from schemas import PromptControls
-from services.prompt_profiles import get_profile_for_model
+from backend.schemas import PromptControls
+from backend.services.prompt_profiles import get_profile_for_model
 
 def build_control_directives(controls: PromptControls) -> str:
     creativity = controls.creativity if controls.creativity is not None else 0.5

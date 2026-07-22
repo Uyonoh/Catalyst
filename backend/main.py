@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Setup logging
-from logging_config import setup_logging, LoggingMiddleware, get_logger
+from backend.logging_config import setup_logging, LoggingMiddleware, get_logger
 
 # Configure logging from environment variables
 log_level = os.environ.get("LOG_LEVEL", "INFO")
@@ -19,8 +19,10 @@ setup_logging(log_level=log_level, log_format=log_format)
 
 logger = get_logger(__name__)
 
-from auth import get_jwks
-from routers import text, image, analyze
+from backend.auth import get_jwks
+from backend.routers.text import router as text_router
+from backend.routers.image import router as image_router
+from backend.routers.analyze import router as analyze_router
 
 app = FastAPI(
     title="Catalyst Backend LLM Inference Service",
@@ -52,9 +54,9 @@ async def startup_event():
     await get_jwks()
 
 # Include routers
-app.include_router(text.router, prefix="/generate-text", tags=["Text generation"])
-app.include_router(image.router, prefix="/generate-image", tags=["Image generation"])
-app.include_router(analyze.router, prefix="/analyze", tags=["Analyze engine"])
+app.include_router(text_router, prefix="/generate-text", tags=["Text generation"])
+app.include_router(image_router, prefix="/generate-image", tags=["Image generation"])
+app.include_router(analyze_router, prefix="/analyze", tags=["Analyze engine"])
 
 @app.get("/health")
 def health_check():
@@ -62,4 +64,4 @@ def health_check():
     return {"status": "healthy"}
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host=host, port=int(port), reload=True)
+    uvicorn.run("backend.main:app", host=host, port=int(port), reload=True)

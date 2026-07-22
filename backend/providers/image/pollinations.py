@@ -1,6 +1,6 @@
 from urllib.parse import quote
 from typing import Optional
-from providers.image.base import ImageParams, ImageResult
+from backend.providers.image.base import ImageParams, ImageResult
 
 class PollinationsImageProvider:
     def __init__(self):

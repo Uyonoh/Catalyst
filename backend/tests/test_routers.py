@@ -15,8 +15,8 @@ os.environ["OPENROUTER_API_KEY_1"] = "mock_openrouter_key"
 os.environ["HF_TOKEN_1"] = "mock_hf_token"
 os.environ["ALLOWED_ORIGINS"] = "http://localhost:3000"
 
-from main import app
-from schemas import TextGenerateRequest, ImageGenerateRequest, AnalyzeRequest
+from backend.main import app
+from backend.schemas import TextGenerateRequest, ImageGenerateRequest, AnalyzeRequest
 
 client = TestClient(app)
 
@@ -29,8 +29,8 @@ def mock_jwt_decode(token, key, **kwargs):
 @pytest.fixture(autouse=True)
 def mock_auth_fixture():
     """Fixture to mock authentication for all tests."""
-    with patch("auth.jwt.decode", side_effect=mock_jwt_decode):
-        with patch("auth.get_jwks", new_callable=AsyncMock, return_value={"keys": []}):
+    with patch("backend.auth.jwt.decode", side_effect=mock_jwt_decode):
+        with patch("backend.auth.get_jwks", new_callable=AsyncMock, return_value={"keys": []}):
             yield
 
 
@@ -132,7 +132,7 @@ class TestAnalyzeRouter:
 class TestTextRouter:
     """Tests for /generate-text endpoint."""
 
-    @patch("routers.text.generate_refined_prompt", new_callable=AsyncMock, return_value="Refined: create a fastapi backend")
+    @patch("backend.routers.text.generate_refined_prompt", new_callable=AsyncMock, return_value="Refined: create a fastapi backend")
     def test_generate_text_endpoint_success(self, mock_refined, mock_auth_fixture):
         """Test text generation endpoint with valid request."""
         request_data = {
@@ -158,7 +158,7 @@ class TestTextRouter:
         assert "format" in data
         assert data["format"] == "text"
 
-    @patch("routers.text.generate_refined_prompt", new_callable=AsyncMock, return_value="```json{\"test\": 1}```")
+    @patch("backend.routers.text.generate_refined_prompt", new_callable=AsyncMock, return_value="```json{\"test\": 1}```")
     def test_generate_text_endpoint_cleans_code_blocks(self, mock_refined, mock_auth_fixture):
         """Test text generation cleans code blocks from response."""
         request_data = {
@@ -190,7 +190,7 @@ class TestTextRouter:
         
         assert response.status_code == 422  # Validation error
 
-    @patch("routers.text.generate_refined_prompt", new_callable=AsyncMock, return_value="  \n  test prompt  \n  ")
+    @patch("backend.routers.text.generate_refined_prompt", new_callable=AsyncMock, return_value="  \n  test prompt  \n  ")
     def test_generate_text_endpoint_strips_whitespace(self, mock_refined, mock_auth_fixture):
         """Test text generation strips whitespace."""
         request_data = {
@@ -208,7 +208,7 @@ class TestTextRouter:
         data = response.json()
         assert data["refinedPrompt"] == "test prompt"
 
-    @patch("routers.text.generate_refined_prompt", new_callable=AsyncMock, return_value="test with ```json and ```markdown")
+    @patch("backend.routers.text.generate_refined_prompt", new_callable=AsyncMock, return_value="test with ```json and ```markdown")
     def test_generate_text_endpoint_cleans_mixed_backticks(self, mock_refined, mock_auth_fixture):
         """Test text generation cleans mixed backticks."""
         request_data = {
@@ -236,10 +236,10 @@ class TestTextRouter:
 class TestImageRouter:
     """Tests for /generate-image endpoint."""
 
-    @patch("routers.image.generate_image")
+    @patch("backend.routers.image.generate_image")
     def test_generate_image_endpoint_success(self, mock_gen_img, mock_auth_fixture):
         """Test image generation endpoint with valid request."""
-        from providers.image.base import ImageResult
+        from backend.providers.image.base import ImageResult
         from unittest.mock import AsyncMock
         mock_result = ImageResult(url="data:image/jpeg;base64,testdata")
         mock_gen_img.return_value = AsyncMock(return_value=mock_result)
@@ -265,10 +265,10 @@ class TestImageRouter:
         assert "seed" in data
         assert data["prompt"] == "a sunset over mountains"
 
-    @patch("routers.image.generate_image")
+    @patch("backend.routers.image.generate_image")
     def test_generate_image_endpoint_1_1_aspect(self, mock_gen_img, mock_auth_fixture):
         """Test image generation with 1:1 aspect ratio."""
-        from providers.image.base import ImageResult
+        from backend.providers.image.base import ImageResult
         from unittest.mock import AsyncMock
         mock_result = ImageResult(url="data:image/jpeg;base64,testdata")
         mock_gen_img.return_value = AsyncMock(return_value=mock_result)
@@ -290,10 +290,10 @@ class TestImageRouter:
         assert data["width"] == 1024
         assert data["height"] == 1024
 
-    @patch("routers.image.generate_image")
+    @patch("backend.routers.image.generate_image")
     def test_generate_image_endpoint_unknown_aspect(self, mock_gen_img, mock_auth_fixture):
         """Test image generation with unknown aspect ratio defaults to 1:1."""
-        from providers.image.base import ImageResult
+        from backend.providers.image.base import ImageResult
         from unittest.mock import AsyncMock
         mock_result = ImageResult(url="data:image/jpeg;base64,testdata")
         mock_gen_img.return_value = AsyncMock(return_value=mock_result)
@@ -327,10 +327,10 @@ class TestImageRouter:
         
         assert response.status_code == 422  # Validation error
 
-    @patch("routers.image.generate_image")
+    @patch("backend.routers.image.generate_image")
     def test_generate_image_endpoint_all_aspect_ratios(self, mock_gen_img, mock_auth_fixture):
         """Test all supported aspect ratios."""
-        from providers.image.base import ImageResult
+        from backend.providers.image.base import ImageResult
         from unittest.mock import AsyncMock
         mock_result = ImageResult(url="data:image/jpeg;base64,testdata")
         mock_gen_img.return_value = AsyncMock(return_value=mock_result)
@@ -397,8 +397,8 @@ class TestRouterAuthentication:
         
         assert response.status_code == 401
 
-    @patch("auth.jwt.decode", side_effect=mock_jwt_decode)
-    @patch("auth.get_jwks", new_callable=AsyncMock, return_value={"keys": []})
+    @patch("backend.auth.jwt.decode", side_effect=mock_jwt_decode)
+    @patch("backend.auth.get_jwks", new_callable=AsyncMock, return_value={"keys": []})
     def test_analyze_with_invalid_token(self, mock_jwks, mock_decode):
         """Test analyze endpoint with invalid token."""
         # Mock decode to raise error for invalid token
@@ -409,7 +409,7 @@ class TestRouterAuthentication:
                 raise JWTError("Invalid token")
             return {"sub": "test-user-id"}
         
-        with patch("auth.jwt.decode", side_effect=mock_decode_invalid):
+        with patch("backend.auth.jwt.decode", side_effect=mock_decode_invalid):
             response = client.post(
                 "/analyze",
                 headers={"Authorization": "Bearer invalid_token"},
@@ -426,7 +426,7 @@ class TestRouterAuthentication:
 class TestResponseModels:
     """Tests for response model validation."""
 
-    @patch("routers.text.generate_refined_prompt", new_callable=AsyncMock, return_value="test")
+    @patch("backend.routers.text.generate_refined_prompt", new_callable=AsyncMock, return_value="test")
     def test_text_response_model(self, mock_refined, mock_auth_fixture):
         """Test TextGenerateResponse model validation."""
         request_data = {
@@ -446,10 +446,10 @@ class TestResponseModels:
         assert isinstance(data["refinedPrompt"], str)
         assert isinstance(data["format"], str)
 
-    @patch("routers.image.generate_image")
+    @patch("backend.routers.image.generate_image")
     def test_image_response_model(self, mock_gen_img, mock_auth_fixture):
         """Test ImageGenerateResponse model validation."""
-        from providers.image.base import ImageResult
+        from backend.providers.image.base import ImageResult
         from unittest.mock import AsyncMock
         mock_result = ImageResult(url="http://example.com/image.jpg")
         mock_gen_img.return_value = AsyncMock(return_value=mock_result)

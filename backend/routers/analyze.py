@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
-from schemas import AnalyzeRequest, AnalyzeResponse
-from auth import verify_jwt
-from services.analyzer import AnalyzerService
-from services.compiler import CompilerService
-from logging_config import get_logger
+from backend.schemas import AnalyzeRequest, AnalyzeResponse
+from backend.auth import verify_jwt
+from backend.services.analyzer import AnalyzerService
+from backend.services.compiler import CompilerService
+from backend.logging_config import get_logger
 
 router = APIRouter()
 logger = get_logger(__name__)

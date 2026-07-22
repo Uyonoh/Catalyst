@@ -1,6 +1,6 @@
 import re
 from typing import List, Dict, Tuple, Optional, Any
-from services.types import Domain, Intent
+from backend.services.types import Domain, Intent
 
 class DomainClassifier:
     def __init__(self):

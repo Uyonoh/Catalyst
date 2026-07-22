@@ -4,7 +4,7 @@ from google import genai
 from google.genai import types
 from typing import Optional
 import asyncio
-from providers.image.base import ImageParams, ImageResult
+from backend.providers.image.base import ImageParams, ImageResult
 
 class GeminiImageProvider:
     def __init__(self):

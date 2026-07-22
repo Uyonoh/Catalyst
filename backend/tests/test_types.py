@@ -2,7 +2,7 @@
 import pytest
 from enum import Enum
 
-from services.types import (
+from backend.services.types import (
     InputModality,
     TargetModel,
     Domain,

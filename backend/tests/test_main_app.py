@@ -14,7 +14,7 @@ os.environ["OPENROUTER_API_KEY_1"] = "mock_openrouter_key"
 os.environ["HF_TOKEN_1"] = "mock_hf_token"
 os.environ["ALLOWED_ORIGINS"] = "http://localhost:3000,https://example.com"
 
-from main import app
+from backend.main import app
 
 client = TestClient(app)
 
@@ -78,11 +78,11 @@ class TestCORSConfiguration:
 class TestStartupEvent:
     """Tests for startup event."""
 
-    @patch("main.get_jwks", new_callable=AsyncMock)
+    @patch("backend.main.get_jwks", new_callable=AsyncMock)
     def test_startup_event_calls_get_jwks(self, mock_get_jwks):
         """Test that startup event calls get_jwks."""
         # Trigger startup event
-        from main import startup_event
+        from backend.main import startup_event
         import asyncio
         
         asyncio.run(startup_event())

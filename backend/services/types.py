@@ -47,7 +47,7 @@ class Intent(str, Enum):
     BRAINSTORM = "BRAINSTORM"
     GENERAL_TASK = "GENERAL_TASK"
 
-class Asset(BaseModel if False else object): # To avoid pydantic dependency import cycle we can define it plain or simple dict, or Pydantic if needed. Let's make it a plain class or dict representation. Pydantic is good.
+class Asset:  # To avoid pydantic dependency import cycle we can define it plain or simple dict, or Pydantic if needed. Let's make it a plain class or dict representation. Pydantic is good.
     pass
 
 # We will use Pydantic in schemas.py, but for type-hints in services we can define standard python structures or import from schemas if needed. Let's just import from schemas.py when needed, or define types directly.

@@ -8,7 +8,7 @@ from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 
-from logging_config import get_logger
+from backend.logging_config import get_logger
 
 bearer = HTTPBearer()
 
