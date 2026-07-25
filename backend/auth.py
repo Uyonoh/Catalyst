@@ -35,10 +35,11 @@ async def get_jwks() -> Optional[Dict[str, Any]]:
     if cache_is_valid:
         return _jwks_cache
 
-    if not SUPABASE_URL:
+    supabase_url = os.environ.get("SUPABASE_URL", "")
+    if not supabase_url:
         return None
 
-    jwks_url = f"{SUPABASE_URL.rstrip('/')}/auth/v1/.well-known/jwks.json"
+    jwks_url = f"{supabase_url.rstrip('/')}/auth/v1/.well-known/jwks.json"
 
     max_retries = 3
     for attempt in range(max_retries):

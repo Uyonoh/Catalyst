@@ -34,6 +34,9 @@ async def generate_text_endpoint(req: TextGenerateRequest, user_id: str = Depend
             if lines[-1] == "```":
                 lines = lines[:-1]
             cleaned_text = "\n".join(lines).strip()
+        else:
+            # Single line code block - strip the backticks
+            cleaned_text = cleaned_text[3:-3].strip()
     else:
         # Replaces raw backticks
         cleaned_text = cleaned_text.replace("```json", "").replace("```markdown", "").replace("```", "").replace("'''", "").strip()

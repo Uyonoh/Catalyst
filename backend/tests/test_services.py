@@ -575,8 +575,8 @@ class TestRouterService:
     """Tests for router service functions."""
 
     @pytest.mark.asyncio
-    @patch("services.router.TEXT_PROVIDERS")
-    @patch("services.router.shuffle_list")
+    @patch("backend.services.router.TEXT_PROVIDERS")
+    @patch("backend.services.router.shuffle_list")
     async def test_generate_refined_prompt_success(self, mock_shuffle, mock_providers):
         """Test successful prompt refinement."""
         mock_provider = MagicMock()
@@ -593,8 +593,8 @@ class TestRouterService:
         assert result == "refined prompt"
 
     @pytest.mark.asyncio
-    @patch("services.router.TEXT_PROVIDERS")
-    @patch("services.router.shuffle_list")
+    @patch("backend.services.router.TEXT_PROVIDERS")
+    @patch("backend.services.router.shuffle_list")
     async def test_generate_refined_prompt_all_fail(self, mock_shuffle, mock_providers):
         """Test prompt refinement fails when all providers fail."""
         mock_provider = MagicMock()

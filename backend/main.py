@@ -39,6 +39,8 @@ logger.info("FastAPI application initialized")
 # e.g. ALLOWED_ORIGINS=https://your-app.vercel.app
 _raw_origins = os.environ.get("ALLOWED_ORIGINS", "http://localhost:3000")
 ALLOWED_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+if not ALLOWED_ORIGINS:
+    ALLOWED_ORIGINS = ["http://localhost:3000"]
 
 app.add_middleware(
     CORSMiddleware,
