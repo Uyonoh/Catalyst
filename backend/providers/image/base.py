@@ -4,6 +4,7 @@ from pydantic import BaseModel
 class ImageParams(BaseModel):
     width: int
     height: int
+    num_steps: Optional[int] = 4
     negative_prompt: Optional[str] = ""
 
 class ImageResult(BaseModel):

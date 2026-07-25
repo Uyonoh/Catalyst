@@ -19,9 +19,13 @@ class HuggingFaceImageProvider:
         return list(set(keys))
 
     async def call(self, prompt: str, key: str, params: Optional[ImageParams]) -> ImageResult:
-        client = InferenceClient(token=key)
-        width = params.width if params else 1024
-        height = params.height if params else 1024
+        client = InferenceClient(
+            #provider="nscale",
+            token=key
+        )
+        width = params.width if params.width else 1024
+        height = params.height if params.height else 1024
+        n_steps = params.num_steps if params.num_steps else 1
 
         loop = asyncio.get_running_loop()
         # text_to_image returns a PIL Image object
@@ -29,9 +33,11 @@ class HuggingFaceImageProvider:
             None,
             lambda: client.text_to_image(
                 prompt,
+                #model="Tongyi-MAI/Z-Image-Turbo",
                 model="black-forest-labs/FLUX.1-schnell",
                 width=width,
-                height=height
+                height=height,
+                num_inference_steps=n_steps,
             )
         )
 

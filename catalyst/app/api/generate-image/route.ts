@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         const ax = parseInt(wh[0]);
         const ay = parseInt(wh[1]);
 
-        const maxWH = 128;
+        const maxWH = 1024;
         let multiplier = 64;
 
         if (ax > ay) {
@@ -63,6 +63,27 @@ export async function POST(request: NextRequest) {
     
     // Compute dimensions to forward or use locally
     let [width, height] = calculateWidthHeight(aspectRatio);
+    
+    // Call token check RPC
+    const { data: tokenResult, error: rpcError } = await supabase.rpc(
+      "consume_image_tokens",
+      { p_user_id: user.id, p_model: model, p_mode: "image-generation" }
+    );
+
+    if (rpcError) {
+      console.error("Token consumption error:", rpcError);
+      return NextResponse.json({ error: "Token check failed" }, { status: 500 });
+    }
+
+    if (!tokenResult.ok) {
+      console.error("Token quota exceedede");
+      return NextResponse.json({
+        error: "Token quota exceeded",
+        remaining: tokenResult.remaining,
+        resets_at: tokenResult.resets_at,
+        limit: tokenResult.limit,
+      }, { status: 402 });
+    }
 
     // Retrieve the server-side session token to authenticate with FastAPI
     const accessToken = await getSessionToken();
@@ -70,6 +91,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    try {
     const backendRes = await fetch(`${BACKEND_URL}/generate-image`, {
       method: "POST",
       headers: {
@@ -100,10 +122,30 @@ export async function POST(request: NextRequest) {
       seed,
       prompt
     });
+    } catch (llmError: any) {
+      console.error("LLM Generation Failed. Reverting tokens.", llmError);
+      
+      // Revert tokens using our RPC
+      const { error: revertError } = await supabase.rpc('refund_image_tokens', {
+        p_user_id: user.id,
+        p_model: model,
+        p_mode: "image-generation"
+      });
+      
+      if (revertError) {
+        console.error("Critical: Failed to revert tokens after LLM failure:", revertError);
+      }
+
+    return NextResponse.json(
+      { error: "We ran into an error while generating your image.\nPlease try again later" },
+      { status: 500 }
+    );
+    }
+
   } catch (error: any) {
     console.error("Failed to generate image with error: ", error);
     return NextResponse.json(
-      { error: "We ran into an error while generating your image.\nPlease try again later" },
+      { error: "There seems to be an issue on our end.\nRest assured, we're already on it!" },
       { status: 500 }
     );
   }
