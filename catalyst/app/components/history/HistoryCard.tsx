@@ -14,7 +14,10 @@ import {
 } from "../../lib/promptTokens";
 import { useCatalog } from "../../context/CatalogContext";
 import { useUser } from "../../context/AuthContext";
-import { toggleFavoritePrompt, checkPromptFavoriteStatus } from "../../lib/prompts-client";
+import {
+  toggleFavoritePrompt,
+  checkPromptFavoriteStatus,
+} from "../../lib/prompts-client";
 
 export interface HistoryItem {
   id: string;
@@ -29,6 +32,12 @@ export interface HistoryItem {
   icon?: string;
   tag?: string;
   is_favorite?: boolean;
+  target?: {
+    output_type?: string;
+    output?: string;
+    negative_prompt?: string;
+    aspect_ratio?: string;
+  };
 }
 
 interface HistoryCardProps {
@@ -44,7 +53,9 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
 
   useEffect(() => {
     if (user && item) {
-      checkPromptFavoriteStatus(user.id, item).then(setIsFavorited).catch(console.error);
+      checkPromptFavoriteStatus(user.id, item)
+        .then(setIsFavorited)
+        .catch(console.error);
     }
   }, [user, item]);
 
@@ -102,7 +113,8 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
         <div className="flex items-center gap-3">
           {(() => {
             const token =
-              PROMPT_TYPE_TOKENS[item.icon || "auto_awesome"] || PROMPT_TYPE_FALLBACK;
+              PROMPT_TYPE_TOKENS[item.icon || "auto_awesome"] ||
+              PROMPT_TYPE_FALLBACK;
             const { Icon } = token;
             return (
               <div
@@ -122,7 +134,9 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
               {item.tag && (
                 <>
                   <span className="text-slate-700">•</span>
-                  <span className="text-cyan-500/80 font-medium">{item.tag.startsWith("#") ? item.tag : `#${item.tag}`}</span>
+                  <span className="text-cyan-500/80 font-medium">
+                    {item.tag.startsWith("#") ? item.tag : `#${item.tag}`}
+                  </span>
                 </>
               )}
             </div>
@@ -139,7 +153,9 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
             }`}
             title={isFavorited ? "Unfavourite" : "Favourite"}
           >
-            <Star className={`size-4 ${isFavorited ? "fill-yellow-400" : ""}`} />
+            <Star
+              className={`size-4 ${isFavorited ? "fill-yellow-400" : ""}`}
+            />
           </button>
           <button
             onClick={handleDelete}
@@ -152,6 +168,16 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
       </div>
 
       <div className="flex flex-col gap-3">
+        {item.target?.output_type === "image" && item.target?.output && (
+          <div className="relative aspect-video overflow-hidden rounded-lg bg-white/5">
+            <img
+              src={item.target?.output ?? null}
+              alt={item.title}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+            />
+          </div>
+        )}
         <div className="flex flex-col gap-1.5">
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
             Raw Intent

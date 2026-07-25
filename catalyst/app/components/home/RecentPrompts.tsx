@@ -38,6 +38,12 @@ export interface RecentItem {
   target_model: string;
   created_at: string;
   is_public: boolean;
+  target?: {
+    output_type?: string;
+    output?: string;
+    negative_prompt?: string;
+    aspect_ratio?: string;
+  };
 }
 
 interface RecentPromptsProps {
@@ -223,6 +229,17 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                 </div>
               </div>
 
+              {prompt.target?.output_type === "image" && prompt.target?.output && (
+                <div className="relative aspect-video overflow-hidden rounded-lg bg-white/5 mb-4">
+                  <img
+                    src={prompt.target.output}
+                    alt={prompt.title}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+
               <div className="mb-2">
                 <p className="text-slate-400 text-sm line-clamp-2">
                   {prompt.snippet}
@@ -344,6 +361,17 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                   </p>
                 </div>
               </div>
+
+              {prompt.target?.output_type === "image" && prompt.target?.output && (
+                <div className="relative aspect-video overflow-hidden rounded-lg bg-white/5 mb-4 w-full sm:w-64">
+                  <img
+                    src={prompt.target.output}
+                    alt={prompt.title}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                </div>
+              )}
 
               <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto border-t sm:border-t-0 border-white/5 pt-3 sm:pt-0">
                 <div className="flex items-center gap-2.5">

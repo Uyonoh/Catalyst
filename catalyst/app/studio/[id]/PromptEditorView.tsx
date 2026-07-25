@@ -23,6 +23,12 @@ interface PromptEditorViewProps {
     tag?: string;
     format?: string;
     workspace_id?: string | null;
+    target?: {
+      output_type?: string;
+      output?: string;
+      negative_prompt?: string;
+      aspect_ratio?: string;
+    };
   };
 }
 
@@ -432,6 +438,7 @@ export default function PromptEditorView({
         }
         userPlan={userPlan}
         isLoading={isSaving}
+        target={initialData.target}
         className="pt-0 pb-0 px-0 sm:px-0"
       />
 

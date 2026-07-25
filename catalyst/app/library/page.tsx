@@ -124,7 +124,7 @@ async function getLibraryItems(searchParams: {
   let query = supabase
     .from("prompts_public")
     .select(
-      "id, title, updated_at, snippet, content, target_model, model_color, tag, icon, icon_color, has_gradient",
+      "id, title, updated_at, snippet, content, target_model, model_color, tag, icon, icon_color, has_gradient, target",
     );
 
   if (searchParams.q) {

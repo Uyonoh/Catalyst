@@ -2,7 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import GlassPanel from "../GlassPanel";
-import { Star, Copy, Check, Edit, Globe, Users, ArrowUpRight } from "lucide-react";
+import {
+  Star,
+  Copy,
+  Check,
+  Edit,
+  Globe,
+  Users,
+  ArrowUpRight,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   PROMPT_TYPE_TOKENS,
@@ -11,7 +19,10 @@ import {
   MODEL_BADGE_FALLBACK,
 } from "../../lib/promptTokens";
 import { useUser } from "../../context/AuthContext";
-import { toggleFavoritePrompt, checkPromptFavoriteStatus } from "../../lib/prompts-client";
+import {
+  toggleFavoritePrompt,
+  checkPromptFavoriteStatus,
+} from "../../lib/prompts-client";
 
 export interface LibraryItem {
   id: string;
@@ -28,6 +39,12 @@ export interface LibraryItem {
   user_id?: string;
   is_favorite?: boolean;
   isWorkspace?: boolean;
+  target?: {
+    output_type?: string;
+    output?: string;
+    negative_prompt?: string;
+    aspect_ratio?: string;
+  };
 }
 
 interface LibraryCardProps {
@@ -56,7 +73,9 @@ export default function LibraryCard({ item }: LibraryCardProps) {
 
   useEffect(() => {
     if (user && item && !item.isWorkspace) {
-      checkPromptFavoriteStatus(user.id, item).then(setIsFavorited).catch(console.error);
+      checkPromptFavoriteStatus(user.id, item)
+        .then(setIsFavorited)
+        .catch(console.error);
     }
   }, [user, item]);
 
@@ -119,7 +138,8 @@ export default function LibraryCard({ item }: LibraryCardProps) {
             </div>
           ) : (
             (() => {
-              const token = PROMPT_TYPE_TOKENS[item.icon] || PROMPT_TYPE_FALLBACK;
+              const token =
+                PROMPT_TYPE_TOKENS[item.icon] || PROMPT_TYPE_FALLBACK;
               const { Icon } = token;
               return (
                 <div
@@ -139,7 +159,7 @@ export default function LibraryCard({ item }: LibraryCardProps) {
             </p>
           </div>
         </div>
-        
+
         {item.isWorkspace ? (
           <div className="text-slate-500 group-hover:text-cyan-400 transition-colors">
             <ArrowUpRight className="size-5 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
@@ -150,11 +170,23 @@ export default function LibraryCard({ item }: LibraryCardProps) {
             className={`transition-colors duration-200 ${isFavorited ? "text-yellow-400" : "text-slate-500 hover:text-yellow-400"}`}
             aria-label="Favourite"
           >
-            <Star className={`size-5 ${isFavorited ? "fill-yellow-400" : ""}`} />
+            <Star
+              className={`size-5 ${isFavorited ? "fill-yellow-400" : ""}`}
+            />
           </button>
         )}
       </div>
       <div className="h-[1px] w-full bg-white/5" />
+      {item.target?.output_type === "image" && item.target?.output && (
+        <div className="relative aspect-video overflow-hidden rounded-lg bg-white/5">
+          <img
+            src={item.target?.output ?? null}
+            alt={item.title}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
+        </div>
+      )}
       <p className="text-slate-300 text-sm leading-relaxed line-clamp-3 font-mono opacity-80 code-preview p-2 rounded border border-white/10 bg-white/5">
         {item.snippet}
       </p>

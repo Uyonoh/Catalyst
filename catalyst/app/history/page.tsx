@@ -22,7 +22,7 @@ async function getHistoryItems(userId: string, searchParams: {
   const supabase = await createClient();
   let query = supabase
     .from("prompts")
-    .select("id, title, content, snippet, raw_input, target_model, created_at, updated_at, is_public, icon, tag, is_favorite")
+    .select("id, title, content, snippet, raw_input, target_model, created_at, updated_at, is_public, icon, tag, is_favorite, target")
     .eq("user_id", userId);
 
   // Favorites filter

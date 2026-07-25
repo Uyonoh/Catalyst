@@ -75,6 +75,7 @@ export default async function WorkspacePage({ params }: PageProps) {
       created_at,
       user_id,
       is_favorite,
+      target,
       user_metadata (
         name
       )
@@ -115,6 +116,7 @@ export default async function WorkspacePage({ params }: PageProps) {
       user_id: p.user_id,
       is_favorite: p.is_favorite || false,
       authorName: pProfile?.name || "Anonymous",
+      target: p.target,
     };
   });
 

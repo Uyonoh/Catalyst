@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import GlassPanel from "../GlassPanel";
 import { useCatalog } from "../../context/CatalogContext";
 import {
@@ -56,9 +57,15 @@ interface PromptEditorProps {
   ) => void;
   onVisibilityChange?: (isPublic: boolean) => void;
   onDownload?: (text: string, title: string) => void;
-  userPlan?: 'free' | 'basic' | 'plus' | 'pro' | 'ultra';
+  userPlan?: "free" | "basic" | "plus" | "pro" | "ultra";
   isLoading?: boolean;
   className?: string;
+  target?: {
+    output_type?: string;
+    output?: string;
+    negative_prompt?: string;
+    aspect_ratio?: string;
+  };
 }
 
 export default function PromptEditor({
@@ -78,6 +85,7 @@ export default function PromptEditor({
   onDownload,
   userPlan = "free",
   isLoading = false,
+  target,
   className,
 }: PromptEditorProps) {
   const canDownload = userPlan !== "free";
@@ -209,6 +217,38 @@ export default function PromptEditor({
               placeholder="Your refined prompt will appear here..."
             />
           </GlassPanel>
+
+          {target?.output_type === "image" && target?.output && (
+            <GlassPanel className="p-6 flex flex-col gap-4 relative overflow-hidden group">
+              <div className="flex items-center gap-2">
+                <div className="bg-cyan-500/20 p-2 rounded-xl text-cyan-400 border border-cyan-500/30">
+                  <Image className="size-5" />
+                </div>
+                <span className="text-white font-semibold text-base">
+                  Generated Image
+                </span>
+              </div>
+              <div className="relative aspect-video overflow-hidden rounded-lg bg-white/5">
+                <img
+                  src={target?.output ?? null}
+                  alt={title}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+              <div className="flex items-center gap-4 text-slate-400 text-sm">
+                {target.aspect_ratio && (
+                  <span className="px-2 py-1 bg-white/5 rounded border border-white/10">
+                    Aspect: {target.aspect_ratio}
+                  </span>
+                )}
+                {target.negative_prompt && (
+                  <span className="px-2 py-1 bg-white/5 rounded border border-white/10 max-w-xs truncate">
+                    Negative: {target.negative_prompt}
+                  </span>
+                )}
+              </div>
+            </GlassPanel>
+          )}
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center gap-4 justify-end">

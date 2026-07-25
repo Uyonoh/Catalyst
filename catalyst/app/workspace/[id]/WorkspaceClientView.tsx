@@ -39,6 +39,12 @@ interface PromptItem {
   user_id: string;
   authorName: string;
   is_favorite?: boolean;
+  target?: {
+    output_type?: string;
+    output?: string;
+    negative_prompt?: string;
+    aspect_ratio?: string;
+  };
 }
 
 interface WorkspaceData {
