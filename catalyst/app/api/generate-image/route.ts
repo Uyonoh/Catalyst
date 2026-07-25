@@ -7,7 +7,10 @@ export async function POST(request: NextRequest) {
   try {
     // Verify the user server-side — never trust the client's Authorization header
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (!user || authError) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -19,7 +22,7 @@ export async function POST(request: NextRequest) {
     if (!prompt || prompt.trim() === "") {
       return NextResponse.json(
         { error: "Subject or prompt is required." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -60,29 +63,35 @@ export async function POST(request: NextRequest) {
     };
 
     const structuredPrompt = `${prompt}. Avoid these concepts: ${negativePrompt}. The output AspectRatio should be ${aspectRatio}`;
-    
+
     // Compute dimensions to forward or use locally
     let [width, height] = calculateWidthHeight(aspectRatio);
-    
+
     // Call token check RPC
     const { data: tokenResult, error: rpcError } = await supabase.rpc(
       "consume_image_tokens",
-      { p_user_id: user.id, p_model: model, p_mode: "image-generation" }
+      { p_user_id: user.id, p_model: model, p_mode: "image-generation" },
     );
 
     if (rpcError) {
       console.error("Token consumption error:", rpcError);
-      return NextResponse.json({ error: "Token check failed" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Token check failed" },
+        { status: 500 },
+      );
     }
 
     if (!tokenResult.ok) {
       console.error("Token quota exceedede");
-      return NextResponse.json({
-        error: "Token quota exceeded",
-        remaining: tokenResult.remaining,
-        resets_at: tokenResult.resets_at,
-        limit: tokenResult.limit,
-      }, { status: 402 });
+      return NextResponse.json(
+        {
+          error: "Token quota exceeded",
+          remaining: tokenResult.remaining,
+          resets_at: tokenResult.resets_at,
+          limit: tokenResult.limit,
+        },
+        { status: 402 },
+      );
     }
 
     // Retrieve the server-side session token to authenticate with FastAPI
@@ -92,61 +101,170 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-    const backendRes = await fetch(`${BACKEND_URL}/generate-image`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({
-        model,
-        prompt: structuredPrompt,
-        negativePrompt,
-        aspectRatio
-      }),
-    });
-
-    if (!backendRes.ok) {
-      const errorText = await backendRes.text();
-      throw new Error(`FastAPI backend error: ${backendRes.status} ${errorText}`);
-    }
-
-    const data = await backendRes.json();
-    const url = data?.url;
-    const seed = data?.seed || Math.floor(Math.random() * 9999999);
-
-    return NextResponse.json({
-      url,
-      width,
-      height,
-      seed,
-      prompt
-    });
-    } catch (llmError: any) {
-      console.error("LLM Generation Failed. Reverting tokens.", llmError);
-      
-      // Revert tokens using our RPC
-      const { error: revertError } = await supabase.rpc('refund_image_tokens', {
-        p_user_id: user.id,
-        p_model: model,
-        p_mode: "image-generation"
+      const backendRes = await fetch(`${BACKEND_URL}/generate-image`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          model,
+          prompt: structuredPrompt,
+          negativePrompt,
+          aspectRatio,
+        }),
       });
-      
-      if (revertError) {
-        console.error("Critical: Failed to revert tokens after LLM failure:", revertError);
+
+      if (!backendRes.ok) {
+        const errorText = await backendRes.text();
+        throw new Error(
+          `FastAPI backend error: ${backendRes.status} ${errorText}`,
+        );
       }
 
-    return NextResponse.json(
-      { error: "We ran into an error while generating your image.\nPlease try again later" },
-      { status: 500 }
-    );
-    }
+      const data = await backendRes.json();
+      const url = data?.url;
+      if (!url) {
+        throw new Error("No image URL received from FastAPI backend");
+      }
+      const seed = data?.seed || Math.floor(Math.random() * 9999999);
 
+      // Download/convert image to Buffer
+      let buffer: Buffer;
+      let contentType = "image/png";
+
+      if (url.startsWith("data:")) {
+        const matches = url.match(
+          /^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/,
+        );
+        if (!matches) {
+          throw new Error("Invalid base64 data URI received from backend");
+        }
+        contentType = matches[1];
+        buffer = Buffer.from(matches[2], "base64");
+      } else {
+        const imgRes = await fetch(url);
+        if (!imgRes.ok) {
+          throw new Error(
+            `Failed to download image from external provider: ${imgRes.statusText}`,
+          );
+        }
+        const arrayBuffer = await imgRes.arrayBuffer();
+        buffer = Buffer.from(arrayBuffer);
+        contentType = imgRes.headers.get("content-type") || "image/png";
+      }
+
+      // Determine file extension and file path
+      const extMap: Record<string, string> = {
+        "image/jpeg": "jpg",
+        "image/png": "png",
+        "image/gif": "gif",
+        "image/webp": "webp",
+      };
+      const fileExt = extMap[contentType] || "png";
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(2, 10);
+      const filePath = `${user.id}/${timestamp}-${randomStr}.${fileExt}`;
+
+      // Upload image buffer to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from("prompt-targets")
+        .upload(filePath, buffer, {
+          contentType,
+          upsert: true,
+        });
+
+      if (uploadError) {
+        throw new Error(
+          `Failed to upload image to Supabase Storage: ${uploadError.message}`,
+        );
+      }
+
+      // Retrieve public URL of the uploaded image
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("prompt-targets").getPublicUrl(filePath);
+
+      // Prepare JSONB structure for target column
+      const targetJson: any = {
+        output_type: "image",
+        output: publicUrl,
+      };
+
+      if (negativePrompt && negativePrompt.trim() !== "") {
+        targetJson.negative_prompt = negativePrompt;
+      }
+      if (aspectRatio && aspectRatio.trim() !== "") {
+        targetJson.aspect_ratio = aspectRatio;
+      }
+
+      const promptTitle =
+        prompt.length > 50 ? prompt.substring(0, 47) + "..." : prompt;
+      const promptSnippet =
+        prompt.length > 150 ? prompt.substring(0, 147) + "..." : prompt;
+
+      // Insert metadata record into public.prompts table
+      const { data: insertData, error: insertError } = await supabase
+        .from("prompts")
+        .insert({
+          user_id: user.id,
+          title: promptTitle,
+          content: prompt, // Original prompt text
+          target_model: model,
+          snippet: promptSnippet,
+          format: "text",
+          target: targetJson,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        throw new Error(
+          `Failed to insert prompt metadata into database: ${insertError.message}`,
+        );
+      }
+
+      return NextResponse.json({
+        url: publicUrl,
+        width,
+        height,
+        seed,
+        prompt,
+        promptId: insertData?.id,
+      });
+    } catch (llmError: any) {
+      console.error("LLM Generation Failed. Reverting tokens.", llmError);
+
+      // Revert tokens using our RPC
+      const { error: revertError } = await supabase.rpc("refund_image_tokens", {
+        p_user_id: user.id,
+        p_model: model,
+        p_mode: "image-generation",
+      });
+
+      if (revertError) {
+        console.error(
+          "Critical: Failed to revert tokens after LLM failure:",
+          revertError,
+        );
+      }
+
+      return NextResponse.json(
+        {
+          error:
+            "We ran into an error while generating your image.\nPlease try again later",
+        },
+        { status: 500 },
+      );
+    }
   } catch (error: any) {
     console.error("Failed to generate image with error: ", error);
     return NextResponse.json(
-      { error: "There seems to be an issue on our end.\nRest assured, we're already on it!" },
-      { status: 500 }
+      {
+        error:
+          "There seems to be an issue on our end.\nRest assured, we're already on it!",
+      },
+      { status: 500 },
     );
   }
 }
