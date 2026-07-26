@@ -167,8 +167,8 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
-        {item.target?.output_type === "image" && item.target?.output && (
+      <div className="flex flex-col gap-2">
+        {item.target?.output_type === "image" && item.target?.output ? (
           <div className="relative aspect-video overflow-hidden rounded-lg bg-white/5">
             <img
               src={item.target?.output ?? null}
@@ -177,31 +177,34 @@ export default function HistoryCard({ item, onDelete }: HistoryCardProps) {
               loading="lazy"
             />
           </div>
+        ) : (
+          <>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                Raw Intent
+              </span>
+              <p className="text-slate-400 text-sm line-clamp-2 italic bg-white/5 p-2 rounded-lg border border-white/5">
+                "{item.raw_input}"
+              </p>
+            </div>
+
+            <div className="flex items-center justify-center py-1">
+              {/* <ArrowRight className="size-4 text-cyan-500/40" />- - - */}
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[10px] font-bold text-cyan-500/70 uppercase tracking-wider">
+                Optimized Prompt
+              </span>
+              <p className="text-slate-200 text-sm line-clamp-3 font-mono bg-cyan-500/5 p-3 rounded-lg border border-cyan-500/10 group-hover:border-cyan-500/30 transition-colors">
+                {item.content}
+              </p>
+            </div>
+          </>
         )}
-        <div className="flex flex-col gap-1.5">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-            Raw Intent
-          </span>
-          <p className="text-slate-400 text-sm line-clamp-2 italic bg-white/5 p-2 rounded-lg border border-white/5">
-            "{item.raw_input}"
-          </p>
-        </div>
-
-        <div className="flex items-center justify-center py-1">
-          {/* <ArrowRight className="size-4 text-cyan-500/40" />- - - */}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <span className="text-[10px] font-bold text-cyan-500/70 uppercase tracking-wider">
-            Optimized Prompt
-          </span>
-          <p className="text-slate-200 text-sm line-clamp-3 font-mono bg-cyan-500/5 p-3 rounded-lg border border-cyan-500/10 group-hover:border-cyan-500/30 transition-colors">
-            {item.content}
-          </p>
-        </div>
       </div>
 
-      <div className="mt-auto pt-2 flex items-center justify-between">
+      <div className="mt-auto flex items-center justify-between">
         <div className="flex items-center gap-2">
           {(() => {
             const { models } = useCatalog();

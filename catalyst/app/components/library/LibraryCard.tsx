@@ -177,7 +177,7 @@ export default function LibraryCard({ item }: LibraryCardProps) {
         )}
       </div>
       <div className="h-[1px] w-full bg-white/5" />
-      {item.target?.output_type === "image" && item.target?.output && (
+      {item.target?.output_type === "image" && item.target?.output ? (
         <div className="relative aspect-video overflow-hidden rounded-lg bg-white/5">
           <img
             src={item.target?.output ?? null}
@@ -186,10 +186,11 @@ export default function LibraryCard({ item }: LibraryCardProps) {
             loading="lazy"
           />
         </div>
+      ) : (
+        <p className="text-slate-300 text-sm leading-relaxed line-clamp-7 font-mono opacity-80 code-preview p-2 rounded border border-white/10 bg-white/5">
+          {item.content}
+        </p>
       )}
-      <p className="text-slate-300 text-sm leading-relaxed line-clamp-3 font-mono opacity-80 code-preview p-2 rounded border border-white/10 bg-white/5">
-        {item.snippet}
-      </p>
       <div className="mt-auto pt-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {(() => {

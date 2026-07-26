@@ -209,7 +209,8 @@ export async function POST(request: NextRequest) {
         .insert({
           user_id: user.id,
           title: promptTitle,
-          content: prompt, // Original prompt text
+          content: prompt, // Original prompt text TODO: refine this
+          raw_input: prompt, // Original prompt text
           target_model: model,
           snippet: promptSnippet,
           format: "text",

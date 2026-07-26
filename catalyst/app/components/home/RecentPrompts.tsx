@@ -191,7 +191,7 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
           {filteredPrompts.map((prompt) => (
             <div
               key={prompt.id}
-              className="glass-panel rounded-2xl p-5 border border-white/5 hover:border-cyan-500/30 transition-all duration-300 group hover:-translate-y-1 cursor-pointer relative overflow-hidden"
+              className="flex flex-col glass-panel rounded-2xl p-5 border border-white/5 hover:border-cyan-500/30 transition-all duration-300 group hover:-translate-y-1 cursor-pointer relative overflow-hidden"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -229,7 +229,8 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                 </div>
               </div>
 
-              {prompt.target?.output_type === "image" && prompt.target?.output && (
+              {prompt.target?.output_type === "image" &&
+              prompt.target?.output ? (
                 <div className="relative aspect-video overflow-hidden rounded-lg bg-white/5 mb-4">
                   <img
                     src={prompt.target.output}
@@ -238,13 +239,13 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                     loading="lazy"
                   />
                 </div>
+              ) : (
+                <div className="mb-2">
+                  <p className="text-slate-400 text-sm line-clamp-5">
+                    {prompt.content}
+                  </p>
+                </div>
               )}
-
-              <div className="mb-2">
-                <p className="text-slate-400 text-sm line-clamp-2">
-                  {prompt.snippet}
-                </p>
-              </div>
 
               <div className="flex items-center gap-2 mb-4">
                 {prompt.tag && (
@@ -254,7 +255,7 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                 )}
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-white/5">
+              <div className="mt-auto w-full flex items-center justify-between pt-4 border-t border-white/5">
                 <div className="flex items-center gap-2">
                   {(() => {
                     const Icon = ICON_MAP[prompt.icon];
@@ -362,16 +363,17 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
                 </div>
               </div>
 
-              {prompt.target?.output_type === "image" && prompt.target?.output && (
-                <div className="relative aspect-video overflow-hidden rounded-lg bg-white/5 mb-4 w-full sm:w-64">
-                  <img
-                    src={prompt.target.output}
-                    alt={prompt.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                </div>
-              )}
+              {prompt.target?.output_type === "image" &&
+                prompt.target?.output && (
+                  <div className="relative aspect-video overflow-hidden rounded-lg bg-white/5 mb-4 w-full sm:w-64">
+                    <img
+                      src={prompt.target.output}
+                      alt={prompt.title}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
 
               <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto border-t sm:border-t-0 border-white/5 pt-3 sm:pt-0">
                 <div className="flex items-center gap-2.5">

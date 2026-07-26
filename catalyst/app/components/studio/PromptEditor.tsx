@@ -222,7 +222,7 @@ export default function PromptEditor({
             <GlassPanel className="p-6 flex flex-col gap-4 relative overflow-hidden group">
               <div className="flex items-center gap-2">
                 <div className="bg-cyan-500/20 p-2 rounded-xl text-cyan-400 border border-cyan-500/30">
-                  <Image className="size-5" />
+                  <ImageIcon className="size-5" />
                 </div>
                 <span className="text-white font-semibold text-base">
                   Generated Image
