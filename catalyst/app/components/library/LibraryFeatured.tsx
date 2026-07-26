@@ -41,10 +41,6 @@ export default function LibraryFeatured({ featured }: LibraryFeaturedProps) {
           </div>
           <Link
             href={`/studio/${featured.id ?? ""}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log("FEAT: ", featured);
-            }}
             className="cursor-pointer"
           >
             <button className="glass-panel border-white/10 hover:bg-cyan-500/20 hover:border-cyan-500/30 text-white h-10 md:h-12 px-5 md:px-6 rounded-lg font-bold flex items-center justify-center gap-2 transition-all duration-300 shrink-0 w-full md:w-auto text-sm md:text-base hover:scale-[1.02] active:scale-[0.98] group/btn shadow-lg">
