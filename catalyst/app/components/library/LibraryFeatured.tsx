@@ -1,7 +1,15 @@
-import React from "react";
-import { ArrowRight } from "lucide-react";
+"use client";
 
-export default function LibraryFeatured() {
+import React from "react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { LibraryItem } from "./LibraryCard";
+
+interface LibraryFeaturedProps {
+  featured: LibraryItem | null;
+}
+
+export default function LibraryFeatured({ featured }: LibraryFeaturedProps) {
   const featuredImage =
     "https://lh3.googleusercontent.com/aida-public/AB6AXuBAVsfsI1WFmkCuQZOSxSw5Rf07bYqbx7lHekw-arWybjAOc2nfPKoim5JXEy5Cp6X3m7dfQCerp9fGDnchx9hx7xh8-B6DMs-kCXIv1xJ0IB9xqmeOSnvW5-AcmNKZsirPCZFbNHQfSDnaUVuRzQXNMlaASTMkxcq0PH3VCOgs6WiQrPO6-mZN37WiZLGW5ZAUB2CcEJhJIsBjp63CaY5LZFonFhD_Qz3bB9aLbXzgK4Njr95gJcsqFGogBn7Rf0W1X9ZSuC3CCBc";
 
@@ -31,10 +39,19 @@ export default function LibraryFeatured() {
               matplotlib code.
             </p>
           </div>
-          <button className="glass-panel border-white/10 hover:bg-cyan-500/20 hover:border-cyan-500/30 text-white h-10 md:h-12 px-5 md:px-6 rounded-lg font-bold flex items-center justify-center gap-2 transition-all duration-300 shrink-0 w-full md:w-auto text-sm md:text-base hover:scale-[1.02] active:scale-[0.98] group/btn shadow-lg">
-            Open Prompt
-            <ArrowRight className="size-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
-          </button>
+          <Link
+            href={`/studio/${featured.id ?? ""}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log("FEAT: ", featured);
+            }}
+            className="cursor-pointer"
+          >
+            <button className="glass-panel border-white/10 hover:bg-cyan-500/20 hover:border-cyan-500/30 text-white h-10 md:h-12 px-5 md:px-6 rounded-lg font-bold flex items-center justify-center gap-2 transition-all duration-300 shrink-0 w-full md:w-auto text-sm md:text-base hover:scale-[1.02] active:scale-[0.98] group/btn shadow-lg">
+              Open Prompt
+              <ArrowRight className="size-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+            </button>
+          </Link>
         </div>
       </div>
     </div>

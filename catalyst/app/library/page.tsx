@@ -29,10 +29,8 @@ async function getLibraryWorkspaces(searchParams: {
   page?: number;
   visibility?: string;
 }): Promise<{ items: LibraryItem[]; totalCount: number }> {
-  let query = supabase
-    .from("workspaces")
-    .select(
-      `
+  let query = supabase.from("workspaces").select(
+    `
       id,
       name,
       description,
@@ -43,9 +41,12 @@ async function getLibraryWorkspaces(searchParams: {
         name
       )
       `,
-    );
+  );
 
-  if (searchParams.visibility && ["community", "public"].includes(searchParams.visibility)) {
+  if (
+    searchParams.visibility &&
+    ["community", "public"].includes(searchParams.visibility)
+  ) {
     query = query.eq("visibility", searchParams.visibility);
   } else {
     query = query.in("visibility", ["community", "public"]);
@@ -308,6 +309,14 @@ export default async function LibraryPage({
         })
       : await getLibraryItems(params);
 
+  let featured: (typeof items)[number] | null = null;
+
+  if (items && totalCount > 0) {
+    featured =
+      items.find((item) => item.id == "ffd8c7aa-24e4-4cb2-a691-7b060b25afcf") ??
+      items[0];
+  }
+
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
@@ -320,7 +329,7 @@ export default async function LibraryPage({
         <main className="flex-1 w-full max-w-[1200px] mx-auto pt-16 pb-12 px-4 md:px-8 relative z-10">
           <LibraryHero />
           <LibraryViewToggle />
-          {view !== "workspaces" && <LibraryFeatured />}
+          {view !== "workspaces" && <LibraryFeatured featured={featured} />}
           {view === "workspaces" ? <WorkspaceSearch /> : <LibrarySearch />}
           {view !== "workspaces" && <LibraryTags />}
           <LibraryGrid items={items} />
