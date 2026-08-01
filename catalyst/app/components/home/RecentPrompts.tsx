@@ -365,7 +365,7 @@ export default function RecentPrompts({ prompts }: RecentPromptsProps) {
 
               {prompt.target?.output_type === "image" &&
                 prompt.target?.output && (
-                  <div className="relative aspect-video overflow-hidden rounded-lg bg-white/5 mb-4 w-full sm:w-64">
+                  <div className="relative w-20 h-14 sm:w-28 sm:h-18 flex-shrink-0 overflow-hidden rounded-lg bg-white/5">
                     <img
                       src={prompt.target.output}
                       alt={prompt.title}

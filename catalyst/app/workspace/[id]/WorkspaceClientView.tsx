@@ -21,11 +21,19 @@ import {
   Loader2,
   AlertTriangle,
   Star,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "../../lib/supabase-browser";
 import Link from "next/link";
 import { toggleFavoritePrompt, checkPromptFavoriteStatus } from "../../lib/prompts-client";
+import {
+  PROMPT_TYPE_TOKENS,
+  PROMPT_TYPE_FALLBACK,
+  MODEL_BADGE_TOKENS,
+  MODEL_BADGE_FALLBACK,
+} from "../../lib/promptTokens";
 
 interface PromptItem {
   id: string;
@@ -85,6 +93,8 @@ export default function WorkspaceClientView({
   const [prompts, setPrompts] = useState<PromptItem[]>(initialPrompts);
   const [searchQuery, setSearchQuery] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"masonry" | "list">("masonry");
 
   // Prompt CRUD operations
   const [promptToDelete, setPromptToDelete] = useState<PromptItem | null>(null);
@@ -234,6 +244,163 @@ export default function WorkspaceClientView({
       p.target_model.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.tag && p.tag.toLowerCase().includes(searchQuery.toLowerCase())),
   );
+
+  // Extract unique tags
+  const uniqueTags = React.useMemo(() => {
+    const tags = new Set<string>();
+    filteredPrompts.forEach((p) => {
+      if (p.tag) tags.add(p.tag);
+    });
+    return Array.from(tags);
+  }, [filteredPrompts]);
+
+  // Apply tag filter
+  const displayedPrompts = selectedTag
+    ? filteredPrompts.filter((p) => p.tag === selectedTag)
+    : filteredPrompts;
+
+  // Distribute prompts into columns for true responsive Masonry grid
+  const masonryColumns2 = React.useMemo(() => {
+    const cols: PromptItem[][] = [[], []];
+    displayedPrompts.forEach((item, idx) => {
+      cols[idx % 2].push(item);
+    });
+    return cols;
+  }, [displayedPrompts]);
+
+  const masonryColumns3 = React.useMemo(() => {
+    const cols: PromptItem[][] = [[], [], []];
+    displayedPrompts.forEach((item, idx) => {
+      cols[idx % 3].push(item);
+    });
+    return cols;
+  }, [displayedPrompts]);
+
+  const renderPromptCard = (prompt: PromptItem) => {
+    const canEditPrompt = currentUserId === prompt.user_id || isWorkspaceOwner;
+    const promptTypeToken =
+      PROMPT_TYPE_TOKENS[prompt.icon] || PROMPT_TYPE_FALLBACK;
+    const { Icon } = promptTypeToken;
+
+    return (
+      <div
+        key={prompt.id}
+        onClick={() => router.push(`/studio/${prompt.id}`)}
+        className="glass-panel rounded-2xl p-5 border border-white/5 hover:border-cyan-500/30 bg-white/5 hover:bg-white/10 transition-all duration-300 flex flex-col group cursor-pointer relative overflow-hidden h-auto animate-in fade-in slide-in-from-bottom-3 duration-300"
+      >
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div
+              className={`size-9 rounded-lg ${promptTypeToken.bg} flex items-center justify-center ${promptTypeToken.text} border ${promptTypeToken.border} group-hover:scale-105 transition-transform flex-shrink-0`}
+            >
+              <Icon className="size-4.5" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-white font-bold text-sm leading-tight group-hover:text-cyan-400 transition-colors truncate">
+                {prompt.title}
+              </h3>
+              <p className="text-slate-500 text-[10px] mt-0.5 truncate">
+                {new Date(prompt.created_at).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+          <span className="text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-black/40 border border-white/10 text-cyan-400 flex-shrink-0">
+            {prompt.target_model}
+          </span>
+        </div>
+
+        {/* Content area - Image or text snippet */}
+        {prompt.target?.output_type === "image" && prompt.target?.output ? (
+          <div className="relative aspect-video mb-3 overflow-hidden rounded-xl bg-white/5 border border-white/5 group-hover:scale-[1.01] transition-transform duration-300">
+            <img
+              src={prompt.target.output}
+              alt={prompt.title}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+            />
+          </div>
+        ) : (
+          <p className="text-slate-300 text-xs line-clamp-4 leading-relaxed mb-3 overflow-hidden italic bg-white/5 p-3 rounded-xl border border-white/5 font-mono opacity-90">
+            "{prompt.snippet || prompt.content.substring(0, 120)}"
+          </p>
+        )}
+
+        {/* Tag */}
+        {prompt.tag && (
+          <div className="mb-3">
+            <span className="px-2 py-0.5 rounded bg-white/5 text-[9px] font-medium text-slate-300 border border-white/5 uppercase">
+              {prompt.tag}
+            </span>
+          </div>
+        )}
+
+        <div className="mt-auto flex items-center justify-between pt-3 border-t border-white/5">
+          <span className="text-[9px] font-bold text-slate-500 flex items-center gap-1 truncate">
+            <User className="size-2.5 flex-shrink-0" />
+            Added by{" "}
+            {currentUserId === prompt.user_id ? "You" : prompt.authorName}
+          </span>
+
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <button
+              onClick={(e) => handleFavoritePrompt(e, prompt)}
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                prompt.is_favorite
+                  ? "text-yellow-400 hover:text-yellow-350"
+                  : "text-slate-400 hover:text-yellow-400 hover:bg-white/5"
+              }`}
+              title={prompt.is_favorite ? "Unfavourite" : "Favourite"}
+            >
+              <Star
+                className={`size-3.5 ${prompt.is_favorite ? "fill-yellow-400" : ""}`}
+              />
+            </button>
+
+            <button
+              onClick={(e) => handleCopy(e, prompt.id, prompt.content)}
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                copiedId === prompt.id
+                  ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/10"
+                  : "text-slate-400 hover:text-white hover:bg-white/5"
+              }`}
+              title="Copy prompt text"
+            >
+              {copiedId === prompt.id ? (
+                <Check className="size-3.5" />
+              ) : (
+                <Copy className="size-3.5" />
+              )}
+            </button>
+
+            {canEditPrompt && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/studio/${prompt.id}`);
+                  }}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 cursor-pointer"
+                  title="Edit prompt"
+                >
+                  <Edit className="size-3.5" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPromptToDelete(prompt);
+                  }}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 cursor-pointer"
+                  title="Delete prompt"
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <main className="flex-1 w-full max-w-[1100px] mx-auto pt-24 pb-12 px-4 md:px-8 relative z-10">
@@ -400,21 +567,78 @@ export default function WorkspaceClientView({
           <h2 className="text-white font-bold text-lg flex items-center gap-2 self-start">
             Workspace Prompts
             <span className="text-xs font-normal text-slate-400">
-              ({filteredPrompts.length})
+              ({displayedPrompts.length})
             </span>
           </h2>
 
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-2.5 size-4 text-slate-500" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search prompts..."
-              className="w-full bg-white/5 border border-white/5 hover:border-white/10 rounded-xl text-white text-xs pl-9 pr-4 py-2.5 outline-none focus:border-cyan-500/50 transition-colors"
-            />
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+            <div className="relative flex-1 min-w-[200px] sm:w-64">
+              <Search className="absolute left-3 top-2.5 size-4 text-slate-500" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search prompts..."
+                className="w-full bg-white/5 border border-white/5 hover:border-white/10 rounded-xl text-white text-xs pl-9 pr-4 py-2.5 outline-none focus:border-cyan-500/50 transition-colors"
+              />
+            </div>
+
+            {/* View mode toggle */}
+            <div className="flex bg-white/5 rounded-xl border border-white/5 p-1">
+              <button
+                onClick={() => setViewMode("masonry")}
+                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                  viewMode === "masonry"
+                    ? "bg-white/10 text-cyan-400 shadow-sm"
+                    : "text-slate-400 hover:text-white"
+                }`}
+                title="Masonry View"
+              >
+                <LayoutGrid className="size-4.5" />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                  viewMode === "list"
+                    ? "bg-white/10 text-cyan-400 shadow-sm"
+                    : "text-slate-400 hover:text-white"
+                }`}
+                title="List View"
+              >
+                <List className="size-4.5" />
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Dynamic Tag Filters */}
+        {uniqueTags.length > 0 && (
+          <div className="flex items-center gap-2 overflow-x-auto pb-4 dropdown-scroll">
+            <button
+              onClick={() => setSelectedTag(null)}
+              className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all cursor-pointer ${
+                !selectedTag
+                  ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30 shadow-[0_0_8px_rgba(6,182,212,0.2)]"
+                  : "bg-white/5 text-slate-400 border-white/5 hover:border-white/10 hover:text-slate-200"
+              }`}
+            >
+              All Categories
+            </button>
+            {uniqueTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setSelectedTag(tag)}
+                className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all cursor-pointer ${
+                  selectedTag === tag
+                    ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30 shadow-[0_0_8px_rgba(6,182,212,0.2)]"
+                    : "bg-white/5 text-slate-400 border-white/5 hover:border-white/10 hover:text-slate-200"
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Delete Prompt Confirmation Modal */}
         {promptToDelete && (
@@ -472,80 +696,170 @@ export default function WorkspaceClientView({
         )}
 
         {/* Prompts list grid */}
-        {filteredPrompts.length === 0 ? (
+        {displayedPrompts.length === 0 ? (
           <div className="py-16 text-center border border-dashed border-white/5 rounded-2xl glass-panel">
             <Sparkles className="size-10 text-slate-600 mx-auto mb-3 opacity-40" />
             <h3 className="text-white font-bold text-sm mb-1">
               No prompts found
             </h3>
             <p className="text-slate-500 text-xs max-w-xs mx-auto">
-              {searchQuery
-                ? "No prompts match your current search query."
+              {searchQuery || selectedTag
+                ? "No prompts match your current search query or filter."
                 : "There are no engineering prompts in this workspace yet."}
             </p>
           </div>
+        ) : viewMode === "masonry" ? (
+          /* MASONRY VIEW LAYOUT */
+          <div className="w-full animate-slideUp">
+            {/* Desktop 3 Columns */}
+            <div className="hidden lg:grid lg:grid-cols-3 gap-4 items-start w-full">
+              {masonryColumns3.map((col, colIdx) => (
+                <div key={colIdx} className="flex flex-col gap-4 min-w-0">
+                  {col.map((prompt) => renderPromptCard(prompt))}
+                </div>
+              ))}
+            </div>
+
+            {/* Tablet 2 Columns */}
+            <div className="hidden sm:grid lg:hidden sm:grid-cols-2 gap-4 items-start w-full">
+              {masonryColumns2.map((col, colIdx) => (
+                <div key={colIdx} className="flex flex-col gap-4 min-w-0">
+                  {col.map((prompt) => renderPromptCard(prompt))}
+                </div>
+              ))}
+            </div>
+
+            {/* Mobile 1 Column */}
+            <div className="flex sm:hidden flex-col gap-4 w-full">
+              {displayedPrompts.map((prompt) => renderPromptCard(prompt))}
+            </div>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredPrompts.map((prompt) => {
-              // User can edit/delete if they created the prompt OR they own the workspace
+          /* LIST VIEW LAYOUT */
+          <div className="flex flex-col gap-3 animate-slideUp">
+            {displayedPrompts.map((prompt, idx) => {
               const canEditPrompt =
                 currentUserId === prompt.user_id || isWorkspaceOwner;
+
+              const promptTypeToken =
+                PROMPT_TYPE_TOKENS[prompt.icon] || PROMPT_TYPE_FALLBACK;
+
+              const modelColorMap: Record<string, string> = {
+                gpt: "green",
+                "gpt-4": "green",
+                "gpt-4-turbo": "green",
+                "gpt-4o": "green",
+                claude: "purple",
+                "claude-3-opus": "purple",
+                "claude-3-sonnet": "purple",
+                "claude-3-haiku": "purple",
+                gemini: "yellow",
+                "gemini-1.5-pro": "yellow",
+                "gemini-1.5-flash": "yellow",
+                llama: "orange",
+                "llama-3": "orange",
+                "llama-3.1": "orange",
+                grok: "cyan",
+                dalle: "pink",
+                "dall-e-3": "pink",
+                stablediffusion: "blue",
+                "stable-diffusion-xl": "blue",
+                midjourney: "cyan",
+                "midjourney-v6": "cyan",
+                veo: "rose",
+              };
+              const modelColor =
+                modelColorMap[prompt.target_model.toLowerCase()] || "cyan";
+              const modelToken =
+                MODEL_BADGE_TOKENS[modelColor] || MODEL_BADGE_FALLBACK;
 
               return (
                 <div
                   key={prompt.id}
                   onClick={() => router.push(`/studio/${prompt.id}`)}
-                  className="glass-panel rounded-2xl p-5 border border-white/5 hover:border-cyan-500/30 bg-white/5 hover:bg-white/10 transition-all duration-300 flex flex-col justify-between group cursor-pointer relative overflow-hidden"
+                  className="glass-panel rounded-xl p-4 border border-white/5 hover:border-cyan-500/30 hover:bg-white/[0.03] transition-all duration-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group cursor-pointer animate-in fade-in slide-in-from-bottom-2 duration-300"
+                  style={{ animationDelay: `${idx * 20}ms` }}
                 >
-                  <div className="flex-1 min-w-0">
-                    {/* Model tag and date */}
-                    <div className="flex items-center justify-between gap-3 mb-3">
-                      <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 roundedbg-black/40 border border-white/10 text-cyan-400">
-                        {prompt.target_model}
-                      </span>
-                      <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                        <Calendar className="size-3" />
+                  <div className="flex items-center gap-4 min-w-0 flex-1">
+                    <div
+                      className={`size-9 rounded-lg ${promptTypeToken.bg} flex items-center justify-center ${promptTypeToken.text} border ${promptTypeToken.border} group-hover:scale-105 transition-transform flex-shrink-0`}
+                    >
+                      <promptTypeToken.Icon className="size-4.5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                        <h3 className="text-base font-bold text-white group-hover:text-cyan-400 transition-colors truncate">
+                          {prompt.title}
+                        </h3>
+                        {prompt.tag && (
+                          <span className="px-1.5 py-0.5 rounded bg-white/5 text-[9px] text-slate-400 border border-white/5 uppercase flex-shrink-0">
+                            {prompt.tag}
+                          </span>
+                        )}
+                        <span
+                          className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                            prompt.target?.output_type === "image"
+                              ? "bg-pink-500/10 text-pink-400"
+                              : "bg-white/5 text-slate-500"
+                          }`}
+                        >
+                          {prompt.target?.output_type === "image"
+                            ? "Image"
+                            : "Text"}
+                        </span>
+                      </div>
+                      <p className="text-slate-400 text-xs line-clamp-1">
+                        {prompt.snippet}
+                      </p>
+                    </div>
+                  </div>
+
+                  {prompt.target?.output_type === "image" &&
+                  prompt.target?.output && (
+                    <div className="relative w-24 h-16 sm:w-28 sm:h-18 flex-shrink-0 overflow-hidden rounded-lg bg-white/5">
+                      <img
+                        src={prompt.target.output}
+                        alt={prompt.title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto border-t sm:border-t-0 border-white/5 pt-3 sm:pt-0">
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className={`flex items-center gap-1 px-2 py-0.5 rounded ${modelToken.bg} border ${modelToken.border} ${modelToken.text}`}
+                      >
+                        <span className="text-[9px] font-black uppercase tracking-wider">
+                          {prompt.target_model}
+                        </span>
+                      </div>
+                      <span className="text-[9px] text-slate-500 font-medium">
                         {new Date(prompt.created_at).toLocaleDateString()}
                       </span>
                     </div>
 
-                    <h3 className="text-white font-bold text-sm tracking-tight group-hover:text-cyan-400 transition-colors truncate">
-                      {prompt.title}
-                    </h3>
-
-                    <p className="text-slate-400 text-xs line-clamp-3 leading-relaxed mt-2 overflow-hidden italic">
-                      "{prompt.snippet || prompt.content.substring(0, 120)}"
-                    </p>
-                  </div>
-
-                  {/* Actions / details bar */}
-                  <div className="border-t border-white/5 pt-3 mt-4 flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-500 flex items-center gap-1">
-                      <User className="size-3" />
-                      Added by{" "}
-                      {currentUserId === prompt.user_id
-                        ? "You"
-                        : prompt.authorName}
-                    </span>
-
                     <div className="flex items-center gap-1">
                       <button
                         onClick={(e) => handleFavoritePrompt(e, prompt)}
-                        className={`p-2 rounded-lg transition-all cursor-pointer ${
+                        className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                           prompt.is_favorite
                             ? "text-yellow-400 hover:text-yellow-350"
                             : "text-slate-400 hover:text-yellow-400 hover:bg-white/5"
                         }`}
                         title={prompt.is_favorite ? "Unfavourite" : "Favourite"}
                       >
-                        <Star className={`size-3.5 ${prompt.is_favorite ? "fill-yellow-400" : ""}`} />
+                        <Star
+                          className={`size-3.5 ${prompt.is_favorite ? "fill-yellow-400" : ""}`}
+                        />
                       </button>
 
                       <button
                         onClick={(e) =>
                           handleCopy(e, prompt.id, prompt.content)
                         }
-                        className={`p-2 rounded-lg transition-all cursor-pointer ${
+                        className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                           copiedId === prompt.id
                             ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/10"
                             : "text-slate-400 hover:text-white hover:bg-white/5"
@@ -566,7 +880,7 @@ export default function WorkspaceClientView({
                               e.stopPropagation();
                               router.push(`/studio/${prompt.id}`);
                             }}
-                            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 cursor-pointer"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 cursor-pointer"
                             title="Edit prompt"
                           >
                             <Edit className="size-3.5" />
@@ -576,7 +890,7 @@ export default function WorkspaceClientView({
                               e.stopPropagation();
                               setPromptToDelete(prompt);
                             }}
-                            className="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 cursor-pointer"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 cursor-pointer"
                             title="Delete prompt"
                           >
                             <Trash2 className="size-3.5" />
