@@ -6,7 +6,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Catalyst Prompt Studio | Professional Prompt Optimization",
+  title: "Free AI Prompt Generator & Studio",
   description:
     "Transform your raw ideas into high-performance AI prompts with our Studio and professional library.",
 };

@@ -10,6 +10,14 @@ import WorkspacesOverview from "../components/home/WorkspacesOverview";
 import { getRecentPrompts } from "../lib/prompts";
 import { getServerUser, createClient } from "../lib/supabase-server";
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
+
+
+export const metadata: Metadata = {
+  title: "Free AI Prompt Workspaces & Community Hub",
+  description:
+    "View your token usage, workspaces and recent prompts at a glance.",
+};
 
 export default async function DashboardPage() {
   const user = await getServerUser();

@@ -6,6 +6,14 @@ import { getServerUser, createClient } from "../lib/supabase-server";
 import { redirect } from "next/navigation";
 import HistoryList from "../components/history/HistoryList";
 import GlassPanel from "../components/GlassPanel";
+import { Metadata } from "next";
+
+
+export const metadata: Metadata = {
+  title: "Archive | Your AI Interaction Logs",
+  description:
+    "Browse through your prompt history and interactions",
+};
 
 const PAGE_SIZE = 9;
 

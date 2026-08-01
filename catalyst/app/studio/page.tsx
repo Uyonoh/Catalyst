@@ -5,7 +5,7 @@ import StudioPageContent from "./StudioPageContent";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Studio",
+  title: "AI Prompt Generator Studio - Craft & Refine AI Prompts",
   description: "Refine your ideas into high-quality, purpose-driven prompts.",
 };
 

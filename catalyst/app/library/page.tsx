@@ -14,7 +14,7 @@ import { Metadata } from "next";
 import LibraryViewToggle from "../components/library/LibraryViewToggle";
 
 export const metadata: Metadata = {
-  title: "Library",
+  title: "Free AI Prompt Library & Generator - Your Organized Prompt Catalog",
   description:
     "Browse, search, and manage prompts from the community. Your creative arsenal, organized.",
 };
