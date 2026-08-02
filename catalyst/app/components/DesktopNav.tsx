@@ -26,6 +26,13 @@ const links = [
     title: "Design and test new prompts",
   },
   {
+    name: "Pricing",
+    href: "/pricing",
+    active: "text-purple-400",
+    inactive: "text-white hover:text-cyan-400 hover:bg-white/5",
+    title: "View our subscription plans",
+  },
+  {
     name: "History",
     href: "/history",
     active: "text-yellow-400",

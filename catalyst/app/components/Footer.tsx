@@ -48,6 +48,7 @@ const Footer = () => {
               <FooterLink href="/studio">Studio</FooterLink>
               <FooterLink href="/library">Library</FooterLink>
               <FooterLink href="/history">History</FooterLink>
+              <FooterLink href="/pricing">Pricing</FooterLink>
               <FooterLink href="/settings">Settings</FooterLink>
             </FooterGroup>
 

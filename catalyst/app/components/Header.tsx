@@ -10,6 +10,7 @@ import {
   Library,
   Sparkles,
   History as HistoryIcon,
+  CreditCard,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -211,6 +212,15 @@ export default function Header() {
                   </div>
                 </Link>
               </div>
+
+              <Link
+                href="/pricing"
+                className="flex items-center gap-3 px-5 py-4 text-sm font-bold text-slate-300 hover:text-white transition-colors rounded-2xl bg-white/5 border border-transparent hover:border-white/10 group"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <CreditCard className="size-5 text-emerald-500 group-hover:text-emerald-400 transition-colors" />
+                Pricing Plans
+              </Link>
 
               {user && (
                 <>

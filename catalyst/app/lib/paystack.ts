@@ -2,7 +2,9 @@ const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_API_URL = "https://api.paystack.co";
 
 if (!PAYSTACK_SECRET_KEY) {
-  console.warn("Warning: PAYSTACK_SECRET_KEY is not defined in environment variables.");
+  console.warn(
+    "Warning: PAYSTACK_SECRET_KEY is not defined in environment variables.",
+  );
 }
 
 interface InitializeResponse {
@@ -57,8 +59,8 @@ export async function initializeTransaction(
   currency: string,
   amount: number,
   callbackUrl: string,
-  metadata: string, 
-  planCode?: string
+  metadata: string,
+  planCode?: string,
 ): Promise<InitializeResponse> {
   const body: any = {
     email,
@@ -73,6 +75,7 @@ export async function initializeTransaction(
   }
   */
 
+  console.log("BODY: ", body);
   const response = await fetch(`${PAYSTACK_API_URL}/transaction/initialize`, {
     method: "POST",
     headers: {
@@ -86,7 +89,9 @@ export async function initializeTransaction(
     const errorText = await response.text();
     console.error("Payment failed with payload: ", body);
     console.error(`Paystack error: ${response.statusText} - ${errorText}`);
-    throw new Error("An error occuured while initializing your payment, try again later or contact support!");
+    throw new Error(
+      "An error occuured while initializing your payment, try again later or contact support!",
+    );
   }
 
   return response.json();
@@ -96,19 +101,26 @@ export async function initializeTransaction(
  * Verify a transaction using its reference.
  * @param reference Paystack transaction reference string
  */
-export async function verifyTransaction(reference: string): Promise<VerifyResponse> {
-  const response = await fetch(`${PAYSTACK_API_URL}/transaction/verify/${reference}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+export async function verifyTransaction(
+  reference: string,
+): Promise<VerifyResponse> {
+  const response = await fetch(
+    `${PAYSTACK_API_URL}/transaction/verify/${reference}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+      },
     },
-  });
+  );
 
   if (!response.ok) {
     const errorText = await response.text();
     console.error("Verification failed with reference: ", reference);
     console.error(`Paystack error: ${response.statusText} - ${errorText}`);
-    throw new Error(`Paystack verification error: ${response.statusText} - ${errorText}`);
+    throw new Error(
+      `Paystack verification error: ${response.statusText} - ${errorText}`,
+    );
   }
 
   return response.json();
