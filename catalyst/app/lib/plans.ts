@@ -24,6 +24,8 @@ export interface Tier {
   bgClass: string;
   hoverClass: string;
   glowClass: string;
+  savedPromptLimit: number;
+  workspaceLimit: number;
 }
 
 export interface ComparisonRow {
@@ -55,6 +57,9 @@ export const TIERS: Tier[] = [
     bgClass: "bg-slate-500",
     hoverClass: "bg-slate-400 text-white",
     glowClass: "",
+    savedPromptLimit: 20,
+    workspaceLimit: 0,
+
   },
   {
     name: "Basic",
@@ -79,6 +84,8 @@ export const TIERS: Tier[] = [
     bgClass: "bg-cyan-500",
     hoverClass: "bg-cyan-400",
     glowClass: "shadow-[0_0_30px_rgba(6,182,212,0.15)]",
+    savedPromptLimit: 50,
+    workspaceLimit: 3,
   },
   {
     name: "Plus",
@@ -103,6 +110,8 @@ export const TIERS: Tier[] = [
     bgClass: "bg-blue-400",
     hoverClass: "bg-blue-300",
     glowClass: "shadow-[0_0_30px_rgba(59,130,246,0.15)]",
+    savedPromptLimit: 100,
+    workspaceLimit: 10,
   },
   {
     name: "Pro",
@@ -127,6 +136,8 @@ export const TIERS: Tier[] = [
     bgClass: "bg-amber-500",
     hoverClass: "bg-amber-400",
     glowClass: "shadow-[0_0_30px_rgba(245,158,11,0.15)]",
+    savedPromptLimit: 200,
+    workspaceLimit: 30,
   },
   {
     name: "Ultra",
@@ -151,6 +162,8 @@ export const TIERS: Tier[] = [
     bgClass: "bg-purple-500",
     hoverClass: "bg-purple-400",
     glowClass: "shadow-[0_0_30px_rgba(168,85,247,0.1)]",
+    savedPromptLimit: 500,
+    workspaceLimit: 50,
   },
 ];
 

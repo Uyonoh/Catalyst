@@ -10,7 +10,7 @@ import {
   ExternalLink,
   InfinityIcon,
   FolderOpen,
-  Heart,
+  Star,
   BarChart3,
   Bot,
   Sparkles,
@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useTokens } from "../../../hooks/useTokens";
 import { useRouter } from "next/navigation";
+import { TIERS } from "../../../lib/plans";
 
 interface SubscriptionPanelProps {
   plan: string;
@@ -83,6 +84,14 @@ const MODEL_THEME: Record<
   },
 };
 
+function getLimits(plan: string) {
+  const tier = TIERS.find(tier => tier.tierKey == plan);
+  const promptLimit = tier.savedPromptLimit;
+  const workspaceLimit = tier.workspaceLimit;
+
+  return [promptLimit, workspaceLimit];
+}
+
 export default function SubscriptionPanel({
   plan,
   promptsCount,
@@ -96,6 +105,7 @@ export default function SubscriptionPanel({
   const { weeklyLimit, used, percentage, isExhausted, refreshProfile } = useTokens();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const isSubscribed = plan !== "free"; 
+  const [promptLimit, workspaceLimit] = getLimits(plan);
   const router = useRouter();
 
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -384,14 +394,14 @@ export default function SubscriptionPanel({
 
         <div className="bg-white/5 rounded-2xl border border-white/10 px-6 overflow-hidden mt-5">
           <SettingsFormRow
-            label="Optimized Prompts"
-            description="Total number of prompts you've created and refined."
+            label="Saved Prompts"
+            description="Total number of prompts you've saved."
           >
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-end gap-2 text-white font-mono text-xl">
                 {promptsCount}{" "}
                 <span className="text-slate-500 text-sm font-sans">
-                  {!isSubscribed ? "/ 50" : "/ ∞"}
+                  {"/ "}{promptLimit}
                 </span>
               </div>
               {!isSubscribed && (
@@ -415,7 +425,7 @@ export default function SubscriptionPanel({
               <div className="flex items-center justify-end gap-2 text-white font-mono text-xl">
                 {workspacesCount}{" "}
                 <span className="text-slate-500 text-sm font-sans">
-                  {!isSubscribed ? "/ 5" : "/ ∞"}
+                  {"/ "}{workspaceLimit}
                 </span>
               </div>
               {!isSubscribed && (
@@ -431,7 +441,7 @@ export default function SubscriptionPanel({
             </div>
           </SettingsFormRow>
 
-          <SettingsFormRow
+          {/* <SettingsFormRow
             label="Live Analyses Run"
             description="Number of times Catalyst has deconstructed your prompts."
           >
@@ -439,6 +449,7 @@ export default function SubscriptionPanel({
               {analysesCount} <Zap className="size-5 text-yellow-500" />
             </div>
           </SettingsFormRow>
+          */}
 
           <SettingsFormRow
             label="Starred Favorites"
@@ -446,9 +457,10 @@ export default function SubscriptionPanel({
           >
             <div className="flex items-center justify-end gap-2 text-white font-mono text-xl">
               {favoritesCount}{" "}
-              <Heart className="size-5 text-rose-500 fill-rose-500/20" />
+              <Star className="size-5 text-amber-500 fill-amber-500/20" />
             </div>
           </SettingsFormRow>
+          
 
           <SettingsFormRow
             label="Weekly Token Usage"
