@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 export interface Tier {
+  id: number;
   name: string;
   alias: string;
   price: number;
@@ -36,6 +37,7 @@ export interface ComparisonRow {
 
 export const TIERS: Tier[] = [
   {
+    id: 0,
     name: "Free",
     alias: "Spark",
     price: 0,
@@ -62,6 +64,7 @@ export const TIERS: Tier[] = [
 
   },
   {
+    id: 1,
     name: "Basic",
     alias: "Orbit",
     price: 3,
@@ -88,6 +91,7 @@ export const TIERS: Tier[] = [
     workspaceLimit: 3,
   },
   {
+    id: 2,
     name: "Plus",
     alias: "Nova",
     price: 7,
@@ -114,6 +118,7 @@ export const TIERS: Tier[] = [
     workspaceLimit: 10,
   },
   {
+    id: 3,
     name: "Pro",
     alias: "Pulsar",
     price: 12,
@@ -140,6 +145,7 @@ export const TIERS: Tier[] = [
     workspaceLimit: 30,
   },
   {
+    id: 4,
     name: "Ultra",
     alias: "Infinity",
     price: 20,

@@ -46,6 +46,24 @@ export default function PricingPage() {
     fetchSymbol();
   }, []);
 
+  const getCTA = (tier: Tier) => {
+    const userTierID = TIERS.find(_tier => _tier.tierKey === profile?.plan ?? "free")?.id ?? 0;
+
+    if (tier.tierKey === "free"){
+      return tier.cta;
+    }
+
+    if (tier.id < userTierID) {
+      return `Switch to ${tier.name}`;
+    } else if (tier.id > userTierID) {
+      return `Upgrade to ${tier.name}`;
+    } else if(tier.id == userTierID) {
+      return "Active plan";
+    }
+
+    return tier.cta;
+  };
+
   const calculateCharge = (tier: Tier) => {
     const price = tier.discountedPrice ? tier.discountedPrice : tier.price;
     return Number((price * (rate ?? 1)).toFixed(2));
@@ -266,7 +284,8 @@ export default function PricingPage() {
                     {loadingTier === tier.tierKey ? (
                       <Loader2 className="size-4 animate-spin" />
                     ) : (
-                      tier.cta
+
+                      getCTA(tier)
                     )}
                   </button>
                 )}
