@@ -68,6 +68,32 @@ interface PromptEditorProps {
   };
 }
 
+async function handleDownload(imageUrl: string | null, filename: string) {
+  if (!imageUrl){
+    console.error("Invalid image url");
+  }
+  if (!filename){
+    console.error("Invalid filename");
+  }
+
+  try {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+
+    const publicUrl = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = publicUrl;
+    link.download = filename;
+
+    document.body.appendChild(link);
+    link.click();
+    window.URL.revokeObjectURL(publicUrl);
+  } catch (error) {
+    console.error("Failed to download image", error);
+  }
+}
+
 export default function PromptEditor({
   title = "Refined Output",
   initialEditedText,
@@ -220,6 +246,7 @@ export default function PromptEditor({
 
           {target?.output_type === "image" && target?.output && (
             <GlassPanel className="p-6 flex flex-col gap-4 relative overflow-hidden group">
+              <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <div className="bg-cyan-500/20 p-2 rounded-xl text-cyan-400 border border-cyan-500/30">
                   <ImageIcon className="size-5" />
@@ -227,11 +254,16 @@ export default function PromptEditor({
                 <span className="text-white font-semibold text-base">
                   Generated Image
                 </span>
+                </div>
+                  <Download className="size-5 cursor-pointer text-cyan-400 hover:text-amber-300 transition-all"
+                  onClick = {() => {handleDownload(target?.output, `${title}.jpg`)}} />
               </div>
               <div className="relative aspect-video overflow-hidden rounded-lg bg-white/5">
-                <img
+                <Image
                   src={target?.output ?? null}
                   alt={title}
+                  width={0}
+                  height={0}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               </div>
