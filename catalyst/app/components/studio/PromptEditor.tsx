@@ -68,12 +68,14 @@ interface PromptEditorProps {
   };
 }
 
-async function handleDownload(imageUrl: string | null, filename: string) {
+async function handleDownload(imageUrl: string | undefined, filename: string) {
   if (!imageUrl){
     console.error("Invalid image url");
+    return;
   }
   if (!filename){
     console.error("Invalid filename");
+    return;
   }
 
   try {

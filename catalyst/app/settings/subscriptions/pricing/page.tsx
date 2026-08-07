@@ -47,7 +47,7 @@ export default function PricingPage() {
   }, []);
 
   const getCTA = (tier: Tier) => {
-    const userTierID = TIERS.find(_tier => _tier.tierKey === profile?.plan ?? "free")?.id ?? 0;
+    const userTierID = TIERS.find(_tier => _tier.tierKey === currentPlan)?.id ?? 0;
 
     if (tier.tierKey === "free"){
       return tier.cta;

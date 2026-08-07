@@ -85,7 +85,7 @@ const MODEL_THEME: Record<
 };
 
 function getLimits(plan: string) {
-  const tier = TIERS.find(tier => tier.tierKey == plan);
+  const tier = TIERS.find(tier => tier.tierKey == plan) ?? TIERS[0];
   const promptLimit = tier.savedPromptLimit;
   const workspaceLimit = tier.workspaceLimit;
 
