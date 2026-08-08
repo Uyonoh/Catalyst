@@ -264,9 +264,11 @@ export default function PromptEditor({
                 <Image
                   src={target?.output ?? null}
                   alt={title}
-                  width={0}
-                  height={0}
+                  fill={true}
+                  quality={70}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  unoptimized
                 />
               </div>
               <div className="flex items-center gap-4 text-slate-400 text-sm">
