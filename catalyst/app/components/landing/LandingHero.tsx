@@ -26,11 +26,6 @@ export default function LandingHero() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-cyan-400 text-xs font-bold uppercase tracking-widest mb-8 animate-fade-in">
-            <Sparkles className="size-3" />
-            <span>Next-Gen Prompt Engineering</span>
-          </div>
 
           {/* Main Title */}
           <h1 className="flex flex-col gap-2 items-center text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-[1.1] mb-6">
@@ -46,7 +41,7 @@ export default function LandingHero() {
           </h2>
 
           {/* Quick Start Input Box */}
-          <div className="max-w-2xl mx-auto mb-16 px-1">
+          <div className="max-w-3xl mx-auto mb-16 px-1">
             <form
               onSubmit={handleOptimize}
               className="glass-panel border border-white/10 p-4 sm:p-5 rounded-3xl shadow-2xl relative group hover:border-cyan-500/20 transition-all duration-300 text-left"
@@ -59,7 +54,7 @@ export default function LandingHero() {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Paste your raw prompt idea here to optimize it..."
-                  className="w-full min-h-[90px] sm:min-h-[110px] bg-transparent text-white placeholder-slate-500 focus:outline-none text-base resize-none border-b border-white/5 pb-2"
+                  className="w-full min-h-[50px] sm:min-h-[50px] bg-transparent text-white placeholder-slate-500 focus:outline-none text-base resize-none border-b border-white/5 pb-2 scrollbar-none"
                 />
 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -71,10 +66,10 @@ export default function LandingHero() {
                     {/* Horizontal scrollable pills on mobile */}
                     <div className="flex gap-1.5 overflow-x-auto pb-1 max-w-full scrollbar-none w-full sm:w-auto">
                       {[
-                        { slug: "gpt", name: "GPT-5" },
-                        { slug: "claude", name: "Claude 4" },
-                        { slug: "gemini", name: "Gemini 3" },
-                        { slug: "llama", name: "Llama 3" },
+                        { slug: "gpt", name: "GPT" },
+                        { slug: "claude", name: "Claude" },
+                        { slug: "gemini", name: "Gemini" },
+                        { slug: "llama", name: "Llama" },
                         { slug: "midjourney", name: "Midjourney" },
                       ].map((m) => (
                         <button
@@ -151,7 +146,7 @@ export default function LandingHero() {
                 Model Optimized
               </h3>
               <p className="text-slate-400 text-sm">
-                Tailor your prompts for GPT-4, Claude 3, or Gemini with
+                Tailor your prompts for ChatGPT, Claude, or Gemini with
                 platform-specific insights.
               </p>
             </div>
