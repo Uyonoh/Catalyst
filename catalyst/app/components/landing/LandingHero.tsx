@@ -33,18 +33,16 @@ export default function LandingHero() {
           </div>
 
           {/* Main Title */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-[1.1] mb-6">
-            Catalyst{" "}
-            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-              Prompt Studio
-            </span>
+          <h1 className="flex flex-col gap-2 items-center text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-[1.1] mb-6">
+            <span>A free AI Prompt Generator</span>
+            <span className="">Built for real results</span>
           </h1>
 
           {/* Subtitle */}
-          <h2 className="text-base sm:text-xl font-medium text-slate-300 tracking-tight leading-relaxed mb-10 max-w-2xl mx-auto">
-            The professional studio for crafting, testing, and managing
-            high-performance AI prompts. Optimize raw ideas into consistent
-            results instantly.
+          <h2 className="text-base sm:text-2xl font-bold text-slate-300 tracking-tight leading-relaxed mb-10 max-w-2xl mx-auto">
+            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+              Catalyst{" "}Prompt Studio
+            </span>
           </h2>
 
           {/* Quick Start Input Box */}

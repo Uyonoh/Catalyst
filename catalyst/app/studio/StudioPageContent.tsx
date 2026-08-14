@@ -162,9 +162,10 @@ function StudioContent({
         {/* Header Action Frame with Toggle Switch */}
         <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
           <div className="flex flex-col gap-1">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
-              Prompt Studio
+            <h1 className="text-2xl md:text-4xl lg:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
+              Start Generating AI Prompts in <span className="inline sm:block">&apos;Prompt Studio&apos;</span>
             </h1>
+            <h2 className="text-slate-400 text-xs sm:text-sm">A free AI prompt generator to</h2>
             <p className="text-slate-400 text-xs sm:text-sm">
               Refine your ideas into high-quality prompts and optimized media assets.
             </p>
