@@ -30,6 +30,8 @@ function LoginForm() {
           redirectTo: `${window.location.origin}/reset-password`,
         });
         if (error) throw error;
+        console.log("Reset origin: ", `${window.location.origin}`);
+        console.log("Reset url: ", `${window.location.origin}/reset-password`);
         setMessage("Check your email for the password reset link.");
         setMode("login");
         return;
