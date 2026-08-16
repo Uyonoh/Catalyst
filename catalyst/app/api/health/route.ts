@@ -26,7 +26,7 @@ export async function GET() {
 			{"message": "API is live and healthy"},
 			{"status": 200}
 		);
-	} catch (error: Any) {
+	} catch (error: any) {
 		console.error("Failed to get API health status: ", error);
 
 		return NextResponse.json(
