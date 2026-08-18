@@ -29,9 +29,10 @@ function LoginForm() {
         const { error } = await supabaseBrowser.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/reset-password`,
         });
-        if (error) throw error;
-        console.log("Reset origin: ", `${window.location.origin}`);
-        console.log("Reset url: ", `${window.location.origin}/reset-password`);
+        if (error) {
+          console.error("Eror generating password reset: ", error);
+          throw new Error(`We encountered an error when processing your password reset.\nPlease try again later or contact support`);
+        }
         setMessage("Check your email for the password reset link.");
         setMode("login");
         return;
@@ -42,10 +43,13 @@ function LoginForm() {
           email,
           password,
         });
-        if (error) throw error;
+        if (error) {
+          console.error("Login error: ", error);
+          throw error;
+        }
         router.push(nextParam || "/studio");
         router.refresh();
-      } else {
+      } else { // Mode == register
         const { error } = await supabaseBrowser.auth.signUp({
           email,
           password,
