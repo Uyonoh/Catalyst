@@ -57,7 +57,7 @@ function StudioContent({
   isTransitioning: boolean;
   setIsTransitioning: (v: boolean) => void;
 }) {
-  const { parsedPrompt, parsedFormat, input, selectedModel } = useWorkspace();
+  const { parsedPrompt, parsedFormat, input, selectedModel, selectedMode } = useWorkspace();
   const [showEditor, setShowEditor] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
@@ -95,6 +95,7 @@ function StudioContent({
               icon: "chat", // Default category
               tag: "",
               format: parsedFormat || "text",
+              mode: selectedMode,
             })
             .select()
             .single();
@@ -105,7 +106,7 @@ function StudioContent({
             await supabase.rpc("refund_tokens", {
               p_user_id: user.id,
               p_model: selectedModel,
-              p_mode: "text"
+              p_mode: selectedMode
             });
             setNotification({
               message: error.message || "Failed to auto-save prompt",
@@ -124,7 +125,7 @@ function StudioContent({
           await supabase.rpc("refund_tokens", {
             p_user_id: user.id,
             p_model: selectedModel,
-            p_mode: "text"
+            p_mode: selectedMode
           });
           setNotification({
             message: err.message || "An error occurred while saving",
@@ -145,6 +146,7 @@ function StudioContent({
     user,
     input,
     selectedModel,
+    selectedMode,
     isPublic,
     router,
     workspaceId,

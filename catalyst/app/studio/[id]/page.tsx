@@ -93,6 +93,7 @@ export default async function PromptViewEditPage({ params, searchParams }: PageP
     format: promptData.format || "text",
     workspace_id: promptData.workspace_id,
     target: promptData.target,
+    mode: promptData.mode || "text",
   };
 
   return (

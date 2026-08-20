@@ -65,6 +65,7 @@ export async function toggleFavoritePrompt(userId: string, prompt: any) {
           is_favorite: true,
           is_public: false,
           raw_input: prompt.raw_input || prompt.content,
+          mode: prompt.mode || "text",
         })
         .select()
         .single();

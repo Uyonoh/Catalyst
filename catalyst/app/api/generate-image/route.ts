@@ -213,9 +213,10 @@ export async function POST(request: NextRequest) {
           raw_input: prompt, // Original prompt text
           target_model: model,
           snippet: promptSnippet,
-          format: "text",
-          target: targetJson,
-        })
+           format: "text",
+           target: targetJson,
+           mode: body.mode || "image",
+         })
         .select()
         .single();
 

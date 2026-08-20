@@ -23,6 +23,7 @@ interface PromptEditorViewProps {
     tag?: string;
     format?: string;
     workspace_id?: string | null;
+    mode?: string;
     target?: {
       output_type?: string;
       output?: string;
@@ -310,6 +311,7 @@ export default function PromptEditorView({
           icon: categorySlug,
           tag: tags,
           workspace_id: workspaceId || null,
+          mode: initialData.mode || "text",
         });
 
         if (error) {
