@@ -37,6 +37,7 @@ async function getLibraryWorkspaces(searchParams: {
       visibility,
       user_id,
       created_at,
+      updated_at,
       user_metadata (
         name
       )
@@ -61,12 +62,12 @@ async function getLibraryWorkspaces(searchParams: {
   // Sorting
   const sort = searchParams.sort || "newest";
   if (sort === "oldest") {
-    query = query.order("created_at", { ascending: true });
+    query = query.order("updated_at", { ascending: true });
   } else if (sort === "title") {
     query = query.order("name", { ascending: true });
   } else {
     // Default: newest
-    query = query.order("created_at", { ascending: false });
+    query = query.order("updated_at", { ascending: false });
   }
 
   const { data, error } = await query;
@@ -86,7 +87,7 @@ async function getLibraryWorkspaces(searchParams: {
     return {
       id: item.id,
       title: item.name,
-      updated_at: item.created_at,
+      updated_at: item.updated_at,
       snippet: item.description || "Active engineering workspace",
       content: "",
       model: community ? "Community" : "Public",
@@ -175,12 +176,12 @@ async function getLibraryItems(searchParams: {
   // Sorting
   const sort = searchParams.sort || "newest";
   if (sort === "oldest") {
-    query = query.order("created_at", { ascending: true });
+    query = query.order("updated_at", { ascending: true });
   } else if (sort === "title") {
     query = query.order("title", { ascending: true });
   } else {
     // Default: newest
-    query = query.order("created_at", { ascending: false });
+    query = query.order("updated_at", { ascending: false });
   }
 
   const { data, error } = await query;
