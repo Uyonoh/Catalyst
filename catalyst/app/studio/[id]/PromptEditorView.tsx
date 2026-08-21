@@ -9,6 +9,7 @@ import Notification, {
 } from "../../components/history/Notification";
 import { useUser } from "../../context/AuthContext";
 import { Sparkles, X, ArrowRight } from "lucide-react";
+import ConfirmGenerateModal from "../../components/studio/ConfirmGenerateModal";
 
 interface PromptEditorViewProps {
   id: string;
@@ -208,6 +209,12 @@ export default function PromptEditorView({
   const { profile } = useUser();
   const [isSaving, setIsSaving] = useState(false);
   const [isPublic, setIsPublic] = useState(initialData.is_public);
+  const [target, setTarget] = useState(initialData.target);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isGeneratingOutput, setIsGeneratingOutput] = useState(false);
+  const [currentPromptText, setCurrentPromptText] = useState(
+    initialData.content || "",
+  );
   const [notification, setNotification] = useState<{
     message: string;
     type: NotificationType;
@@ -419,6 +426,57 @@ export default function PromptEditorView({
     setNotification({ message: `Downloaded as ${filename}`, type: "success" });
   };
 
+  const handleOpenGenerateConfirm = (currentText: string) => {
+    setCurrentPromptText(currentText);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmGenerate = async () => {
+    try {
+      setIsGeneratingOutput(true);
+      const textToUse = currentPromptText || initialData.content;
+      const response = await fetch("/api/generate-output", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          promptId: id,
+          prompt: textToUse,
+          model: initialData.target_model,
+          mode: initialData.mode || "text",
+          aspectRatio: target?.aspect_ratio,
+          negativePrompt: target?.negative_prompt,
+        }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(
+          errData.error || `Output generation failed (${response.status})`,
+        );
+      }
+
+      const data = await response.json();
+      if (data.target) {
+        setTarget(data.target);
+        setNotification({
+          message: "Output generated and saved successfully!",
+          type: "success",
+        });
+        setShowConfirmModal(false);
+      }
+    } catch (err: any) {
+      console.error("Output generation error:", err);
+      setNotification({
+        message: err.message || "Failed to generate output",
+        type: "error",
+      });
+    } finally {
+      setIsGeneratingOutput(false);
+    }
+  };
+
   return (
     <main className="flex-1 w-full max-w-[1000px] mx-auto pt-16 pb-12 px-4 sm:px-6 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
       <PromptEditor
@@ -438,10 +496,23 @@ export default function PromptEditorView({
         onDownload={(text, title) =>
           handleDownload(text, title, initialData.format)
         }
+        onGenerateOutput={handleOpenGenerateConfirm}
+        isGenerating={isGeneratingOutput}
+        mode={initialData.mode || "text"}
         userPlan={userPlan}
         isLoading={isSaving}
-        target={initialData.target}
+        target={target}
         className="pt-0 pb-0 px-0 sm:px-0"
+      />
+
+      <ConfirmGenerateModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmGenerate}
+        isGenerating={isGeneratingOutput}
+        mode={initialData.mode || "text"}
+        targetModelId={initialData.target_model}
+        promptTitle={initialData.title}
       />
 
       {notification && (

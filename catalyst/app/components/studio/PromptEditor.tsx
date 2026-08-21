@@ -57,6 +57,9 @@ interface PromptEditorProps {
   ) => void;
   onVisibilityChange?: (isPublic: boolean) => void;
   onDownload?: (text: string, title: string) => void;
+  onGenerateOutput?: (currentText: string) => void;
+  isGenerating?: boolean;
+  mode?: string;
   userPlan?: "free" | "basic" | "plus" | "pro" | "ultra";
   isLoading?: boolean;
   className?: string;
@@ -66,6 +69,18 @@ interface PromptEditorProps {
     negative_prompt?: string;
     aspect_ratio?: string;
   };
+}
+
+function handleDownloadText(content: string, filename: string) {
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 async function handleDownload(imageUrl: string | undefined, filename: string) {
@@ -111,6 +126,9 @@ export default function PromptEditor({
   onSave,
   onVisibilityChange,
   onDownload,
+  onGenerateOutput,
+  isGenerating = false,
+  mode = "text",
   userPlan = "free",
   isLoading = false,
   target,
@@ -129,6 +147,7 @@ export default function PromptEditor({
     initialWorkspaceId || "",
   );
   const [copied, setCopied] = useState(false);
+  const [outputCopied, setOutputCopied] = useState(false);
   const selectedModel = models.find(
     (m) => m.slug === selectedModelId || m.name === selectedModelId,
   ) ||
@@ -148,6 +167,17 @@ export default function PromptEditor({
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy text: ", err);
+    }
+  };
+
+  const handleCopyOutput = async () => {
+    if (!target?.output) return;
+    try {
+      await navigator.clipboard.writeText(target.output);
+      setOutputCopied(true);
+      setTimeout(() => setOutputCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy output: ", err);
     }
   };
 
@@ -249,16 +279,20 @@ export default function PromptEditor({
           {target?.output_type === "image" && target?.output && (
             <GlassPanel className="p-6 flex flex-col gap-4 relative overflow-hidden group">
               <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <div className="bg-cyan-500/20 p-2 rounded-xl text-cyan-400 border border-cyan-500/30">
-                  <ImageIcon className="size-5" />
+                <div className="flex items-center gap-2">
+                  <div className="bg-cyan-500/20 p-2 rounded-xl text-cyan-400 border border-cyan-500/30">
+                    <ImageIcon className="size-5" />
+                  </div>
+                  <span className="text-white font-semibold text-base">
+                    Generated Image
+                  </span>
                 </div>
-                <span className="text-white font-semibold text-base">
-                  Generated Image
-                </span>
-                </div>
-                  <Download className="size-5 cursor-pointer text-cyan-400 hover:text-amber-300 transition-all"
-                  onClick = {() => {handleDownload(target?.output, `${title}.jpg`)}} />
+                <Download
+                  className="size-5 cursor-pointer text-cyan-400 hover:text-amber-300 transition-all"
+                  onClick={() => {
+                    handleDownload(target?.output, `${title}.jpg`);
+                  }}
+                />
               </div>
               <div className="relative aspect-video overflow-hidden rounded-lg bg-white/5">
                 <Image
@@ -286,11 +320,66 @@ export default function PromptEditor({
             </GlassPanel>
           )}
 
+          {target?.output && target?.output_type !== "image" && (
+            <GlassPanel className="p-6 flex flex-col gap-4 relative overflow-hidden group">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="bg-purple-500/20 p-2 rounded-xl text-purple-400 border border-purple-500/30">
+                    <Sparkles className="size-5" />
+                  </div>
+                  <div>
+                    <span className="text-white font-semibold text-base flex items-center gap-2">
+                      Generated Output
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase tracking-wider font-bold">
+                        {target.output_type || mode || "Text"}
+                      </span>
+                    </span>
+                    <p className="text-xs text-slate-400">
+                      Model completion generated for this prompt
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={handleCopyOutput}
+                    className={`p-2 rounded-lg transition-all ${
+                      outputCopied
+                        ? "text-emerald-400 bg-emerald-500/10"
+                        : "text-slate-400 hover:text-cyan-400 hover:bg-white/5"
+                    }`}
+                    title={outputCopied ? "Copied!" : "Copy output"}
+                  >
+                    {outputCopied ? (
+                      <Check className="size-4" />
+                    ) : (
+                      <Copy className="size-4" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleDownloadText(
+                        target.output || "",
+                        `${title.toLowerCase().replace(/\s+/g, "-") || "output"}-output.txt`,
+                      )
+                    }
+                    className="p-2 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-white/5 transition-all"
+                    title="Download output text"
+                  >
+                    <Download className="size-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="relative w-full max-h-[400px] overflow-y-auto bg-black/40 border border-white/10 rounded-xl p-5 text-slate-200 text-sm md:text-base leading-relaxed font-mono whitespace-pre-wrap selection:bg-cyan-500/30">
+                {target.output}
+              </div>
+            </GlassPanel>
+          )}
+
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center gap-4 justify-end">
+          <div className="flex flex-col sm:flex-row items-center gap-3 justify-end flex-wrap">
             <button
               onClick={handleDiscard}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl border border-white/10 text-slate-300 font-bold text-sm hover:bg-white/5 transition-all active:scale-95"
+              className="w-full sm:w-auto px-5 py-3 rounded-xl border border-white/10 text-slate-300 font-bold text-sm hover:bg-white/5 transition-all active:scale-95"
             >
               Discard Changes
             </button>
@@ -298,13 +387,13 @@ export default function PromptEditor({
             {/* Download Button — visible to all, gated for free plan */}
             <button
               onClick={() => onDownload?.(editedText, editedTitle)}
-              disabled={isLoading}
+              disabled={isLoading || isGenerating}
               title={
                 canDownload
                   ? "Download prompt"
                   : "Upgrade to Basic or higher plans to download"
               }
-              className={`relative w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center justify-center gap-2 ${
+              className={`relative w-full sm:w-auto px-5 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center justify-center gap-2 ${
                 canDownload
                   ? "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white"
                   : "bg-white/5 border border-white/10 text-slate-500 cursor-pointer hover:border-amber-500/30 hover:text-amber-400/80"
@@ -319,9 +408,33 @@ export default function PromptEditor({
               )}
             </button>
 
+            {/* Generate Output Button */}
+            {onGenerateOutput && (
+              <button
+                type="button"
+                onClick={() => onGenerateOutput(editedText)}
+                disabled={isLoading || isGenerating}
+                title="Generate model output for this prompt"
+                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-cyan-500/40 text-cyan-300 hover:text-white font-bold text-sm hover:border-cyan-400 hover:bg-cyan-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] disabled:opacity-50 cursor-pointer"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin text-cyan-400" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="size-4 text-cyan-400" />
+                    Generate Output
+                  </>
+                )}
+              </button>
+            )}
+
             <button
               onClick={handleApply}
-              className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-primary text-white font-bold text-sm shadow-neon hover:shadow-neon-strong transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2"
+              disabled={isLoading || isGenerating}
+              className="w-full sm:w-auto px-7 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-primary text-white font-bold text-sm shadow-neon hover:shadow-neon-strong transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <Save className="size-5" />
               Save Prompt
