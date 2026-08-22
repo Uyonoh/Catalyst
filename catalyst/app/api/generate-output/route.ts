@@ -113,7 +113,9 @@ export async function POST(req: NextRequest) {
 
         if (!backendRes.ok) {
           const errorText = await backendRes.text();
-          throw new Error(`FastAPI backend error: ${backendRes.status} ${errorText}`);
+          throw new Error(
+            `FastAPI backend error: ${backendRes.status} ${errorText}`,
+          );
         }
 
         const data = await backendRes.json();
@@ -254,12 +256,15 @@ export async function POST(req: NextRequest) {
             precision: 0.7,
             length: "medium",
           },
+          buildPrompt: false,
         }),
       });
 
       if (!backendRes.ok) {
         const errorText = await backendRes.text();
-        throw new Error(`FastAPI backend error: ${backendRes.status} ${errorText}`);
+        throw new Error(
+          `FastAPI backend error: ${backendRes.status} ${errorText}`,
+        );
       }
 
       const backendData = await backendRes.json();

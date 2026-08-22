@@ -17,12 +17,12 @@ class GeminiTextProvider:
 
     async def call(self, prompt: str, key: str) -> str:
         client = genai.Client(api_key=key)
-        
+
         loop = asyncio.get_running_loop()
         response = await loop.run_in_executor(
             None,
             lambda: client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-3.5-flash",
                 contents=prompt
             )
         )
@@ -33,4 +33,3 @@ class GeminiTextProvider:
         if "429" in err_msg or "quota" in err_msg or "high demand" in err_msg:
             return True
         return False
-

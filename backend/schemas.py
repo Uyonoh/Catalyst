@@ -16,6 +16,7 @@ class TextGenerateRequest(BaseModel):
     model: str
     controls: Optional[PromptControls] = Field(default_factory=PromptControls)
     mode: Optional[str] = "text"
+    buildPrompt: Optional[bool] = True
 
 class TextGenerateResponse(BaseModel):
     refinedPrompt: str
