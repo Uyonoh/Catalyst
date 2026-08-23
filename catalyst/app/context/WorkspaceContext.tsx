@@ -10,6 +10,8 @@ import React, {
 import { useParsing } from "../hooks/useParsing";
 import { OptimizedPrompt, PromptControls } from "../lib/engine/types";
 import { useUser } from "./AuthContext";
+import { useCatalog } from "./CatalogContext";
+import type { Model } from "../lib/models";
 import {
   ModelMode,
   getDefaultMode,
@@ -55,6 +57,7 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const { profile, refreshProfile } = useUser();
+  const { models: catalogModels } = useCatalog();
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState("gpt");
   const [selectedMode, setSelectedMode] = useState<ModelMode>("text");
@@ -86,11 +89,14 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   // Auto-reset mode on model change
   useEffect(() => {
-    const model = FALLBACK_MODELS.find((m: any) => m.slug === selectedModel);
+    // Use catalog models if available otherwies fallback to fallback models
+    const modelsToUse: Model[] =
+      catalogModels.length > 0 ? catalogModels : FALLBACK_MODELS;
+    const model = modelsToUse.find((m) => m.slug === selectedModel);
     if (model) {
       setSelectedMode(getDefaultMode(model));
     }
-  }, [selectedModel]);
+  }, [selectedModel, catalogModels]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
