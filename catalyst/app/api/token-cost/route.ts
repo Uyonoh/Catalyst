@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/app/lib/supabase-server";
 import { getTokenCostFromDB, TOKEN_COST_MATRIX } from "@/app/lib/tokenCosts";
 
 /**
@@ -15,25 +16,27 @@ export async function GET(req: NextRequest) {
     
     // Check if this is a request for all token costs
     if (searchParams.has('all') || searchParams.get('model') === 'all') {
-      // Get all models from TOKEN_COST_MATRIX to know what to fetch
-      const allModels: Array<{ modelSlug: string; mode: string }> = [];
+      const supabase = await createClient();
       
-      for (const [modelSlug, modes] of Object.entries(TOKEN_COST_MATRIX)) {
-        for (const mode of Object.keys(modes)) {
-          allModels.push({ modelSlug, mode });
+      // Fetch the entire token_costs table in one query
+      const { data, error } = await supabase
+        .from("token_costs")
+        .select("model_slug, mode, cost");
+
+      if (error) {
+        console.warn("Failed to fetch token costs from DB:", error.message);
+        // Fall through to use TOKEN_COST_MATRIX fallback below
+      } else {
+        // Build the costs map from DB results
+        const tokenCosts: Record<string, number> = {};
+        if (data && Array.isArray(data)) {
+          for (const record of data) {
+            const key = `${record.model_slug}:${record.mode}`;
+            tokenCosts[key] = record.cost;
+          }
         }
+        return NextResponse.json({ costs: tokenCosts });
       }
-
-      // Fetch all token costs from DB
-      const tokenCosts: Record<string, number> = {};
-      
-      for (const pair of allModels) {
-        const cost = await getTokenCostFromDB(pair.modelSlug, pair.mode);
-        const key = `${pair.modelSlug}:${pair.mode}`;
-        tokenCosts[key] = cost;
-      }
-
-      return NextResponse.json({ costs: tokenCosts });
     }
 
     // Single model+mode request
