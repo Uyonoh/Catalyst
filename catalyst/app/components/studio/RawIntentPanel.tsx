@@ -9,8 +9,56 @@ import ModelSelector from "./ModelSelector";
 import ModeSelector from "./ModeSelector";
 import { useCatalog } from "../../context/CatalogContext";
 import PromptControlsPanel from "./PromptControlsPanel";
-import { getPreviewCost } from "../../lib/tokens";
+import { getPreviewCost, TOKEN_COST_MATRIX } from "../../lib/tokens";
 import { TokensMobile } from "../TokenMeter";
+
+// Type for our cached token costs
+interface TokenCostsCache {
+  [key: string]: number;
+}
+
+// Global cache to store all token costs (shared across all instances)
+let tokenCostsCache: TokenCostsCache | null = null;
+let cachePromise: Promise<TokenCostsCache> | null = null;
+
+/**
+ * Fetches all token costs once and caches them.
+ * Subsequent calls return the cached value.
+ */
+async function getAllTokenCosts(): Promise<TokenCostsCache> {
+  // Return cached values if available
+  if (tokenCostsCache) {
+    return tokenCostsCache;
+  }
+  
+  // If a fetch is already in progress, wait for it
+  if (cachePromise) {
+    return cachePromise;
+  }
+  
+  // Fetch all token costs from the API
+  cachePromise = fetch('/api/token-cost?all')
+    .then(res => res.json())
+    .then(data => {
+      tokenCostsCache = data.costs || {};
+      cachePromise = null;
+      return tokenCostsCache;
+    })
+    .catch(() => {
+      // On error, build fallback from TOKEN_COST_MATRIX
+      cachePromise = null;
+      const fallback: TokenCostsCache = {};
+      for (const [modelSlug, modes] of Object.entries(TOKEN_COST_MATRIX)) {
+        for (const [mode, cost] of Object.entries(modes)) {
+          fallback[`${modelSlug}:${mode}`] = cost;
+        }
+      }
+      tokenCostsCache = fallback;
+      return tokenCostsCache;
+    });
+  
+  return cachePromise;
+}
 import {
   FilePenLine,
   Zap,
@@ -43,29 +91,22 @@ export default function RawIntentPanel() {
   const { user, profile } = useUser();
   const router = useRouter();
   const [showControls, setShowControls] = useState(false);
+  const [tokenCosts, setTokenCosts] = useState<TokenCostsCache | null>(null);
 
   const selectedModel =
     models.find((m) => m.slug === selectedModelId) || models[0];
 
-  // Fetch token cost from API (which queries public.token_costs DB table with fallback)
-  const [cost, setCost] = useState<number>(getPreviewCost(selectedModel.slug, selectedMode));
-
+  // Load all token costs once on mount
   useEffect(() => {
-    if (selectedModel?.slug && selectedMode) {
-      // Fetch from DB via API endpoint
-      fetch(`/api/token-cost?model=${selectedModel.slug}&mode=${selectedMode}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.cost !== undefined) {
-            setCost(data.cost);
-          }
-        })
-        .catch(() => {
-          // On error, use the fallback from TOKEN_COST_MATRIX
-          setCost(getPreviewCost(selectedModel.slug, selectedMode));
-        });
-    }
-  }, [selectedModel?.slug, selectedMode]);
+    getAllTokenCosts().then(costs => {
+      setTokenCosts(costs);
+    });
+  }, []);
+
+  // Get cost from cache, fallback to TOKEN_COST_MATRIX if cache not loaded yet
+  const cost = tokenCosts && selectedModel?.slug && selectedMode
+    ? tokenCosts[`${selectedModel.slug}:${selectedMode}`] ?? getPreviewCost(selectedModel.slug, selectedMode)
+    : getPreviewCost(selectedModel?.slug || '', selectedMode);
 
   return (
     <div className="relative group flex flex-col h-full">

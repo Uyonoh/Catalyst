@@ -1,5 +1,7 @@
 import { createClient } from "./supabase-server";
-import { getFallbackCost as getFallbackCostFromTokens } from "./tokens";
+import { getFallbackCost as getFallbackCostFromTokens, TOKEN_COST_MATRIX } from "./tokens";
+
+export { TOKEN_COST_MATRIX };
 
 /**
  * Token cost record structure from the database
