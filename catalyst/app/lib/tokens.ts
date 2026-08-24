@@ -25,8 +25,34 @@ export interface TokenCheckResult {
   error?: 'quota_exceeded' | 'profile_not_found' | string;
 }
 
-/** Token cost matrix — mirrors token_costs DB table, used for UI preview only.
- *  The authoritative cost is always resolved server-side from the DB.
+/**
+ * Gets the fallback token cost from TOKEN_COST_MATRIX.
+ * Returns 2 as the ultimate fallback if model or mode is not found.
+ * 
+ * @param modelSlug - The model slug
+ * @param mode - The mode
+ * @returns The token cost from the matrix, or 2 as default
+ */
+export function getFallbackCost(modelSlug: string, mode: string): number {
+  const modelCosts = TOKEN_COST_MATRIX[modelSlug];
+  if (modelCosts) {
+    const modeCost = modelCosts[mode];
+    if (modeCost !== undefined) {
+      return modeCost;
+    }
+    // If mode not found for this model, try to find any mode for the model
+    const firstMode = Object.values(modelCosts)[0];
+    if (firstMode !== undefined) {
+      return firstMode;
+    }
+  }
+  // Ultimate fallback
+  return 2;
+}
+
+/** Token cost matrix — mirrors public.token_costs DB table, used as fallback.
+ *  The authoritative cost comes from public.token_costs table.
+ *  When DB connection fails, this matrix serves as the fallback.
  */
 export const TOKEN_COST_MATRIX: Record<string, Record<string, number>> = {
   gpt:             { text: 2, vision: 3, image: 5, audio: 4, code: 2 },
@@ -40,7 +66,11 @@ export const TOKEN_COST_MATRIX: Record<string, Record<string, number>> = {
   veo:             { video: 10 },
 };
 
-/** Returns the UI-preview cost for a given model+mode pairing (falls back to 2). */
+/** Returns the UI-preview cost for a given model+mode pairing (falls back to 2).
+ * This is a synchronous fallback function used on the client side.
+ * For server-side operations, use getTokenCostFromDB() from ./tokenCosts which
+ * queries public.token_costs table first with fallback to this matrix.
+ */
 export function getPreviewCost(modelSlug: string, mode: string): number {
   return TOKEN_COST_MATRIX[modelSlug]?.[mode] ?? 2;
 }

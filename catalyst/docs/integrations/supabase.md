@@ -649,6 +649,283 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Consume tokens with fallback to token_costs table
+-- This version uses public.token_costs table as the primary source
+CREATE OR REPLACE FUNCTION consume_tokens_v2(
+  p_user_id uuid,
+  p_model varchar,
+  p_mode varchar
+)
+RETURNS json AS $$
+DECLARE
+  v_subscription record;
+  v_usage record;
+  v_token_cost_record record;
+  v_token_cost integer;
+  v_remaining integer;
+  v_fallback_cost integer;
+BEGIN
+  -- Get token cost from public.token_costs table first
+  SELECT * INTO v_token_cost_record
+  FROM token_costs
+  WHERE model_slug = p_model AND mode = p_mode
+  LIMIT 1;
+
+  -- If not found, try to get any cost for the model
+  IF v_token_cost_record IS NULL THEN
+    SELECT * INTO v_token_cost_record
+    FROM token_costs
+    WHERE model_slug = p_model
+    ORDER BY created_at DESC
+    LIMIT 1;
+  END IF;
+
+  -- Use the cost from token_costs table, or fall back to 2
+  IF v_token_cost_record IS NOT NULL THEN
+    v_token_cost := v_token_cost_record.cost;
+  ELSE
+    -- Fallback: try to get from models table for backward compatibility
+    SELECT (config->>'tokenCost')::integer INTO v_token_cost
+    FROM models
+    WHERE slug = p_model
+    LIMIT 1;
+    
+    IF v_token_cost IS NULL THEN
+      v_token_cost := 2; -- Ultimate fallback
+    END IF;
+  END IF;
+
+  -- Get user's subscription
+  SELECT * INTO v_subscription
+  FROM subscriptions
+  WHERE user_id = p_user_id AND status = 'active'
+  LIMIT 1;
+
+  IF v_subscription IS NULL THEN
+    RETURN json_build_object(
+      'ok', false,
+      'error', 'No active subscription',
+      'remaining', 0,
+      'limit', 0
+    );
+  END IF;
+
+  -- Check current usage
+  SELECT * INTO v_usage
+  FROM usage
+  WHERE user_id = p_user_id AND api_endpoint = '/api/parse' AND date = CURRENT_DATE
+  LIMIT 1;
+
+  IF v_usage IS NULL THEN
+    -- First usage today
+    v_remaining := v_subscription.plan_id::text::integer - v_token_cost;
+    
+    INSERT INTO usage (user_id, subscription_id, api_endpoint, request_count, token_count, date)
+    VALUES (p_user_id, v_subscription.id, '/api/parse', 1, v_token_cost, CURRENT_DATE);
+  ELSE
+    -- Update existing usage
+    v_remaining := v_subscription.plan_id::text::integer - (v_usage.token_count + v_token_cost);
+    
+    UPDATE usage
+    SET request_count = request_count + 1, token_count = token_count + v_token_cost
+    WHERE id = v_usage.id;
+  END IF;
+
+  RETURN json_build_object(
+    'ok', v_remaining >= 0,
+    'remaining', v_remaining,
+    'limit', v_subscription.plan_id::text::integer,
+    'resets_at', v_subscription.current_period_end
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Consume image tokens with fallback
+CREATE OR REPLACE FUNCTION consume_image_tokens_v2(
+  p_user_id uuid,
+  p_model varchar,
+  p_mode varchar
+)
+RETURNS json AS $$
+DECLARE
+  v_subscription record;
+  v_usage record;
+  v_token_cost_record record;
+  v_token_cost integer;
+  v_remaining integer;
+BEGIN
+  -- Get token cost from public.token_costs table first
+  SELECT * INTO v_token_cost_record
+  FROM token_costs
+  WHERE model_slug = p_model AND mode = p_mode
+  LIMIT 1;
+
+  -- If not found, try to get any cost for the model
+  IF v_token_cost_record IS NULL THEN
+    SELECT * INTO v_token_cost_record
+    FROM token_costs
+    WHERE model_slug = p_model
+    ORDER BY created_at DESC
+    LIMIT 1;
+  END IF;
+
+  -- Use the cost from token_costs table, or fall back to 5 for image generation
+  IF v_token_cost_record IS NOT NULL THEN
+    v_token_cost := v_token_cost_record.cost;
+  ELSE
+    -- Fallback: try to get from models table for backward compatibility
+    SELECT (config->>'tokenCost')::integer INTO v_token_cost
+    FROM models
+    WHERE slug = p_model
+    LIMIT 1;
+    
+    IF v_token_cost IS NULL THEN
+      v_token_cost := 5; -- Ultimate fallback for image generation
+    END IF;
+  END IF;
+
+  -- Get user's subscription
+  SELECT * INTO v_subscription
+  FROM subscriptions
+  WHERE user_id = p_user_id AND status = 'active'
+  LIMIT 1;
+
+  IF v_subscription IS NULL THEN
+    RETURN json_build_object(
+      'ok', false,
+      'error', 'No active subscription',
+      'remaining', 0,
+      'limit', 0
+    );
+  END IF;
+
+  -- Check current usage for image generation
+  SELECT * INTO v_usage
+  FROM usage
+  WHERE user_id = p_user_id AND api_endpoint = '/api/generate-image' AND date = CURRENT_DATE
+  LIMIT 1;
+
+  IF v_usage IS NULL THEN
+    -- First usage today
+    v_remaining := v_subscription.plan_id::text::integer - v_token_cost;
+    
+    INSERT INTO usage (user_id, subscription_id, api_endpoint, request_count, token_count, date)
+    VALUES (p_user_id, v_subscription.id, '/api/generate-image', 1, v_token_cost, CURRENT_DATE);
+  ELSE
+    -- Update existing usage
+    v_remaining := v_subscription.plan_id::text::integer - (v_usage.token_count + v_token_cost);
+    
+    UPDATE usage
+    SET request_count = request_count + 1, token_count = token_count + v_token_cost
+    WHERE id = v_usage.id;
+  END IF;
+
+  RETURN json_build_object(
+    'ok', v_remaining >= 0,
+    'remaining', v_remaining,
+    'limit', v_subscription.plan_id::text::integer,
+    'resets_at', v_subscription.current_period_end
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+-- Refund tokens with fallback
+CREATE OR REPLACE FUNCTION refund_tokens_v2(
+  p_user_id uuid,
+  p_model varchar,
+  p_mode varchar
+)
+RETURNS void AS $$
+DECLARE
+  v_token_cost_record record;
+  v_token_cost integer;
+BEGIN
+  -- Get token cost from public.token_costs table first
+  SELECT * INTO v_token_cost_record
+  FROM token_costs
+  WHERE model_slug = p_model AND mode = p_mode
+  LIMIT 1;
+
+  -- If not found, try to get any cost for the model
+  IF v_token_cost_record IS NULL THEN
+    SELECT * INTO v_token_cost_record
+    FROM token_costs
+    WHERE model_slug = p_model
+    ORDER BY created_at DESC
+    LIMIT 1;
+  END IF;
+
+  -- Use the cost from token_costs table, or fall back to 2
+  IF v_token_cost_record IS NOT NULL THEN
+    v_token_cost := v_token_cost_record.cost;
+  ELSE
+    -- Fallback
+    SELECT (config->>'tokenCost')::integer INTO v_token_cost
+    FROM models
+    WHERE slug = p_model
+    LIMIT 1;
+    
+    IF v_token_cost IS NULL THEN
+      v_token_cost := 2;
+    END IF;
+  END IF;
+
+  -- Refund tokens
+  UPDATE usage
+  SET token_count = token_count - v_token_cost
+  WHERE user_id = p_user_id AND date = CURRENT_DATE;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Refund image tokens with fallback
+CREATE OR REPLACE FUNCTION refund_image_tokens_v2(
+  p_user_id uuid,
+  p_model varchar,
+  p_mode varchar
+)
+RETURNS void AS $$
+DECLARE
+  v_token_cost_record record;
+  v_token_cost integer;
+BEGIN
+  -- Get token cost from public.token_costs table first
+  SELECT * INTO v_token_cost_record
+  FROM token_costs
+  WHERE model_slug = p_model AND mode = p_mode
+  LIMIT 1;
+
+  -- If not found, try to get any cost for the model
+  IF v_token_cost_record IS NULL THEN
+    SELECT * INTO v_token_cost_record
+    FROM token_costs
+    WHERE model_slug = p_model
+    ORDER BY created_at DESC
+    LIMIT 1;
+  END IF;
+
+  -- Use the cost from token_costs table, or fall back to 5
+  IF v_token_cost_record IS NOT NULL THEN
+    v_token_cost := v_token_cost_record.cost;
+  ELSE
+    -- Fallback
+    SELECT (config->>'tokenCost')::integer INTO v_token_cost
+    FROM models
+    WHERE slug = p_model
+    LIMIT 1;
+    
+    IF v_token_cost IS NULL THEN
+      v_token_cost := 5;
+    END IF;
+  END IF;
+
+  -- Refund tokens for image generation
+  UPDATE usage
+  SET token_count = token_count - v_token_cost
+  WHERE user_id = p_user_id AND api_endpoint = '/api/generate-image' AND date = CURRENT_DATE;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 ```
 
 ---

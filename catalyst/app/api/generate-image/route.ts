@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, getSessionToken } from "@/app/lib/supabase-server";
+import { consumeTokens, refundTokens } from "@/app/lib/tokenCosts";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 
@@ -67,22 +68,11 @@ export async function POST(request: NextRequest) {
     // Compute dimensions to forward or use locally
     let [width, height] = calculateWidthHeight(aspectRatio);
 
-    // Call token check RPC
-    const { data: tokenResult, error: rpcError } = await supabase.rpc(
-      "consume_image_tokens",
-      { p_user_id: user.id, p_model: model, p_mode: "image-generation" },
-    );
-
-    if (rpcError) {
-      console.error("Token consumption error:", rpcError);
-      return NextResponse.json(
-        { error: "Token check failed" },
-        { status: 500 },
-      );
-    }
+    // Consume tokens using the new function that queries public.token_costs with fallback
+    const tokenResult = await consumeTokens(supabase, user.id, model, "image-generation", '/api/generate-image');
 
     if (!tokenResult.ok) {
-      console.error("Token quota exceedede");
+      console.error("Token quota exceeded");
       return NextResponse.json(
         {
           error: "Token quota exceeded",
@@ -237,19 +227,8 @@ export async function POST(request: NextRequest) {
     } catch (llmError: any) {
       console.error("LLM Generation Failed. Reverting tokens.", llmError);
 
-      // Revert tokens using our RPC
-      const { error: revertError } = await supabase.rpc("refund_image_tokens", {
-        p_user_id: user.id,
-        p_model: model,
-        p_mode: "image-generation",
-      });
-
-      if (revertError) {
-        console.error(
-          "Critical: Failed to revert tokens after LLM failure:",
-          revertError,
-        );
-      }
+      // Revert tokens using our new function
+      await refundTokens(supabase, user.id, model, "image-generation", '/api/generate-image');
 
       return NextResponse.json(
         {

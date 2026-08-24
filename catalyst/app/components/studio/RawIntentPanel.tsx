@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import GlassPanel from "../GlassPanel";
 import { useWorkspace } from "../../context/WorkspaceContext";
 import { useUser } from "../../context/AuthContext";
@@ -47,7 +47,25 @@ export default function RawIntentPanel() {
   const selectedModel =
     models.find((m) => m.slug === selectedModelId) || models[0];
 
-  const cost = getPreviewCost(selectedModel.slug, selectedMode);
+  // Fetch token cost from API (which queries public.token_costs DB table with fallback)
+  const [cost, setCost] = useState<number>(getPreviewCost(selectedModel.slug, selectedMode));
+
+  useEffect(() => {
+    if (selectedModel?.slug && selectedMode) {
+      // Fetch from DB via API endpoint
+      fetch(`/api/token-cost?model=${selectedModel.slug}&mode=${selectedMode}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.cost !== undefined) {
+            setCost(data.cost);
+          }
+        })
+        .catch(() => {
+          // On error, use the fallback from TOKEN_COST_MATRIX
+          setCost(getPreviewCost(selectedModel.slug, selectedMode));
+        });
+    }
+  }, [selectedModel?.slug, selectedMode]);
 
   return (
     <div className="relative group flex flex-col h-full">

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, getSessionToken } from "@/app/lib/supabase-server";
+import { consumeTokens, refundTokens } from "@/app/lib/tokenCosts";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 
@@ -29,16 +30,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Call token check RPC
-    const { data: tokenResult, error: rpcError } = await supabase.rpc(
-      "consume_tokens",
-      { p_user_id: user.id, p_model: modelId, p_mode: mode }
-    );
-
-    if (rpcError) {
-      console.error("Token consumption error:", rpcError);
-      return NextResponse.json({ error: "Token check failed" }, { status: 500 });
-    }
+    // Consume tokens using the new function that queries public.token_costs with fallback
+    const tokenResult = await consumeTokens(supabase, user.id, modelId, mode, '/api/parse');
 
     if (!tokenResult.ok) {
       return NextResponse.json({
@@ -85,16 +78,8 @@ export async function POST(req: NextRequest) {
     } catch (llmError: any) {
       console.error("LLM Generation Failed. Reverting tokens.", llmError);
       
-      // Revert tokens using our RPC
-      const { error: revertError } = await supabase.rpc('refund_tokens', {
-        p_user_id: user.id,
-        p_model: modelId,
-        p_mode: mode
-      });
-      
-      if (revertError) {
-        console.error("Critical: Failed to revert tokens after LLM failure:", revertError);
-      }
+      // Revert tokens using our new function
+      await refundTokens(supabase, user.id, modelId, mode, '/api/parse');
 
       const isRateLimit = llmError?.message && (
         llmError.message.includes("exhausted") || 

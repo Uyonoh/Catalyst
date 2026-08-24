@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, getSessionToken } from "@/app/lib/supabase-server";
+import { consumeTokens, refundTokens } from "@/app/lib/tokenCosts";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 
@@ -46,18 +47,7 @@ export async function POST(req: NextRequest) {
 
     // ─── Image Generation Flow ────────────────────────────────────────────────
     if (mode === "image") {
-      const { data: tokenResult, error: rpcError } = await supabase.rpc(
-        "consume_image_tokens",
-        { p_user_id: user.id, p_model: modelId, p_mode: "image-generation" },
-      );
-
-      if (rpcError) {
-        console.error("Token consumption error:", rpcError);
-        return NextResponse.json(
-          { error: "Token check failed" },
-          { status: 500 },
-        );
-      }
+      const tokenResult = await consumeTokens(supabase, user.id, modelId, "image-generation", '/api/generate-image');
 
       if (!tokenResult.ok) {
         return NextResponse.json(
@@ -196,11 +186,7 @@ export async function POST(req: NextRequest) {
         });
       } catch (llmError: any) {
         console.error("Image generation failed, reverting tokens:", llmError);
-        await supabase.rpc("refund_image_tokens", {
-          p_user_id: user.id,
-          p_model: modelId,
-          p_mode: "image-generation",
-        });
+        await refundTokens(supabase, user.id, modelId, "image-generation", '/api/generate-image');
 
         return NextResponse.json(
           {
@@ -214,18 +200,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── Text / Code / Other Generation Flow ──────────────────────────────────
-    const { data: tokenResult, error: rpcError } = await supabase.rpc(
-      "consume_tokens",
-      { p_user_id: user.id, p_model: modelId, p_mode: mode },
-    );
-
-    if (rpcError) {
-      console.error("Token consumption error:", rpcError);
-      return NextResponse.json(
-        { error: "Token check failed" },
-        { status: 500 },
-      );
-    }
+    const tokenResult = await consumeTokens(supabase, user.id, modelId, mode, '/api/parse');
 
     if (!tokenResult.ok) {
       return NextResponse.json(
@@ -292,11 +267,7 @@ export async function POST(req: NextRequest) {
       });
     } catch (llmError: any) {
       console.error("Text generation failed, reverting tokens:", llmError);
-      await supabase.rpc("refund_tokens", {
-        p_user_id: user.id,
-        p_model: modelId,
-        p_mode: mode,
-      });
+      await refundTokens(supabase, user.id, modelId, mode, '/api/parse');
 
       return NextResponse.json(
         {

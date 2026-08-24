@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+TEST*.md
 
 # next.js
 /.next/
