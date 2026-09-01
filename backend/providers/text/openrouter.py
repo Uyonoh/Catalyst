@@ -26,7 +26,7 @@ class OpenRouterTextProvider:
                     "X-Title": "Catalyst",
                 },
                 json={
-                    "model": "meta-llama/llama-3.3-70b-instruct:free",
+                    "model": "google/gemma-4-31b-it:free",
                     "messages": [{"role": "user", "content": prompt}],
                     "temperature": 0.7,
                 },
