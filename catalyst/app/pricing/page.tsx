@@ -29,6 +29,7 @@ export default function PublicPricingPage() {
   useEffect(() => {
     const fetchSymbol = async () => {
       try {
+        const CURRENCY_API_URL = process.env.NEXT_PUBLIC_CURRENCY_API_URL;
         const response = await fetch("/api/detect-currency");
         const data = await response.json();
         setSymbol(data?.currencyData?.symbol ?? "$");
@@ -39,7 +40,7 @@ export default function PublicPricingPage() {
         ) {
           const rateResponse = await fetch(
             // `https://www.currencyexchangetool.com/api/v1/convert?from=USD&to=${data.currencyData.currency}&amount=1`
-            `https://currency-exchange-api-hgi8.onrender.com/rates/USD/${data.currencyData.currency}`,
+            `${CURRENCY_API_URL}/USD/${data.currencyData.currency}`,
           );
           const rateData = await rateResponse.json();
           setRate(rateData?.rate ?? 1);
