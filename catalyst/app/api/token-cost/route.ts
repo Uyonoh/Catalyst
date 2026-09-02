@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/app/lib/supabase-server";
-import { getTokenCostFromDB, TOKEN_COST_MATRIX } from "@/app/lib/tokenCosts";
+import {
+  getFallbackCost,
+  getTokenCostFromDB,
+  TOKEN_COST_MATRIX,
+} from "@/app/lib/tokenCosts";
 
 /**
  * API endpoint to fetch token costs.
