@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import GlassPanel from "../GlassPanel";
 import { useCatalog } from "../../context/CatalogContext";
+import { useUser } from "../../context/AuthContext";
 import {
   ArrowLeft,
   Loader2,
@@ -136,6 +137,8 @@ export default function PromptEditor({
 }: PromptEditorProps) {
   const canDownload = userPlan !== "free";
   const router = useRouter();
+  const { user } = useUser();
+  const isLoggedIn = !!user;
   const { models, categories } = useCatalog();
   const [editedText, setEditedText] = useState(initialEditedText);
   const [selectedCategory, setSelectedCategory] = useState(
@@ -157,8 +160,16 @@ export default function PromptEditor({
     setEditedText(initialEditedText);
     setEditedTitle(title);
     setEditedTags(initialTags);
+    setSelectedCategory(initialCategory || "");
     setSelectedWorkspaceId(initialWorkspaceId || "");
-  }, [initialEditedText, title, initialTags, initialWorkspaceId]);
+  }, [initialEditedText, title, initialTags, initialCategory, initialWorkspaceId]);
+
+  const isChanged =
+    editedText !== initialEditedText ||
+    editedTitle !== title ||
+    selectedCategory !== (initialCategory || "") ||
+    editedTags !== initialTags ||
+    selectedWorkspaceId !== (initialWorkspaceId || "");
 
   const handleCopy = async () => {
     try {
@@ -193,6 +204,11 @@ export default function PromptEditor({
   };
 
   const handleDiscard = () => {
+    setEditedText(initialEditedText);
+    setEditedTitle(title);
+    setSelectedCategory(initialCategory || "");
+    setEditedTags(initialTags);
+    setSelectedWorkspaceId(initialWorkspaceId || "");
     if (onDiscard) onDiscard();
   };
 
@@ -207,8 +223,11 @@ export default function PromptEditor({
       <div className="flex items-center gap-4 mb-2">
         <button
           onClick={() => {
-            if (onDiscard) onDiscard();
-            else router.back();
+            if (window.history.length > 1) {
+              router.back();
+            } else {
+              router.push("/library");
+            }
           }}
           className="text-slate-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-xl border border-white/5 active:scale-95 flex items-center justify-center shrink-0"
         >
@@ -377,12 +396,15 @@ export default function PromptEditor({
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center gap-3 justify-end flex-wrap">
-            <button
-              onClick={handleDiscard}
-              className="w-full sm:w-auto px-5 py-3 rounded-xl border border-white/10 text-slate-300 font-bold text-sm hover:bg-white/5 transition-all active:scale-95"
-            >
-              Discard Changes
-            </button>
+            {/* Discard Changes Button - visible only when prompt has changes */}
+            {isChanged && (
+              <button
+                onClick={handleDiscard}
+                className="w-full sm:w-auto px-5 py-3 rounded-xl border border-white/10 text-slate-300 font-bold text-sm hover:bg-white/5 transition-all active:scale-95"
+              >
+                Discard Changes
+              </button>
+            )}
 
             {/* Download Button — visible to all, gated for free plan */}
             <button
@@ -408,14 +430,22 @@ export default function PromptEditor({
               )}
             </button>
 
-            {/* Generate Output Button */}
+            {/* Generate Output Button - locked for guests */}
             {onGenerateOutput && (
               <button
                 type="button"
                 onClick={() => onGenerateOutput(editedText)}
                 disabled={isLoading || isGenerating}
-                title="Generate model output for this prompt"
-                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-cyan-500/40 text-cyan-300 hover:text-white font-bold text-sm hover:border-cyan-400 hover:bg-cyan-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] disabled:opacity-50 cursor-pointer"
+                title={
+                  isLoggedIn
+                    ? "Generate model output for this prompt"
+                    : "Log in to generate model output"
+                }
+                className={`relative w-full sm:w-auto px-5 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 ${
+                  isLoggedIn
+                    ? "bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-cyan-500/40 text-cyan-300 hover:text-white hover:border-cyan-400 hover:bg-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+                    : "bg-white/5 border border-white/10 text-slate-500 hover:border-cyan-500/30 hover:text-cyan-400/80"
+                }`}
               >
                 {isGenerating ? (
                   <>
@@ -424,21 +454,29 @@ export default function PromptEditor({
                   </>
                 ) : (
                   <>
-                    <Sparkles className="size-4 text-cyan-400" />
+                    <Sparkles className={`size-4 ${isLoggedIn ? "text-cyan-400" : "text-slate-500"}`} />
                     Generate Output
+                    {!isLoggedIn && (
+                      <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center size-4 rounded-full bg-cyan-500 border border-black">
+                        <Lock className="size-2.5 text-black" />
+                      </span>
+                    )}
                   </>
                 )}
               </button>
             )}
 
-            <button
-              onClick={handleApply}
-              disabled={isLoading || isGenerating}
-              className="w-full sm:w-auto px-7 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-primary text-white font-bold text-sm shadow-neon hover:shadow-neon-strong transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              <Save className="size-5" />
-              Save Prompt
-            </button>
+            {/* Save Button - visible if user is not author (save copy) OR if changes were made */}
+            {(!isAuthor || isChanged) && (
+              <button
+                onClick={handleApply}
+                disabled={isLoading || isGenerating}
+                className="w-full sm:w-auto px-7 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-primary text-white font-bold text-sm shadow-neon hover:shadow-neon-strong transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <Save className="size-5" />
+                {isAuthor ? "Save Prompt" : "Save Copy"}
+              </button>
+            )}
           </div>
         </div>
 

@@ -338,11 +338,10 @@ export default function PromptEditorView({
   };
 
   const handleDiscard = () => {
-    if (window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/library");
-    }
+    setNotification({
+      message: "Changes reverted to original",
+      type: "info",
+    });
   };
 
   const handleVisibilityChange = async (newVisibility: boolean) => {
@@ -427,6 +426,10 @@ export default function PromptEditorView({
   };
 
   const handleOpenGenerateConfirm = (currentText: string) => {
+    if (!currentUserId && !profile) {
+      router.push(`/login?next=/studio/${id}`);
+      return;
+    }
     setCurrentPromptText(currentText);
     setShowConfirmModal(true);
   };
