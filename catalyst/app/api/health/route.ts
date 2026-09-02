@@ -19,7 +19,11 @@ export async function GET() {
 
       		if (!backendRes.ok) {
         		const errorText = await backendRes.text();
-        		throw new Error(`FastAPI backend error: ${backendRes.status} ${errorText}`);
+        		console.error(
+        		  `[health] Backend error ${backendRes.status}:`,
+        		  errorText,
+        		);
+        		throw new Error("health_backend_error");
       		}
 
 		return NextResponse.json(

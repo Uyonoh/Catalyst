@@ -122,15 +122,17 @@ export async function POST(request: NextRequest) {
 
       if (!backendRes.ok) {
         const errorText = await backendRes.text();
-        throw new Error(
-          `FastAPI backend error: ${backendRes.status} ${errorText}`,
+        console.error(
+          `[generate-image] Backend error ${backendRes.status}:`,
+          errorText,
         );
+        throw new Error("image_backend_error");
       }
 
       const data = await backendRes.json();
       const url = data?.url;
       if (!url) {
-        throw new Error("No image URL received from FastAPI backend");
+        throw new Error("No image URL received from backend");
       }
       const seed = data?.seed || Math.floor(Math.random() * 9999999);
 

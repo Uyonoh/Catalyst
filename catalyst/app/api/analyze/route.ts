@@ -42,7 +42,11 @@ export async function POST(req: NextRequest) {
 
     if (!backendRes.ok) {
       const errorText = await backendRes.text();
-      throw new Error(`FastAPI backend error: ${backendRes.status} ${errorText}`);
+      console.error(
+        `[analyze] Backend error ${backendRes.status}:`,
+        errorText,
+      );
+      throw new Error("analyze_backend_error");
     }
 
     const optimized = await backendRes.json();

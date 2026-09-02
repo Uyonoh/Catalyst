@@ -3,10 +3,7 @@
 import React from "react";
 import { X, Sparkles, Loader2, Bot, Layers } from "lucide-react";
 import { useCatalog } from "../../context/CatalogContext";
-import {
-  MODE_LABELS,
-  ModelMode,
-} from "../../lib/models-shared";
+import { MODE_LABELS, ModelMode } from "../../lib/models-shared";
 
 interface ConfirmGenerateModalProps {
   isOpen: boolean;
@@ -116,6 +113,11 @@ export default function ConfirmGenerateModal({
               <strong className="text-cyan-400">{modeDisplay}</strong> for the{" "}
               <strong className="text-white">{selectedModel.name}</strong>{" "}
               model. The resulting output will be saved directly to this prompt.
+              This action consumes tokens.
+              <span className="block">
+                We might use a different model if the selected model is
+                unavailable.
+              </span>
             </p>
 
             {/* Actions */}

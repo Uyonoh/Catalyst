@@ -78,7 +78,7 @@ export async function POST() {
   } catch (err: any) {
     console.error("Cancel subscription error:", err);
     return NextResponse.json(
-      { message: err.message || "Internal server error" },
+      { message: "An unexpected error occurred. Please try again." },
       { status: 500 }
     );
   }

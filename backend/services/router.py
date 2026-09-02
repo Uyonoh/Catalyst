@@ -138,7 +138,7 @@ async def generate_refined_prompt(
     keys = provider.keys
     if not keys:
         logger.error(f"No API keys available for provider [{provider_id}]")
-        raise HTTPException(status_code=503, detail=f"No API keys available for provider {provider_id}")
+        raise HTTPException(status_code=503, detail="Service temporarily unavailable. Please try again later.")
 
     shuffled_keys = shuffle_list(keys)
     for key in shuffled_keys:
@@ -155,7 +155,7 @@ async def generate_refined_prompt(
                 continue
 
     logger.error(f"All keys exhausted for provider [{provider_id}]. Our servers are currently experiencing high demand. Please try again later.")
-    raise HTTPException(status_code=503, detail="All LLM provider keys exhausted. Our servers are currently experiencing high demand. Please try again later.")
+    raise HTTPException(status_code=503, detail="Our servers are experiencing high demand. Please try again later.")
 
 async def generate_image(
     provider_id: Optional[str],
@@ -180,7 +180,7 @@ async def generate_image(
     keys = provider.keys
     if not keys:
         logger.error(f"No API keys available for provider [{provider_id}]")
-        raise HTTPException(status_code=503, detail=f"No API keys available for provider {provider_id}")
+        raise HTTPException(status_code=503, detail="Service temporarily unavailable. Please try again later.")
 
     shuffled_keys = shuffle_list(keys)
     for key in shuffled_keys:
@@ -197,4 +197,4 @@ async def generate_image(
                 continue
 
     logger.error(f"All keys exhausted for image provider [{provider_id}]. Our servers are currently experiencing high demand. Please try again later.")
-    raise HTTPException(status_code=503, detail="All LLM image provider keys exhausted. Our servers are currently experiencing high demand. Please try again later.")
+    raise HTTPException(status_code=503, detail="Our servers are experiencing high demand. Please try again later.")

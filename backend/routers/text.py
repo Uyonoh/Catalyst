@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from backend.schemas import TextGenerateRequest, TextGenerateResponse
 from backend.auth import verify_jwt
 from backend.services.prompt_builder import build_prompt
@@ -12,48 +12,62 @@ logger = get_logger(__name__)
 async def generate_text_endpoint(req: TextGenerateRequest, user_id: str = Depends(verify_jwt)):
     logger.info(f"Processing text generation request from user {user_id}")
 
-    if req.buildPrompt:
-        prompt_str = build_prompt(
-            text=req.text,
-            model=req.model,
-            controls=req.controls,
-            mode=req.mode
-        )
-    else:
-        prompt_str = req.text
-
-    logger.debug(f"Compiled prompt: {prompt_str[:100]}...")
-
-    refined_text = await generate_refined_prompt(
-        prompt=prompt_str,
-        provider_id=req.provider,
-        model_id=req.model,
-        build_prompt_step=req.buildPrompt
-    )
-
-    # Mirroring clean-up code block wraps logic in parse/route.ts
-    cleaned_text = refined_text.strip()
-    if cleaned_text.startswith("```") and cleaned_text.endswith("```"):
-        # Strip outer block
-        lines = cleaned_text.splitlines()
-        if len(lines) >= 2:
-            if lines[0].startswith("```"):
-                lines = lines[1:]
-            if lines[-1] == "```":
-                lines = lines[:-1]
-            cleaned_text = "\n".join(lines).strip()
+    try:
+        if req.buildPrompt:
+            prompt_str = build_prompt(
+                text=req.text,
+                model=req.model,
+                controls=req.controls,
+                mode=req.mode
+            )
         else:
-            # Single line code block - strip the backticks
-            cleaned_text = cleaned_text[3:-3].strip()
-    else:
-        # Replaces raw backticks
-        cleaned_text = cleaned_text.replace("```json", "").replace("```markdown", "").replace("```", "").replace("'''", "").strip()
+            prompt_str = req.text
 
-    output_format = req.controls.outputFormat if req.controls and req.controls.outputFormat else "text"
+        logger.debug(f"Compiled prompt: {prompt_str[:100]}...")
 
-    logger.info(f"Text generation completed for user {user_id}, output format: {output_format}")
+        refined_text = await generate_refined_prompt(
+            prompt=prompt_str,
+            provider_id=req.provider,
+            model_id=req.model,
+            build_prompt_step=req.buildPrompt
+        )
 
-    return TextGenerateResponse(
-        refinedPrompt=cleaned_text,
-        format=output_format
-    )
+        # Mirroring clean-up code block wraps logic in parse/route.ts
+        cleaned_text = refined_text.strip()
+        if cleaned_text.startswith("```") and cleaned_text.endswith("```"):
+            # Strip outer block
+            lines = cleaned_text.splitlines()
+            if len(lines) >= 2:
+                if lines[0].startswith("```"):
+                    lines = lines[1:]
+                if lines[-1] == "```":
+                    lines = lines[:-1]
+                cleaned_text = "\n".join(lines).strip()
+            else:
+                # Single line code block - strip the backticks
+                cleaned_text = cleaned_text[3:-3].strip()
+        else:
+            # Replaces raw backticks
+            cleaned_text = cleaned_text.replace("```json", "").replace("```markdown", "").replace("```", "").replace("'''", "").strip()
+
+        output_format = req.controls.outputFormat if req.controls and req.controls.outputFormat else "text"
+
+        logger.info(f"Text generation completed for user {user_id}, output format: {output_format}")
+
+        return TextGenerateResponse(
+            refinedPrompt=cleaned_text,
+            format=output_format
+        )
+    except HTTPException:
+        # Re-raise HTTPExceptions as-is (they already have sanitized messages)
+        raise
+    except Exception as exc:
+        logger.error(
+            f"Unexpected error in text generation for user {user_id}: {exc}",
+            exc_info=True
+        )
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred. Please try again later."
+        )
+

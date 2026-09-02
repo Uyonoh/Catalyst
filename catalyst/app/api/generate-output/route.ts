@@ -123,7 +123,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             error:
-              videoError?.message ||
               "We ran into an error while generating your video. Please try again later.",
           },
           { status: 500 },
@@ -210,9 +209,11 @@ export async function POST(req: NextRequest) {
 
         if (!backendRes.ok) {
           const errorText = await backendRes.text();
-          throw new Error(
-            `FastAPI backend error: ${backendRes.status} ${errorText}`,
+          console.error(
+            `[generate-output] Image backend error ${backendRes.status}:`,
+            errorText,
           );
+          throw new Error("image_backend_error");
         }
 
         const data = await backendRes.json();
@@ -304,7 +305,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             error:
-              llmError?.message ||
               "We ran into an error while generating your image. Please try again later.",
           },
           { status: 500 },
@@ -374,9 +374,11 @@ export async function POST(req: NextRequest) {
 
       if (!backendRes.ok) {
         const errorText = await backendRes.text();
-        throw new Error(
-          `FastAPI backend error: ${backendRes.status} ${errorText}`,
+        console.error(
+          `[generate-output] Text backend error ${backendRes.status}:`,
+          errorText,
         );
+        throw new Error("text_backend_error");
       }
 
       const backendData = await backendRes.json();
