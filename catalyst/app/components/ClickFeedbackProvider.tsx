@@ -28,6 +28,12 @@ export function ClickFeedbackProvider({ children }: { children: React.ReactNode 
       if (target.getAttribute("data-clicking") === "true") return;
       if (target instanceof HTMLButtonElement && target.disabled) return;
       
+      // Skip modal close buttons (X buttons in top-right of modals/dialogs)
+      if (target.getAttribute("aria-label") === "Close" || 
+          target.closest('[role="dialog"], [role="alertdialog"], .fixed.inset-0')) {
+        return;
+      }
+      
       // Determine variation based on component class or size
       const isLarge = target.classList.contains("px-6") || target.innerText.length > 10;
       target.setAttribute("data-clicking", "true");
