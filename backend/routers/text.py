@@ -24,7 +24,12 @@ async def generate_text_endpoint(req: TextGenerateRequest, user_id: str = Depend
 
     logger.debug(f"Compiled prompt: {prompt_str[:100]}...")
 
-    refined_text = await generate_refined_prompt(prompt_str)
+    refined_text = await generate_refined_prompt(
+        prompt=prompt_str,
+        provider_id=req.provider,
+        model_id=req.model,
+        build_prompt_step=req.buildPrompt
+    )
 
     # Mirroring clean-up code block wraps logic in parse/route.ts
     cleaned_text = refined_text.strip()

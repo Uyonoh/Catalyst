@@ -47,7 +47,13 @@ export async function POST(req: NextRequest) {
 
     // ─── Image Generation Flow ────────────────────────────────────────────────
     if (mode === "image") {
-      const tokenResult = await consumeTokens(supabase, user.id, modelId, "image-generation", '/api/generate-image');
+      const tokenResult = await consumeTokens(
+        supabase,
+        user.id,
+        modelId,
+        "image-generation",
+        "/api/generate-image",
+      );
 
       if (!tokenResult.ok) {
         return NextResponse.json(
@@ -87,6 +93,20 @@ export async function POST(req: NextRequest) {
           ? `${prompt}. Avoid these concepts: ${negativePrompt}. The output AspectRatio should be ${aspectRatio || "1:1"}`
           : prompt;
 
+        // Determine provider and model for image
+        let imgProvider = "pollinations";
+        let imgModel = "pollinations";
+        if (modelId === "huggingface") {
+          imgProvider = "huggingface";
+          imgModel = "black-forest-labs/FLUX.1-schnell";
+        } else if (modelId === "gemini") {
+          imgProvider = "gemini";
+          imgModel = "gemini-3.1-flash-lite-image";
+        } else if (modelId === "stablediffusion") {
+          imgProvider = "huggingface";
+          imgModel = "stabilityai/stable-diffusion-xl-base-1.0";
+        }
+
         const backendRes = await fetch(`${BACKEND_URL}/generate-image`, {
           method: "POST",
           headers: {
@@ -94,7 +114,8 @@ export async function POST(req: NextRequest) {
             Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({
-            model: modelId,
+            model: imgModel,
+            provider: imgProvider,
             prompt: structuredPrompt,
             negativePrompt: negativePrompt || "",
             aspectRatio: aspectRatio || "1:1",
@@ -186,7 +207,13 @@ export async function POST(req: NextRequest) {
         });
       } catch (llmError: any) {
         console.error("Image generation failed, reverting tokens:", llmError);
-        await refundTokens(supabase, user.id, modelId, "image-generation", '/api/generate-image');
+        await refundTokens(
+          supabase,
+          user.id,
+          modelId,
+          "image-generation",
+          "/api/generate-image",
+        );
 
         return NextResponse.json(
           {
@@ -200,7 +227,13 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── Text / Code / Other Generation Flow ──────────────────────────────────
-    const tokenResult = await consumeTokens(supabase, user.id, modelId, mode, '/api/parse');
+    const tokenResult = await consumeTokens(
+      supabase,
+      user.id,
+      modelId,
+      mode,
+      "/api/parse",
+    );
 
     if (!tokenResult.ok) {
       return NextResponse.json(
@@ -215,6 +248,23 @@ export async function POST(req: NextRequest) {
     }
 
     try {
+      // Determine provider and model for text
+      let textProvider = "gemini";
+      let textModel = "gemini-3.5-flash";
+      if (modelId === "gpt" || modelId === "claude" || modelId === "grok") {
+        textProvider = "groq";
+        if (modelId === "gpt") textModel = "openai/gpt-oss-120b";
+        else if (modelId === "claude")
+          textModel = "anthropic/claude-3.5-sonnet";
+        else if (modelId === "grok") textModel = "x-ai/grok-beta";
+      } else if (modelId === "llama") {
+        textProvider = "groq";
+        textModel = "meta-llama/llama-prompt-guard-2-86m";
+      } else if (modelId === "gemini") {
+        textProvider = "gemini";
+        textModel = "gemini-3.5-flash";
+      }
+
       const backendRes = await fetch(`${BACKEND_URL}/generate-text`, {
         method: "POST",
         headers: {
@@ -223,7 +273,8 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           text: prompt,
-          model: modelId,
+          model: textModel,
+          provider: textProvider,
           mode: mode,
           controls: {
             outputFormat: "text",
@@ -267,7 +318,7 @@ export async function POST(req: NextRequest) {
       });
     } catch (llmError: any) {
       console.error("Text generation failed, reverting tokens:", llmError);
-      await refundTokens(supabase, user.id, modelId, mode, '/api/parse');
+      await refundTokens(supabase, user.id, modelId, mode, "/api/parse");
 
       return NextResponse.json(
         {

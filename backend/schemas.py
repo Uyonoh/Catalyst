@@ -14,6 +14,7 @@ class PromptControls(BaseModel):
 class TextGenerateRequest(BaseModel):
     text: str
     model: str
+    provider: Optional[str] = None
     controls: Optional[PromptControls] = Field(default_factory=PromptControls)
     mode: Optional[str] = "text"
     buildPrompt: Optional[bool] = True
@@ -24,6 +25,7 @@ class TextGenerateResponse(BaseModel):
 
 class ImageGenerateRequest(BaseModel):
     model: str
+    provider: Optional[str] = None
     prompt: str
     negativePrompt: Optional[str] = ""
     aspectRatio: Optional[str] = "1:1"

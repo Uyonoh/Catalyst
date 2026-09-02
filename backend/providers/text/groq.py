@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 import httpx
 
 class GroqTextProvider:
@@ -13,7 +14,8 @@ class GroqTextProvider:
                 keys.append(v)
         return list(set(keys))
 
-    async def call(self, prompt: str, key: str) -> str:
+    async def call(self, prompt: str, key: str, model: Optional[str] = None) -> str:
+        model_name = model if model else "openai/gpt-oss-20b"
         async with httpx.AsyncClient() as client:
             res = await client.post(
                 "https://api.groq.com/openai/v1/chat/completions",
@@ -22,7 +24,7 @@ class GroqTextProvider:
                     "Content-Type": "application/json",
                 },
                 json={
-                    "model": "openai/gpt-oss-20b",
+                    "model": model_name,
                     "messages": [{"role": "user", "content": prompt}],
                 },
                 timeout=30.0

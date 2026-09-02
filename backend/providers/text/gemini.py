@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 from google import genai
 from google.genai import types
 import asyncio
@@ -15,14 +16,15 @@ class GeminiTextProvider:
                 keys.append(v)
         return list(set(keys))
 
-    async def call(self, prompt: str, key: str) -> str:
+    async def call(self, prompt: str, key: str, model: Optional[str] = None) -> str:
         client = genai.Client(api_key=key)
+        model_name = model if model else "gemini-3.1-flash-lite"
 
         loop = asyncio.get_running_loop()
         response = await loop.run_in_executor(
             None,
             lambda: client.models.generate_content(
-                model="gemini-3.5-flash",
+                model=model_name,
                 contents=prompt
             )
         )

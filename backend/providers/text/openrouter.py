@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 import httpx
 
 class OpenRouterTextProvider:
@@ -13,8 +14,9 @@ class OpenRouterTextProvider:
                 keys.append(v)
         return list(set(keys))
 
-    async def call(self, prompt: str, key: str) -> str:
+    async def call(self, prompt: str, key: str, model: Optional[str] = None) -> str:
         app_url = os.environ.get("NEXT_PUBLIC_APP_URL", "http://localhost:3000")
+        model_name = model if model else "google/gemma-4-31b-it:free"
         
         async with httpx.AsyncClient() as client:
             res = await client.post(
@@ -26,7 +28,7 @@ class OpenRouterTextProvider:
                     "X-Title": "Catalyst",
                 },
                 json={
-                    "model": "google/gemma-4-31b-it:free",
+                    "model": model_name,
                     "messages": [{"role": "user", "content": prompt}],
                     "temperature": 0.7,
                 },

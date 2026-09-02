@@ -17,7 +17,7 @@ class LLMImageProvider(Protocol):
     def keys(self) -> list[str]:
         ...
         
-    async def call(self, prompt: str, key: str, params: Optional[ImageParams]) -> ImageResult:
+    async def call(self, prompt: str, key: str, params: Optional[ImageParams], model: Optional[str] = None) -> ImageResult:
         ...
         
     def is_rate_limit_error(self, err: Exception) -> bool:

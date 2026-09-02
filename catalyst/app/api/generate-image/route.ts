@@ -90,6 +90,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Determine provider and model based on model slug
+    let provider = "pollinations";
+    let actualModel = "pollinations";
+    if (model === "huggingface") {
+      provider = "huggingface";
+      actualModel = "black-forest-labs/FLUX.1-schnell";
+    } else if (model === "gemini") {
+      provider = "gemini";
+      actualModel = "gemini-3.1-flash-lite-image";
+    } else if (model === "stablediffusion") {
+      provider = "huggingface";
+      actualModel = "stabilityai/stable-diffusion-xl-base-1.0";
+    }
+
     try {
       const backendRes = await fetch(`${BACKEND_URL}/generate-image`, {
         method: "POST",
@@ -98,7 +112,8 @@ export async function POST(request: NextRequest) {
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
-          model,
+          model: actualModel,
+          provider: provider,
           prompt: structuredPrompt,
           negativePrompt,
           aspectRatio,

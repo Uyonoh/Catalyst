@@ -18,14 +18,15 @@ class GeminiImageProvider:
                 keys.append(v)
         return list(set(keys))
 
-    async def call(self, prompt: str, key: str, params: Optional[ImageParams]) -> ImageResult:
+    async def call(self, prompt: str, key: str, params: Optional[ImageParams], model: Optional[str] = None) -> ImageResult:
         client = genai.Client(api_key=key)
+        model_name = model if model else "gemini-3.1-flash-lite-image"
         
         loop = asyncio.get_running_loop()
         response = await loop.run_in_executor(
             None,
             lambda: client.models.generate_content(
-                model="gemini-3.1-flash-lite-image",
+                model=model_name,
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_modalities=["TEXT", "IMAGE"]

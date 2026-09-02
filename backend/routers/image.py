@@ -38,7 +38,8 @@ async def generate_image_endpoint(req: ImageGenerateRequest, user_id: str = Depe
     # We pass model, prompt, parameters
     # The frontend expects structure matches generate-image/route.ts
     result = await generate_image(
-        selected_provider_id=req.model,
+        provider_id=req.provider,
+        model_id=req.model,
         prompt=req.prompt,
         parameters=params
     )

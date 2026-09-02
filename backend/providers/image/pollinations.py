@@ -10,11 +10,11 @@ class PollinationsImageProvider:
     def keys(self) -> list[str]:
         return ["Dummy Key"]
 
-    async def call(self, prompt: str, key: str, params: Optional[ImageParams]) -> ImageResult:
+    async def call(self, prompt: str, key: str, params: Optional[ImageParams], model: Optional[str] = None) -> ImageResult:
         encoded_prompt = quote(prompt)
         image_url = f"https://image.pollinations.ai/p/{encoded_prompt}?enhance=true"
 
-        # Pollinatioms generates the image and returns to the user once the url is hit
+        # Pollinations generates the image and returns to the user once the url is hit
         return ImageResult(url=image_url)
 
     def is_rate_limit_error(self, err: Exception) -> bool:

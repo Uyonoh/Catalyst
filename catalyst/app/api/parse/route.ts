@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+
     if (!user || authError) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -61,9 +61,11 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           text,
-          model: modelId,
+          model: "gemini-3.1-flash-lite",
+          provider: "gemini",
           controls,
-          mode
+          mode,
+          buildPrompt: true
         }),
       });
 
@@ -77,13 +79,13 @@ export async function POST(req: NextRequest) {
       format = backendData.format;
     } catch (llmError: any) {
       console.error("LLM Generation Failed. Reverting tokens.", llmError);
-      
+
       // Revert tokens using our new function
       await refundTokens(supabase, user.id, modelId, mode, '/api/parse');
 
       const isRateLimit = llmError?.message && (
-        llmError.message.includes("exhausted") || 
-        llmError.message.includes("high demand") || 
+        llmError.message.includes("exhausted") ||
+        llmError.message.includes("high demand") ||
         llmError.message.includes("429") ||
         llmError.message.includes("503")
       );
@@ -94,17 +96,17 @@ export async function POST(req: NextRequest) {
           { status: 503 },
         );
       }
-      
+
       return NextResponse.json(
         { error: "Failed to parse intent with LLM" },
         { status: 500 },
       );
     }
 
-    return NextResponse.json({ 
-      refinedPrompt: refinedText, 
+    return NextResponse.json({
+      refinedPrompt: refinedText,
       format: format,
-      tokenResult 
+      tokenResult
     });
   } catch (error: any) {
     console.error("LLM Parsing Router Error:", error);
@@ -114,4 +116,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
