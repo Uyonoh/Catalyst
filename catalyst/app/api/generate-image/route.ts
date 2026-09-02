@@ -248,19 +248,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "We ran into an error while generating your image.\nPlease try again later",
+            "We're sorry, we could not complete your request at the moment. Please try again later or contact support.",
         },
         { status: 500 },
       );
     }
   } catch (error: any) {
     console.error("Failed to generate image with error: ", error);
-    return NextResponse.json(
-      {
-        error:
-          "There seems to be an issue on our end.\nRest assured, we're already on it!",
-      },
-      { status: 500 },
-    );
+      return NextResponse.json(
+        {
+          error:
+            "We're sorry, we could not complete your request at the moment. Please try again later or contact support.",
+        },
+        { status: 500 },
+      );
   }
 }

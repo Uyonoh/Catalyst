@@ -19,27 +19,27 @@ interface TokenCostsCache {
 
 // Global cache to store all token costs (shared across all instances)
 let tokenCostsCache: TokenCostsCache | null = null;
-let cachePromise: Promise<TokenCostsCache> | null = null;
+let cachePromise: Promise<TokenCostsCache | null> | null = null;
 
 /**
  * Fetches all token costs once and caches them.
  * Subsequent calls return the cached value.
  */
-async function getAllTokenCosts(): Promise<TokenCostsCache> {
+async function getAllTokenCosts(): Promise<TokenCostsCache | null> {
   // Return cached values if available
   if (tokenCostsCache) {
     return tokenCostsCache;
   }
-  
+
   // If a fetch is already in progress, wait for it
   if (cachePromise) {
     return cachePromise;
   }
-  
+
   // Fetch all token costs from the API
-  cachePromise = fetch('/api/token-cost?all')
-    .then(res => res.json())
-    .then(data => {
+  cachePromise = fetch("/api/token-cost?all")
+    .then((res) => res.json())
+    .then((data) => {
       tokenCostsCache = data.costs || {};
       cachePromise = null;
       return tokenCostsCache;
@@ -56,7 +56,7 @@ async function getAllTokenCosts(): Promise<TokenCostsCache> {
       tokenCostsCache = fallback;
       return tokenCostsCache;
     });
-  
+
   return cachePromise;
 }
 import {
@@ -98,15 +98,17 @@ export default function RawIntentPanel() {
 
   // Load all token costs once on mount
   useEffect(() => {
-    getAllTokenCosts().then(costs => {
+    getAllTokenCosts().then((costs) => {
       setTokenCosts(costs);
     });
   }, []);
 
   // Get cost from cache, fallback to TOKEN_COST_MATRIX if cache not loaded yet
-  const cost = tokenCosts && selectedModel?.slug && selectedMode
-    ? tokenCosts[`${selectedModel.slug}:${selectedMode}`] ?? getPreviewCost(selectedModel.slug, selectedMode)
-    : getPreviewCost(selectedModel?.slug || '', selectedMode);
+  const cost =
+    tokenCosts && selectedModel?.slug && selectedMode
+      ? (tokenCosts[`${selectedModel.slug}:${selectedMode}`] ??
+        getPreviewCost(selectedModel.slug, selectedMode))
+      : getPreviewCost(selectedModel?.slug || "", selectedMode);
 
   return (
     <div className="relative group flex flex-col h-full">

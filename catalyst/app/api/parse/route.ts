@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
       }
 
       return NextResponse.json(
-        { error: "Failed to parse intent with LLM" },
+        { error: "We're sorry, we could not complete your request at the moment. Please try again later or contact support." },
         { status: 500 },
       );
     }
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error("LLM Parsing Router Error:", error);
     return NextResponse.json(
-      { error: "Server Error" },
+      { error: "We're sorry, we could not complete your request at the moment. Please try again later or contact support." },
       { status: 500 },
     );
   }

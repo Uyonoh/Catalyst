@@ -323,8 +323,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            llmError?.message ||
-            "We ran into an error while generating your output. Please try again later.",
+            "We're sorry, we could not complete your request at the moment. Please try again later or contact support.",
         },
         { status: 500 },
       );
@@ -332,7 +331,10 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error("Error in generate-output API:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      {
+        error:
+          "We're sorry, we could not complete your request at the moment. Please try again later or contact support.",
+      },
       { status: 500 },
     );
   }
