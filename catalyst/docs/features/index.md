@@ -34,6 +34,12 @@ Complete prompt history tracking with advanced filtering, search, and management
 - Pagination and batch operations
 - Usage statistics and analytics
 
+### 🏛️ [Prompt Library](./library.md)
+Curated and community prompt repository to discover, search, and import battle-tested prompt architectures directly into the Studio.
+
+### 💳 [Subscriptions & Token Economics](./pricing-subscriptions.md)
+Transparent multi-tier pricing plans (Spark, Orbit, Nova, Pulsar, Infinity) with weekly token allowances, automated Paystack billing, and workspace scaling.
+
 ## Feature Integration
 
 All Catalyst features work seamlessly together:
