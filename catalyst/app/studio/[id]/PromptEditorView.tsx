@@ -455,6 +455,7 @@ export default function PromptEditorView({
 
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
+        setShowConfirmModal(false);
         throw new Error(
           errData.error || `Output generation failed (${response.status})`,
         );
@@ -477,6 +478,7 @@ export default function PromptEditorView({
       });
     } finally {
       setIsGeneratingOutput(false);
+      setShowConfirmModal(false);
     }
   };
 

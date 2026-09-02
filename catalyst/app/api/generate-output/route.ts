@@ -21,10 +21,30 @@ export async function POST(req: NextRequest) {
       promptId,
       prompt,
       model: modelId,
-      mode = "text",
+      mode: rawMode = "text-generation",
       negativePrompt,
       aspectRatio,
     } = body;
+
+    // Normalize and validate output generation mode
+    const modeMap: Record<string, "text-generation" | "image-generation" | "video-generation"> = {
+      "text-generation": "text-generation",
+      "image-generation": "image-generation",
+      "video-generation": "video-generation",
+      text: "text-generation",
+      image: "image-generation",
+      video: "video-generation",
+    };
+
+    const mode = modeMap[rawMode];
+    if (!mode) {
+      return NextResponse.json(
+        {
+          error: `Invalid mode '${rawMode}'. Output generation only supports 'video-generation', 'image-generation', and 'text-generation'.`,
+        },
+        { status: 400 },
+      );
+    }
 
     if (!prompt || typeof prompt !== "string" || prompt.trim() === "") {
       return NextResponse.json(
@@ -45,14 +65,80 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // ─── Video Generation Flow ────────────────────────────────────────────────
+    if (mode === "video-generation") {
+      const tokenResult = await consumeTokens(
+        supabase,
+        user.id,
+        modelId,
+        "video-generation",
+        "/api/generate-output",
+      );
+
+      if (!tokenResult.ok) {
+        return NextResponse.json(
+          {
+            error: "Token quota exceeded",
+            remaining: tokenResult.remaining,
+            resets_at: tokenResult.resets_at,
+            limit: tokenResult.limit,
+          },
+          { status: 402 },
+        );
+      }
+
+      try {
+        const targetJson: any = {
+          output_type: "video",
+          output: `Video generation initialized for: ${prompt}`,
+        };
+        if (aspectRatio) targetJson.aspect_ratio = aspectRatio;
+        if (negativePrompt) targetJson.negative_prompt = negativePrompt;
+
+        if (promptId) {
+          const { error: updateError } = await supabase
+            .from("prompts")
+            .update({ target: targetJson })
+            .eq("id", promptId);
+
+          if (updateError) {
+            console.error("Failed to update prompt target for video:", updateError);
+          }
+        }
+
+        return NextResponse.json({
+          target: targetJson,
+          tokenResult,
+        });
+      } catch (videoError: any) {
+        console.error("Video generation failed, reverting tokens:", videoError);
+        await refundTokens(
+          supabase,
+          user.id,
+          modelId,
+          "video-generation",
+          "/api/generate-output",
+        );
+
+        return NextResponse.json(
+          {
+            error:
+              videoError?.message ||
+              "We ran into an error while generating your video. Please try again later.",
+          },
+          { status: 500 },
+        );
+      }
+    }
+
     // ─── Image Generation Flow ────────────────────────────────────────────────
-    if (mode === "image") {
+    if (mode === "image-generation") {
       const tokenResult = await consumeTokens(
         supabase,
         user.id,
         modelId,
         "image-generation",
-        "/api/generate-image",
+        "/api/generate-output",
       );
 
       if (!tokenResult.ok) {
@@ -226,13 +312,13 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ─── Text / Code / Other Generation Flow ──────────────────────────────────
+    // ─── Text Generation Flow ────────────────────────────────────────────────
     const tokenResult = await consumeTokens(
       supabase,
       user.id,
       modelId,
-      mode,
-      "/api/parse",
+      "text-generation",
+      "/api/generate-output",
     );
 
     if (!tokenResult.ok) {
@@ -275,7 +361,7 @@ export async function POST(req: NextRequest) {
           text: prompt,
           model: textModel,
           provider: textProvider,
-          mode: mode,
+          mode: "text",
           controls: {
             outputFormat: "text",
             creativity: 0.7,
@@ -297,7 +383,7 @@ export async function POST(req: NextRequest) {
       const outputText = backendData.refinedPrompt || "";
 
       const targetJson = {
-        output_type: mode || "text",
+        output_type: "text",
         output: outputText,
       };
 
@@ -318,7 +404,13 @@ export async function POST(req: NextRequest) {
       });
     } catch (llmError: any) {
       console.error("Text generation failed, reverting tokens:", llmError);
-      await refundTokens(supabase, user.id, modelId, mode, "/api/parse");
+      await refundTokens(
+        supabase,
+        user.id,
+        modelId,
+        "text-generation",
+        "/api/generate-output",
+      );
 
       return NextResponse.json(
         {

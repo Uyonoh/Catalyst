@@ -1,7 +1,20 @@
 import { createClient } from "./supabase-server";
-import { getFallbackCost as getFallbackCostFromTokens, TOKEN_COST_MATRIX } from "./tokens";
+import {
+  getFallbackCost as getFallbackCostFromTokens,
+  TOKEN_COST_MATRIX,
+  OUTPUT_GENERATION_MODES,
+  OutputGenerationMode,
+  DEFAULT_MODE_COSTS,
+  getDefaultCostForMode,
+} from "./tokens";
 
-export { TOKEN_COST_MATRIX };
+export {
+  TOKEN_COST_MATRIX,
+  OUTPUT_GENERATION_MODES,
+  DEFAULT_MODE_COSTS,
+  getDefaultCostForMode,
+};
+export type { OutputGenerationMode };
 
 /**
  * Token cost record structure from the database
@@ -24,18 +37,35 @@ export interface TokenConsumptionResult {
 }
 
 /**
- * Fetches token cost from the public.token_costs table.
- * Falls back to TOKEN_COST_MATRIX if DB query fails or returns no result.
- * 
+/**
+ * Fetches token cost from the public.token_costs table following the exact flow:
+ * 1. Get from DB for (model_slug, mode)
+ * 2. Fallback matrix if not found in DB
+ * 3. Any model cost (from DB, then from matrix)
+ * 4. Default cost for the mode
+ *
  * @param modelSlug - The model slug (e.g., 'gpt', 'claude', 'dalle')
- * @param mode - The mode (e.g., 'text', 'image', 'video', 'vision')
+ * @param mode - The mode (e.g., 'text-generation', 'image-generation', 'video-generation', 'text', 'image', 'video')
  * @returns Promise resolving to the token cost as a number
  */
-export async function getTokenCostFromDB(modelSlug: string, mode: string): Promise<number> {
+export async function getTokenCostFromDB(
+  modelSlug: string,
+  mode: string,
+): Promise<number> {
+  const aliasMap: Record<string, string> = {
+    "text-generation": "text",
+    "image-generation": "image",
+    "video-generation": "video",
+    text: "text-generation",
+    image: "image-generation",
+    video: "video-generation",
+  };
+  const altMode = aliasMap[mode];
+
   try {
     const supabase = await createClient();
-    
-    // Try to fetch from public.token_costs table (without .single() to avoid coercion error)
+
+    // 1. Get from DB: Specific mode or its alias
     const { data, error } = await supabase
       .from("token_costs")
       .select("cost")
@@ -44,12 +74,40 @@ export async function getTokenCostFromDB(modelSlug: string, mode: string): Promi
       .maybeSingle();
 
     if (error) {
-      console.warn(`Failed to fetch token cost for ${modelSlug}/${mode} from DB:`, error.message);
+      console.warn(
+        `Failed to fetch token cost for ${modelSlug}/${mode} from DB:`,
+        error.message,
+      );
     } else if (data && data.cost !== null && data.cost !== undefined) {
       return data.cost;
     }
 
-    // If no record found for specific mode, try to get any cost for the model
+    if (altMode) {
+      const { data: altData } = await supabase
+        .from("token_costs")
+        .select("cost")
+        .eq("model_slug", modelSlug)
+        .eq("mode", altMode)
+        .maybeSingle();
+
+      if (altData && altData.cost !== null && altData.cost !== undefined) {
+        return altData.cost;
+      }
+    }
+
+    // 2. Fallback matrix if not found in DB
+    const modelMatrix = TOKEN_COST_MATRIX[modelSlug];
+    if (modelMatrix) {
+      const matrixCost = modelMatrix[mode];
+      if (matrixCost !== undefined) {
+        return matrixCost;
+      }
+      if (altMode && modelMatrix[altMode] !== undefined) {
+        return modelMatrix[altMode];
+      }
+    }
+
+    // 3. Any model cost: First from DB, then from matrix
     const { data: modelData, error: modelError } = await supabase
       .from("token_costs")
       .select("cost")
@@ -59,28 +117,44 @@ export async function getTokenCostFromDB(modelSlug: string, mode: string): Promi
       .maybeSingle();
 
     if (modelError) {
-      console.warn(`Failed to fetch any token cost for ${modelSlug} from DB:`, modelError.message);
-    } else if (modelData && modelData.cost !== null && modelData.cost !== undefined) {
+      console.warn(
+        `Failed to fetch any token cost for ${modelSlug} from DB:`,
+        modelError.message,
+      );
+    } else if (
+      modelData &&
+      modelData.cost !== null &&
+      modelData.cost !== undefined
+    ) {
       return modelData.cost;
     }
 
-    // Fall back to the hardcoded matrix
-    return getFallbackCost(modelSlug, mode);
+    if (modelMatrix) {
+      const anyMatrixCost = Object.values(modelMatrix)[0];
+      if (anyMatrixCost !== undefined) {
+        return anyMatrixCost;
+      }
+    }
+
+    // 4. Default cost for mode
+    return getDefaultCostForMode(mode);
   } catch (err) {
-    // If there's any unexpected error (e.g., DB connection failed), use fallback
-    console.error(`Unexpected error fetching token cost for ${modelSlug}/${mode}:`, err);
+    // If DB connection fails, proceed with matrix -> any model cost -> default cost
+    console.error(
+      `Unexpected error fetching token cost for ${modelSlug}/${mode}:`,
+      err,
+    );
     return getFallbackCost(modelSlug, mode);
   }
 }
 
 /**
  * Re-exports getFallbackCost from tokens.ts for convenience.
- * Gets the fallback token cost from TOKEN_COST_MATRIX.
- * Returns 2 as the ultimate fallback if model or mode is not found.
- * 
+ * Follows the flow: fallback matrix -> any model cost -> default cost.
+ *
  * @param modelSlug - The model slug
  * @param mode - The mode
- * @returns The token cost from the matrix, or 2 as default
+ * @returns The token cost from the matrix, any model cost, or default mode cost
  */
 export function getFallbackCost(modelSlug: string, mode: string): number {
   return getFallbackCostFromTokens(modelSlug, mode);
@@ -92,7 +166,7 @@ export function getFallbackCost(modelSlug: string, mode: string): number {
 async function localTokenCheck(
   supabase: any,
   userId: string,
-  tokenCost: number
+  tokenCost: number,
 ): Promise<TokenConsumptionResult> {
   try {
     // Get user's subscription
@@ -108,12 +182,12 @@ async function localTokenCheck(
         ok: false,
         error: "No active subscription",
         remaining: 0,
-        limit: 0
+        limit: 0,
       };
     }
 
     // Get current usage
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const { data: usage, error: usageError } = await supabase
       .from("usage")
       .select("token_count")
@@ -129,7 +203,7 @@ async function localTokenCheck(
       ok: remaining >= 0,
       remaining: remaining,
       limit: limit,
-      resets_at: subscription.current_period_end
+      resets_at: subscription.current_period_end,
     };
   } catch (err) {
     console.error("Local token check failed:", err);
@@ -137,7 +211,7 @@ async function localTokenCheck(
       ok: false,
       error: "Token check failed",
       remaining: 0,
-      limit: 0
+      limit: 0,
     };
   }
 }
@@ -145,7 +219,7 @@ async function localTokenCheck(
 /**
  * Consumes tokens for a user, querying public.token_costs table first.
  * Falls back to TOKEN_COST_MATRIX when DB connection fails.
- * 
+ *
  * @param supabase - Supabase client
  * @param userId - User ID
  * @param modelSlug - Model slug
@@ -158,34 +232,55 @@ export async function consumeTokens(
   userId: string,
   modelSlug: string,
   mode: string,
-  apiEndpoint: string = '/api/parse'
+  apiEndpoint: string = "/api/parse",
 ): Promise<TokenConsumptionResult> {
   try {
-    // First, get the token cost using our fallback logic
+    // First, get the token cost using our resolution flow (DB -> matrix -> any model -> default cost)
     const tokenCost = await getTokenCostFromDB(modelSlug, mode);
 
-    // Now call the RPC to consume tokens
-    const { data: tokenResult, error: rpcError } = await supabase.rpc(
-      "consume_tokens",
-      { p_user_id: userId, p_model: modelSlug, p_mode: mode }
-    );
+    // Call the RPC to consume tokens, passing p_cost so DB deducts the exact resolved cost
+    let tokenResult: any;
+    let rpcError: any;
+
+    const resWithCost = await supabase.rpc("consume_tokens", {
+      p_user_id: userId,
+      p_model: modelSlug,
+      p_mode: mode,
+      p_cost: tokenCost,
+    });
+
+    if (
+      resWithCost.error &&
+      (resWithCost.error.message?.includes("function") ||
+        resWithCost.error.code === "PGRST202")
+    ) {
+      // Fallback if Postgres RPC function does not yet accept p_cost parameter
+      const resWithoutCost = await supabase.rpc("consume_tokens", {
+        p_user_id: userId,
+        p_model: modelSlug,
+        p_mode: mode,
+      });
+      tokenResult = resWithoutCost.data;
+      rpcError = resWithoutCost.error;
+    } else {
+      tokenResult = resWithCost.data;
+      rpcError = resWithCost.error;
+    }
 
     if (rpcError) {
       console.error("Token consumption RPC error:", rpcError);
-      // If RPC fails, we can't track usage, but we can still check if user has quota
-      // by falling back to a local check
+      // If RPC fails, check quota via localTokenCheck
       return await localTokenCheck(supabase, userId, tokenCost);
     }
 
     return tokenResult;
   } catch (err) {
     console.error("Token consumption error:", err);
-    // If everything fails, use fallback cost and assume no quota
     return {
       ok: false,
       error: "Token check failed",
       remaining: 0,
-      limit: 0
+      limit: 0,
     };
   }
 }
@@ -198,17 +293,34 @@ export async function refundTokens(
   userId: string,
   modelSlug: string,
   mode: string,
-  apiEndpoint: string = '/api/parse'
+  apiEndpoint: string = "/api/parse",
 ): Promise<void> {
   try {
-    const { error } = await supabase.rpc('refund_tokens', {
+    const tokenCost = await getTokenCostFromDB(modelSlug, mode);
+
+    const resWithCost = await supabase.rpc("refund_tokens", {
       p_user_id: userId,
       p_model: modelSlug,
-      p_mode: mode
+      p_mode: mode,
+      p_cost: tokenCost,
     });
 
-    if (error) {
-      console.error("Failed to refund tokens:", error);
+    if (
+      resWithCost.error &&
+      (resWithCost.error.message?.includes("function") ||
+        resWithCost.error.code === "PGRST202")
+    ) {
+      const { error } = await supabase.rpc("refund_tokens", {
+        p_user_id: userId,
+        p_model: modelSlug,
+        p_mode: mode,
+      });
+
+      if (error) {
+        console.error("Failed to refund tokens:", error);
+      }
+    } else if (resWithCost.error) {
+      console.error("Failed to refund tokens:", resWithCost.error);
     }
   } catch (err) {
     console.error("Refund tokens error:", err);
@@ -218,21 +330,23 @@ export async function refundTokens(
 /**
  * Batch fetch token costs for multiple model/mode pairs from the DB.
  * More efficient than calling getTokenCostFromDB multiple times.
- * 
+ *
  * @param pairs - Array of {modelSlug, mode} pairs
  * @returns Promise resolving to Record<`${modelSlug}:${mode}`, number>
  */
-export async function getBatchTokenCosts(pairs: Array<{ modelSlug: string; mode: string }>): Promise<Record<string, number>> {
+export async function getBatchTokenCosts(
+  pairs: Array<{ modelSlug: string; mode: string }>,
+): Promise<Record<string, number>> {
   try {
     const supabase = await createClient();
-    
+
     // Fetch all matching records in one query
     const { data, error } = await supabase
       .from("token_costs")
       .select("model_slug, mode, cost")
       .in(
         "model_slug",
-        pairs.map((p) => p.modelSlug)
+        pairs.map((p) => p.modelSlug),
       );
 
     if (error) {
@@ -248,28 +362,75 @@ export async function getBatchTokenCosts(pairs: Array<{ modelSlug: string; mode:
 
     // Build a map from the DB results
     const dbCosts: Record<string, number> = {};
+    const dbModelAnyCosts: Record<string, number> = {};
     if (data && Array.isArray(data)) {
       for (const record of data) {
         const key = `${record.model_slug}:${record.mode}`;
         dbCosts[key] = record.cost;
+        if (dbModelAnyCosts[record.model_slug] === undefined) {
+          dbModelAnyCosts[record.model_slug] = record.cost;
+        }
       }
     }
 
-    // Fill in any missing values with fallback costs
+    const aliasMap: Record<string, string> = {
+      "text-generation": "text",
+      "image-generation": "image",
+      "video-generation": "video",
+      text: "text-generation",
+      image: "image-generation",
+      video: "video-generation",
+    };
+
+    // Resolve costs following: DB -> Fallback matrix -> Any model cost -> Default cost
     const result: Record<string, number> = {};
     for (const pair of pairs) {
       const key = `${pair.modelSlug}:${pair.mode}`;
+      const altMode = aliasMap[pair.mode];
+      const altKey = altMode ? `${pair.modelSlug}:${altMode}` : null;
+
+      // 1. Get from DB
       if (dbCosts[key] !== undefined) {
         result[key] = dbCosts[key];
-      } else {
-        result[key] = getFallbackCost(pair.modelSlug, pair.mode);
+        continue;
       }
+      if (altKey && dbCosts[altKey] !== undefined) {
+        result[key] = dbCosts[altKey];
+        continue;
+      }
+
+      // 2. Fallback matrix if not found in DB
+      const modelMatrix = TOKEN_COST_MATRIX[pair.modelSlug];
+      if (modelMatrix && modelMatrix[pair.mode] !== undefined) {
+        result[key] = modelMatrix[pair.mode];
+        continue;
+      }
+      if (modelMatrix && altMode && modelMatrix[altMode] !== undefined) {
+        result[key] = modelMatrix[altMode];
+        continue;
+      }
+
+      // 3. Any model cost (DB first, then matrix)
+      if (dbModelAnyCosts[pair.modelSlug] !== undefined) {
+        result[key] = dbModelAnyCosts[pair.modelSlug];
+        continue;
+      }
+      if (modelMatrix) {
+        const anyCost = Object.values(modelMatrix)[0];
+        if (anyCost !== undefined) {
+          result[key] = anyCost;
+          continue;
+        }
+      }
+
+      // 4. Default cost for mode
+      result[key] = getDefaultCostForMode(pair.mode);
     }
 
     return result;
   } catch (err) {
     console.error(`Unexpected error in batch token cost fetch:`, err);
-    // Fall back to TOKEN_COST_MATRIX for all
+    // Fall back using the resolution flow for all
     const result: Record<string, number> = {};
     for (const pair of pairs) {
       const key = `${pair.modelSlug}:${pair.mode}`;

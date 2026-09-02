@@ -59,12 +59,7 @@ export async function GET(req: NextRequest) {
     const mode = searchParams.get("mode");
 
     if (modelSlug && mode) {
-      // Try to get from TOKEN_COST_MATRIX as fallback
-      const matrix = TOKEN_COST_MATRIX as Record<
-        string,
-        Record<string, number>
-      >;
-      const fallbackCost = matrix[modelSlug]?.[mode] ?? 2;
+      const fallbackCost = getFallbackCost(modelSlug, mode);
       return NextResponse.json({ cost: fallbackCost });
     }
 

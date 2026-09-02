@@ -100,4 +100,63 @@ describe('/api/generate-output POST route handler', () => {
       },
     });
   });
+
+  it('rejects unsupported output generation modes with 400 Bad Request', async () => {
+    vi.spyOn(SupabaseServerModule, 'createClient').mockResolvedValue({
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'u1' } }, error: null }) },
+    } as any);
+
+    const req = new NextRequest('http://localhost:3000/api/generate-output', {
+      method: 'POST',
+      body: JSON.stringify({
+        prompt: 'Play song',
+        model: 'gpt',
+        mode: 'audio',
+      }),
+    });
+
+    const response = await POST(req);
+    expect(response.status).toBe(400);
+    const json = await response.json();
+    expect(json.error).toContain("Output generation only supports 'video-generation', 'image-generation', and 'text-generation'");
+  });
+
+  it('generates video output successfully when mode is video-generation', async () => {
+    const mockRpc = vi.fn().mockResolvedValue({
+      data: { ok: true, remaining: 10, limit: 25 },
+      error: null,
+    });
+
+    const mockUpdate = vi.fn().mockReturnValue({
+      eq: vi.fn().mockResolvedValue({ error: null }),
+    });
+
+    vi.spyOn(SupabaseServerModule, 'createClient').mockResolvedValue({
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'u1' } }, error: null }) },
+      rpc: mockRpc,
+      from: vi.fn().mockReturnValue({
+        update: mockUpdate,
+      }),
+    } as any);
+
+    vi.spyOn(SupabaseServerModule, 'getSessionToken').mockResolvedValue('session_token');
+
+    const req = new NextRequest('http://localhost:3000/api/generate-output', {
+      method: 'POST',
+      body: JSON.stringify({
+        promptId: 'prompt-video-1',
+        prompt: 'A cinematic drone shot of mountains',
+        model: 'veo',
+        mode: 'video-generation',
+        aspectRatio: '16:9',
+      }),
+    });
+
+    const response = await POST(req);
+    expect(response.status).toBe(200);
+
+    const json = await response.json();
+    expect(json.target.output_type).toBe('video');
+    expect(json.target.aspect_ratio).toBe('16:9');
+  });
 });
