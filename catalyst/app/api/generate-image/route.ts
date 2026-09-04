@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, getSessionToken } from "@/app/lib/supabase-server";
 import { consumeTokens, refundTokens } from "@/app/lib/tokenCosts";
+import { getModelBySlug } from "@/app/lib/models";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 
@@ -90,19 +91,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Determine provider and model based on model slug
-    let provider = "pollinations";
-    let actualModel = "pollinations";
-    if (model === "huggingface") {
-      provider = "huggingface";
-      actualModel = "black-forest-labs/FLUX.1-schnell";
-    } else if (model === "gemini") {
-      provider = "gemini";
-      actualModel = "gemini-3.1-flash-lite-image";
-    } else if (model === "stablediffusion") {
-      provider = "huggingface";
-      actualModel = "stabilityai/stable-diffusion-xl-base-1.0";
-    }
+    // Fetch model details from DB for backend provider and model
+    const modelRecord = await getModelBySlug(model);
+    const provider = modelRecord?.image_provider || "pollinations";
+    const actualModel = modelRecord?.image_model || "pollinations";
 
     try {
       const backendRes = await fetch(`${BACKEND_URL}/generate-image`, {

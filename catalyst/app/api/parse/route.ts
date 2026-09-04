@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           text,
           model: "gemini-3.1-flash-lite",
-          provider: "gemini",
+          provider: "google",
           controls,
           mode,
           buildPrompt: true

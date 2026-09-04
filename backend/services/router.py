@@ -2,12 +2,12 @@ import random
 from typing import List, Union, Optional
 from fastapi import HTTPException
 from backend.providers.text.base import LLMTextProvider
-from backend.providers.text.gemini import GeminiTextProvider
+from backend.providers.text.google import GoogleTextProvider
 from backend.providers.text.groq import GroqTextProvider
 from backend.providers.text.openrouter import OpenRouterTextProvider
 
 from backend.providers.image.base import LLMImageProvider, ImageParams, ImageResult
-from backend.providers.image.gemini import GeminiImageProvider
+from backend.providers.image.google import GoogleImageProvider
 from backend.providers.image.huggingface import HuggingFaceImageProvider
 from backend.providers.image.pollinations import PollinationsImageProvider
 
@@ -17,7 +17,7 @@ logger = get_logger(__name__)
 
 # Provider configurations with allowed models and defaults
 TEXT_PROVIDER_CONFIG = {
-    "gemini": {
+    "google": {
         "default_model": "gemini-3.1-flash-lite",
         "allowed_models": ["gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-3.1-flash-lite-image"],
     },
@@ -40,7 +40,7 @@ IMAGE_PROVIDER_CONFIG = {
         "default_model": "pollinations",
         "allowed_models": ["pollinations"],
     },
-    "gemini": {
+    "google": {
         "default_model": "gemini-3.1-flash-lite-image",
         "allowed_models": ["gemini-3.1-flash-lite-image", "imagen-3.0-generate-002"],
     },
@@ -62,7 +62,7 @@ def shuffle_list(lst: list) -> list:
 
 # Text Providers list
 TEXT_PROVIDERS: List[LLMTextProvider] = [
-    GeminiTextProvider(),
+    GoogleTextProvider(),
     GroqTextProvider(),
     OpenRouterTextProvider()
 ]
@@ -70,26 +70,29 @@ TEXT_PROVIDERS: List[LLMTextProvider] = [
 # Image Providers list
 IMAGE_PROVIDERS: List[LLMImageProvider] = [
     HuggingFaceImageProvider(),
-    GeminiImageProvider(),
+    GoogleImageProvider(),
     PollinationsImageProvider()
 ]
 
 def get_text_provider(provider_id: str) -> Optional[LLMTextProvider]:
+    target_id = "google" if provider_id == "gemini" else provider_id
     for provider in TEXT_PROVIDERS:
-        if provider.id == provider_id:
+        if provider.id == target_id:
             return provider
     return None
 
 def get_image_provider(provider_id: str) -> Optional[LLMImageProvider]:
+    target_id = "google" if provider_id == "gemini" else provider_id
     for provider in IMAGE_PROVIDERS:
-        if provider.id == provider_id:
+        if provider.id == target_id:
             return provider
     return None
 
 def validate_text_model(provider_id: str, model: Optional[str]) -> str:
-    config = TEXT_PROVIDER_CONFIG.get(provider_id)
+    target_id = "google" if provider_id == "gemini" else provider_id
+    config = TEXT_PROVIDER_CONFIG.get(target_id)
     if not config:
-        return TEXT_PROVIDER_CONFIG["gemini"]["default_model"]
+        return TEXT_PROVIDER_CONFIG["google"]["default_model"]
 
     if model and model in config["allowed_models"]:
         return model
@@ -97,7 +100,8 @@ def validate_text_model(provider_id: str, model: Optional[str]) -> str:
     return config["default_model"]
 
 def validate_image_model(provider_id: str, model: Optional[str]) -> str:
-    config = IMAGE_PROVIDER_CONFIG.get(provider_id)
+    target_id = "google" if provider_id == "gemini" else provider_id
+    config = IMAGE_PROVIDER_CONFIG.get(target_id)
     if not config:
         return IMAGE_PROVIDER_CONFIG["pollinations"]["default_model"]
 
@@ -118,21 +122,21 @@ async def generate_refined_prompt(
     For prompt generation (build_prompt_step=True): Always use gemini with gemini-3.5-flash
     For output generation (build_prompt_step=False): Use specified provider/model with defaults
     """
-    # For prompt generation step, always use gemini-3.-flash-lite
+    # For prompt generation step, always use google gemini flash-lite
     if build_prompt_step:
-        provider_id = "gemini"
+        provider_id = "google"
         model_id = "gemini-3.1-flash-lite"
     else:
         # For output generation, use provided or default
         if not provider_id:
-            provider_id = "gemini"
+            provider_id = "google"
         model_id = validate_text_model(provider_id, model_id)
 
     provider = get_text_provider(provider_id)
     if not provider:
-        logger.error(f"Text provider '{provider_id}' not found, defaulting to gemini")
-        provider = get_text_provider("gemini")
-        provider_id = "gemini"
+        logger.error(f"Text provider '{provider_id}' not found, defaulting to google")
+        provider = get_text_provider("google")
+        provider_id = "google"
         model_id = "gemini-3.1-flash-lite"
 
     keys = provider.keys

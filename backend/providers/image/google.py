@@ -6,9 +6,9 @@ from typing import Optional
 import asyncio
 from backend.providers.image.base import ImageParams, ImageResult
 
-class GeminiImageProvider:
+class GoogleImageProvider:
     def __init__(self):
-        self.id = "gemini"
+        self.id = "google"
 
     @property
     def keys(self) -> list[str]:

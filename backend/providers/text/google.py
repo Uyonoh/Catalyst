@@ -4,9 +4,9 @@ from google import genai
 from google.genai import types
 import asyncio
 
-class GeminiTextProvider:
+class GoogleTextProvider:
     def __init__(self):
-        self.id = "gemini"
+        self.id = "google"
 
     @property
     def keys(self) -> list[str]:

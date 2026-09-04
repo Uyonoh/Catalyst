@@ -19,3 +19,8 @@ export async function getModels(): Promise<Model[]> {
     return FALLBACK_MODELS;
   }
 }
+
+export async function getModelBySlug(slug: string): Promise<Model | undefined> {
+  const models = await getModels();
+  return models.find((m) => m.slug === slug);
+}

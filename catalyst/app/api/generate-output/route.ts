@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, getSessionToken } from "@/app/lib/supabase-server";
 import { consumeTokens, refundTokens } from "@/app/lib/tokenCosts";
+import { getModelBySlug } from "@/app/lib/models";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 
@@ -27,12 +28,18 @@ export async function POST(req: NextRequest) {
     } = body;
 
     // Normalize and validate output generation mode
-    const modeMap: Record<string, "text-generation" | "image-generation" | "video-generation"> = {
+    const modeMap: Record<
+      string,
+      "text-generation" | "image-generation" | "video-generation"
+    > = {
       "text-generation": "text-generation",
       "image-generation": "image-generation",
       "video-generation": "video-generation",
       text: "text-generation",
+      code: "text-generation",
+      vision: "text-generation",
       image: "image-generation",
+      // audio: "audio-generation",
       video: "video-generation",
     };
 
@@ -102,7 +109,10 @@ export async function POST(req: NextRequest) {
             .eq("id", promptId);
 
           if (updateError) {
-            console.error("Failed to update prompt target for video:", updateError);
+            console.error(
+              "Failed to update prompt target for video:",
+              updateError,
+            );
           }
         }
 
@@ -178,19 +188,10 @@ export async function POST(req: NextRequest) {
           ? `${prompt}. Avoid these concepts: ${negativePrompt}. The output AspectRatio should be ${aspectRatio || "1:1"}`
           : prompt;
 
-        // Determine provider and model for image
-        let imgProvider = "pollinations";
-        let imgModel = "pollinations";
-        if (modelId === "huggingface") {
-          imgProvider = "huggingface";
-          imgModel = "black-forest-labs/FLUX.1-schnell";
-        } else if (modelId === "gemini") {
-          imgProvider = "gemini";
-          imgModel = "gemini-3.1-flash-lite-image";
-        } else if (modelId === "stablediffusion") {
-          imgProvider = "huggingface";
-          imgModel = "stabilityai/stable-diffusion-xl-base-1.0";
-        }
+        // Fetch model details from DB to get backend provider and model
+        const modelRecord = await getModelBySlug(modelId);
+        const imgProvider = modelRecord?.image_provider || "pollinations";
+        const imgModel = modelRecord?.image_model || "pollinations";
 
         const backendRes = await fetch(`${BACKEND_URL}/generate-image`, {
           method: "POST",
@@ -334,22 +335,10 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      // Determine provider and model for text
-      let textProvider = "gemini";
-      let textModel = "gemini-3.5-flash";
-      if (modelId === "gpt" || modelId === "claude" || modelId === "grok") {
-        textProvider = "groq";
-        if (modelId === "gpt") textModel = "openai/gpt-oss-120b";
-        else if (modelId === "claude")
-          textModel = "anthropic/claude-3.5-sonnet";
-        else if (modelId === "grok") textModel = "x-ai/grok-beta";
-      } else if (modelId === "llama") {
-        textProvider = "groq";
-        textModel = "meta-llama/llama-prompt-guard-2-86m";
-      } else if (modelId === "gemini") {
-        textProvider = "gemini";
-        textModel = "gemini-3.5-flash";
-      }
+      // Fetch model details from DB to get backend provider and model
+      const modelRecord = await getModelBySlug(modelId);
+      const textProvider = modelRecord?.text_provider || "google";
+      const textModel = modelRecord?.text_model || "gemini-3.5-flash";
 
       const backendRes = await fetch(`${BACKEND_URL}/generate-text`, {
         method: "POST",
