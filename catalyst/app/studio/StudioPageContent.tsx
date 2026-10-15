@@ -79,12 +79,28 @@ function StudioContent({
       if (parsedPrompt && user && !isSaving) {
         try {
           setIsSaving(true);
+
+          let title = "Untitled Generated Prompt";
+          try {
+            const titleRes = await fetch("/api/generate-title", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ content: parsedPrompt }),
+            });
+            if (titleRes.ok) {
+              const { title: generatedTitle } = await titleRes.json();
+              if (generatedTitle) title = generatedTitle;
+            }
+          } catch (titleErr) {
+            console.warn("Failed to generate title, using default:", titleErr);
+          }
+
           const { data, error } = await supabase
             .from("prompts")
             .insert({
               user_id: user.id,
               workspace_id: workspaceId,
-              title: "Untitled Generated Prompt",
+              title,
               content: parsedPrompt,
               snippet:
                 parsedPrompt.substring(0, 150) +
@@ -120,7 +136,7 @@ function StudioContent({
             // Redirect to the edit page for the newly saved prompt
             router.push(`/studio/${data.id}`);
           }
-        } catch (err: any) {
+        } catch (err) {
           console.error("Error auto-saving prompt", err);
           await supabase.rpc("refund_tokens", {
             p_user_id: user.id,
@@ -128,7 +144,7 @@ function StudioContent({
             p_mode: selectedMode
           });
           setNotification({
-            message: err.message || "An error occurred while saving",
+            message: err instanceof Error ? err.message : "An error occurred while saving",
             type: "error",
           });
         } finally {
