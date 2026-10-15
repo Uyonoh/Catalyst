@@ -338,7 +338,7 @@ export async function POST(req: NextRequest) {
       // Fetch model details from DB to get backend provider and model
       const modelRecord = await getModelBySlug(modelId);
       const textProvider = modelRecord?.text_provider || "google";
-      const textModel = modelRecord?.text_model || "gemini-3.5-flash";
+      const textModel = modelRecord?.text_model || "gemini-3.6-flash";
 
       const backendRes = await fetch(`${BACKEND_URL}/generate-text`, {
         method: "POST",

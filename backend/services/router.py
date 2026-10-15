@@ -19,7 +19,7 @@ logger = get_logger(__name__)
 TEXT_PROVIDER_CONFIG = {
     "google": {
         "default_model": "gemini-3.1-flash-lite",
-        "allowed_models": ["gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-3.1-flash-lite-image"],
+        "allowed_models": ["gemini-3.1-flash-lite", "gemini-3.6-flash", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-3.1-flash-lite-image"],
     },
     "groq": {
         "default_model": "openai/gpt-oss-20b",
@@ -153,6 +153,7 @@ async def generate_refined_prompt(
         except Exception as err:
             if provider.is_rate_limit_error(err):
                 logger.info(f"Provider [{provider_id}] key hit rate limit, trying next key...")
+                logging.info(err)
                 continue
             else:
                 logger.warning(f"Provider [{provider_id}] failed with non-rate-limit error: {err}")
