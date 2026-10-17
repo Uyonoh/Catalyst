@@ -23,6 +23,7 @@ from backend.auth import get_jwks
 from backend.routers.text import router as text_router
 from backend.routers.image import router as image_router
 from backend.routers.analyze import router as analyze_router
+from backend.routers.transcribe import router as transcribe_router
 
 app = FastAPI(
     title="Catalyst Backend LLM Inference Service",
@@ -59,6 +60,7 @@ async def startup_event():
 app.include_router(text_router, prefix="/generate-text", tags=["Text generation"])
 app.include_router(image_router, prefix="/generate-image", tags=["Image generation"])
 app.include_router(analyze_router, prefix="/analyze", tags=["Analyze engine"])
+app.include_router(transcribe_router, prefix="/transcribe", tags=["Transcription"])
 
 @app.get("/health")
 def health_check():

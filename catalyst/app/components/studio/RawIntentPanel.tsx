@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import GlassPanel from "../GlassPanel";
 import { useWorkspace } from "../../context/WorkspaceContext";
 import { useUser } from "../../context/AuthContext";
@@ -92,6 +92,82 @@ export default function RawIntentPanel() {
   const router = useRouter();
   const [showControls, setShowControls] = useState(false);
   const [tokenCosts, setTokenCosts] = useState<TokenCostsCache | null>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+
+  const toggleListening = async () => {
+    if (isListening) {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
+      }
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        setIsListening(false);
+        setIsTranscribing(true);
+        stream.getTracks().forEach((track) => track.stop());
+
+        try {
+          const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+          const formData = new FormData();
+          formData.append("file", audioBlob, "voice-input.webm");
+
+          const res = await fetch("/api/transcribe", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!res.ok) {
+            throw new Error("Failed to transcribe audio");
+          }
+
+          const data = await res.json();
+          if (data.transcription) {
+            const base = input.trim();
+            setInput(base ? `${base} ${data.transcription}` : data.transcription);
+          }
+        } catch (err) {
+          console.error("Transcription error:", err);
+          alert("Failed to transcribe speech using Google AI. Please try again.");
+        } finally {
+          setIsTranscribing(false);
+        }
+      };
+
+      mediaRecorder.start();
+      setIsListening(true);
+    } catch (err) {
+      console.error("Microphone access error:", err);
+      alert("Could not access microphone. Please check your browser permissions.");
+      setIsListening(false);
+      setIsTranscribing(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        try {
+          mediaRecorderRef.current.stop();
+        } catch {}
+      }
+    };
+  }, []);
 
   const selectedModel =
     models.find((m) => m.slug === selectedModelId) || models[0];
@@ -205,11 +281,18 @@ export default function RawIntentPanel() {
               <ImagePlus className="size-6 md:size-5" />
             </button>
             <button
-              className="p-3 md:p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors flex items-center justify-center"
-              title="Voice Input"
-              aria-label="Voice Input"
+              type="button"
+              onClick={toggleListening}
+              disabled={isTranscribing}
+              className={`p-3 md:p-2 rounded-lg transition-colors flex items-center justify-center ${isListening ? "text-rose-400 bg-rose-500/20 animate-pulse ring-2 ring-rose-500/50" : isTranscribing ? "text-cyan-400 bg-cyan-500/20 animate-pulse" : "text-slate-400 hover:text-white hover:bg-white/5"}`}
+              title={isListening ? "Listening... Click to stop" : isTranscribing ? "Transcribing with Google AI..." : "Voice Input (Google AI)"}
+              aria-label={isListening ? "Stop Voice Input" : "Voice Input"}
             >
-              <Mic className="size-6 md:size-5" />
+              {isTranscribing ? (
+                <Loader2 className="size-6 md:size-5 animate-spin" />
+              ) : (
+                <Mic className="size-6 md:size-5" />
+              )}
             </button>
             <button
               className="p-3 md:p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors flex items-center justify-center"
